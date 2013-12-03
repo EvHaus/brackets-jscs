@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets */
+/*global $, brackets, define */
 
 define(function (require, exports, module) {
 	"use strict";
@@ -14,9 +14,10 @@ define(function (require, exports, module) {
 		
 		_configFileName = ".jscs.json",
 		
-		config = {
+		defaultConfig = {
 			disallowMultipleVarDecl: true
-		};
+		},
+		config = defaultConfig;
 
 	
 	// JSCSParser()
@@ -26,10 +27,11 @@ define(function (require, exports, module) {
 	// @param	fullpath	string		File path to the file
 	//
 	function JSCSParser(text, fullPath) {
+		var checker;
 		
 		// Initialize JSCS
 		try {
-			var checker = new JscsStringChecker();
+			checker = new JscsStringChecker();
 			checker.registerDefaultRules();
 			checker.configure(config);
 		} catch (e) {
@@ -123,6 +125,7 @@ define(function (require, exports, module) {
 				_refreshCodeInspection();
 			});
 	}
+	
 
 	AppInit.appReady(function () {
 		
