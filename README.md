@@ -10,6 +10,8 @@ Issues/Updates
 
 Now works with Brackets master branch - pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
 
+**[2014-01-09]** \(v0.0.4\) Fixed bug with error line number being reported 1 line down.
+
 **[2014-01-09]** \(v0.0.3\) Updating to latest version of JSCS.
 
 **[2013-12-15]** \(v0.0.2\) Updating to latest version of JSCS.

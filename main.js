@@ -52,7 +52,7 @@ define(function (require, exports, module) {
 			errList.forEach(function(error) {
 				result.errors.push({
 					pos: {
-						line: error.line,
+						line: error.line - 1,
 						ch: error.column
 					},
 					message: error.message,
