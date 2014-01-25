@@ -1,4 +1,8 @@
 {
+    "excludeFiles": [
+        "jscs/**/*.js"
+    ],
+    
 	"requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return"],
 	"requireSpacesInFunctionExpression": {
 		"beforeOpeningCurlyBrace": true

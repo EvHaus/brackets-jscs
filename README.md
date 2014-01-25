@@ -10,13 +10,29 @@ Issues/Updates
 
 Now works with Brackets master branch - pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
 
-**[2014-01-09]** \(v0.0.4\) Fixed bug with error line number being reported 1 line down.
+**v0.0.5** (2014-01-25)
 
-**[2014-01-09]** \(v0.0.3\) Updating to latest version of JSCS.
+- Upgrade to node-jscs 1.2.4
+- Remove default "disallowMultipleVarDecl" config
+- Add support for "excludeFiles" option
+- Fix for extension package name
+- Added NOTICE for third-party licenses
 
-**[2013-12-15]** \(v0.0.2\) Updating to latest version of JSCS.
+**v0.0.4** (2014-01-09)
 
-**[2013-12-02]** \(v0.0.1\) Initial release. 
+- Fixed bug with error line number being reported 1 line down.
+
+**v0.0.3** (2014-01-09)
+
+- Updating to latest version of JSCS.
+
+**v0.0.2** (2013-12-15)
+
+- Updating to latest version of JSCS.
+
+**v0.0.1** (2013-12-02)
+
+- Initial release. 
 
 Credit
 =====
