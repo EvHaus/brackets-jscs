@@ -10,12 +10,10 @@ define(function (require, exports, module) {
 		FileSystem		= brackets.getModule("filesystem/FileSystem"),
 		ProjectManager	= brackets.getModule("project/ProjectManager"),
 		DocumentManager	= brackets.getModule("document/DocumentManager"),
+        globmatch       = brackets.getModule("thirdparty/globmatch"),
 		
 		// node-jscs Library
 		JscsStringChecker = require("jscs/jscs-browser"),
-		
-		// Minimatch (for excludeFiles) processing
-		globmatch = require('libs/globmatch'),
 		
 		// Config file name
 		_configFileName = ".jscs.json",
