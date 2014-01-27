@@ -1,14 +1,14 @@
 brackets-jscs
 =================
 
-A Brackets extension to enable JSCS support. For more information about JSCS see https://github.com/mdevils/node-jscs
+A Brackets extension that enables JSCS validation for Javascript files. For more information about JSCS see <https://github.com/mdevils/node-jscs>.
 
-JSHint can be configured configured by .jscs.json file located the project root.
+JSCS can be configured by a .jscs.json file located in the project root directory.
 
 Issues/Updates
 =====
 
-Now works with Brackets master branch - pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
+The extension currently works with the Brackets master branch and should work in Sprint 36 (pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
 
 **v0.0.5** (2014-01-25)
 
@@ -20,19 +20,19 @@ Now works with Brackets master branch - pending official release of [PR #5935](h
 
 **v0.0.4** (2014-01-09)
 
-- Fixed bug with error line number being reported 1 line down.
+- Fixed bug with error line number being reported 1 line down
 
 **v0.0.3** (2014-01-09)
 
-- Updating to latest version of JSCS.
+- Updating to latest version of JSCS
 
 **v0.0.2** (2013-12-15)
 
-- Updating to latest version of JSCS.
+- Updating to latest version of JSCS
 
 **v0.0.1** (2013-12-02)
 
-- Initial release. 
+- Initial release
 
 Credit
 =====
