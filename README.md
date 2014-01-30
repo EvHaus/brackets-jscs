@@ -10,6 +10,11 @@ Issues/Updates
 
 The extension currently works with the Brackets master branch and should work in Sprint 36 (pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
 
+**v0.0.6** (2014-01-29)
+
+- Fix for [Issue #2](https://github.com/globexdesigns/brackets-jscs/issues/2)
+- Temporarily changing extension package name back to incorrect value, pending response to [this thread](https://groups.google.com/forum/#!topic/brackets-dev/VK2T211fRx8)
+
 **v0.0.5** (2014-01-25)
 
 - Upgrade to node-jscs 1.2.4

@@ -55,33 +55,63 @@ define(function (require, exports, module) {
 			checker.registerDefaultRules();
 			checker.configure(config);
 		} catch (e) {
-			console.error("JSCS Failed to initialize: " + e);
+			console.error("JSCS failed to initialize: " + e);
 			return null;
 		}
 		
 		// Run JSCS
-		var errors = checker.checkString(text),
-			errList = errors.getErrorList();
+		try {
+			var errors = checker.checkString(text),
+				errList = errors.getErrorList(),
+				result = {
+					errors: []
+				};
 		
-		var result = {
-			errors: []
-		};
-		
-		// Get errors
-		if (errList.length) {
-			errList.forEach(function(error) {
-				result.errors.push({
-					pos: {
-						line: error.line - 1,
-						ch: error.column
-					},
-					message: error.message,
-					type: CodeInspection.Type.WARNING
+			// Get errors
+			if (errList.length) {
+				errList.forEach(function(error) {
+					result.errors.push({
+						pos: {
+							line: error.line - 1,
+							ch: error.column
+						},
+						message: error.message,
+						type: CodeInspection.Type.WARNING
+					});
 				});
-			});
-			return result;
-		} else {
-			return null;	
+				
+				return result;
+			} else {
+				return null;	
+			}
+		} catch (e) {
+			if (e.message) {
+				// Try to find line number in message
+				var lineCheck = e.message.match('Line ([0-9]+):'),
+					line = lineCheck ? parseInt(lineCheck[1], 10) - 1 : 0;
+				
+				return {
+					errors: [{
+						pos: {
+							line: line,
+							ch: 1
+						},
+						message: e.message,
+						type: CodeInspection.Type.WARNING
+					}]
+				};
+			} else {
+				return {
+					errors: [{
+						pos: {
+							line: 0,
+							ch: 1
+						},
+						message: "JSCS failed processing code due to an unexpected error.",
+						type: CodeInspection.Type.WARNING
+					}]
+				};
+			}
 		}
 	}
 	
