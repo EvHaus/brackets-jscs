@@ -5,10 +5,22 @@ A Brackets extension that enables JSCS validation for Javascript files. For more
 
 JSCS can be configured by a .jscs.json file located in the project root directory.
 
-Issues/Updates
+Requirements
 =====
 
-The extension currently works with the Brackets master branch and should work in Sprint 36 (pending official release of [PR #5935](https://github.com/adobe/brackets/pull/5935)).
+Brackets Sprint 37 or greater
+
+Configuration Files
+=====
+
+This extension will search for a **.jscs.json** file in your project's root directory, if not found, it will look for a **.jscsrc** file in your project's root directory, and if that isn't found either, JSCS will use a default configuration spec with no rules defined.
+
+Release Notes
+=====
+
+**v0.0.7** (2014-03-27)
+
+- Added support for .jscsrc files [Issue #4](https://github.com/globexdesigns/brackets-jscs/issues/4)
 
 **v0.0.6** (2014-01-29)
 

@@ -16,7 +16,7 @@ define(function (require, exports, module) {
 		JscsStringChecker = require("jscs/jscs-browser"),
 		
 		// Config file name
-		_configFileName = ".jscs.json",
+		_configFileNames = [".jscs.json", ".jscsrc"],
 		
 		// Default configuration
 		defaultConfig = {},
@@ -126,13 +126,14 @@ define(function (require, exports, module) {
 	// is loaded each time project is changed or the configuration file is
 	// modified.
 	//
+	// @param	file_name		string		Name of file to try and load
+	//
 	// @return Promise to return JSCS configuration object.
 	//
-	function loadProjectConfig() {
-
-		var projectRootEntry = ProjectManager.getProjectRoot(),
-			result = new $.Deferred(),
-			file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName),
+	function loadProjectConfig(file_name) {
+		
+		var result = new $.Deferred(),
+			file = FileSystem.getFileForPath(file_name),
 			cfg;
 		
 		file.read(function (err, content) {
@@ -160,33 +161,48 @@ define(function (require, exports, module) {
 	// tryLoadConfig()
 	// Attempts to load project configuration file.
 	//
-	function tryLoadConfig() {
+	// @param	file_paths		array		List of file paths to try and load the config from
+	//
+	function tryLoadConfig(file_paths) {
 		function _refreshCodeInspection() {
 			CodeInspection.toggleEnabled();
 			CodeInspection.toggleEnabled();
 		}
 		
-		loadProjectConfig()
-			.done(function (newConfig) {
-				if (newConfig.excludeFiles) {
-					excludeFiles = newConfig.excludeFiles;
-					delete newConfig.excludeFiles;
-				}
-				
-				config = newConfig;
-			})
-			.fail(function () {
-				config = defaultConfig;
-			})
-			.always(function () {
-				_refreshCodeInspection();
-			});
+		var tried = 0,
+			loadConfig = function (index) {
+				loadProjectConfig(file_paths[index])
+					.done(function (newConfig) {
+						if (newConfig.excludeFiles) {
+							excludeFiles = newConfig.excludeFiles;
+							delete newConfig.excludeFiles;
+						}
+
+						config = newConfig;
+					})
+					.fail(function () {
+						tried++;
+
+						// Try the next config
+						if (tried < file_paths.length) {
+							loadConfig(tried);
+						} else {
+							// If all config fail to load - load the default
+							config = defaultConfig;
+						}
+					})
+					.always(function () {
+						_refreshCodeInspection();
+					});	
+			};
+		
+		// Try loading the first config
+		loadConfig(tried);
 	}
 	
 	
 	// ==========================================================================================
 	
-
 	AppInit.appReady(function () {
 		
 		CodeInspection.register("javascript", {
@@ -194,18 +210,22 @@ define(function (require, exports, module) {
 			scanFile: JSCSParser
 		});
 		
+		var config_paths = _configFileNames.map(function (fn) {
+			return ProjectManager.getProjectRoot().fullPath + fn;
+		});
+		
 		$(DocumentManager)
 			.on("documentSaved.jscs documentRefreshed.jscs", function (e, document) {
-				if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + _configFileName) {
-					tryLoadConfig();
+				if (document.file && config_paths.indexOf(document.file.fullPath) < 0) {
+					tryLoadConfig(config_paths);
 				}
 			});
 		
 		$(ProjectManager)
 			.on("projectOpen.jscs", function () {
-				tryLoadConfig();
+				tryLoadConfig(config_paths);
 			});
 		
-		tryLoadConfig();
+		tryLoadConfig(config_paths);
 	});
 });
