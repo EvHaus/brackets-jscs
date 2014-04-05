@@ -18,6 +18,11 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.0.8** (2014-04-05)
+
+- Upgrade to node-jscs 1.3.0
+- Fix for [Issue #5](https://github.com/globexdesigns/brackets-jscs/issues/5)
+
 **v0.0.7** (2014-03-27)
 
 - Added support for .jscsrc files [Issue #4](https://github.com/globexdesigns/brackets-jscs/issues/4)
