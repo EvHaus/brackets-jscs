@@ -31,12 +31,14 @@ define(function (require, exports, module) {
 	// ==========================================================================================
 	
 	
-	// JSCSParser()
-	// Main function for the Brackets Linting API
-	//
-	// @param	text		string		The string of code to validate
-	// @param	fullpath	string		File path to the file
-	//
+	/**
+	 * Main function for the Brackets Linting API
+	 * @method JSCSParser
+	 * 
+	 * @param	{string}	text		- The string of code to validate
+	 * @param	{string}	fullPath	- File path to the file
+	 * 
+	 */
 	function JSCSParser(text, fullPath) {
 		var checker;
 		
@@ -119,17 +121,19 @@ define(function (require, exports, module) {
 	// ==========================================================================================
 	
 
-	// loadProjectConfig()
-	// Loads project-wide JSCS configuration.
-	//
-	// JSCS project file should be located at <Project Root>/.jscs.json. It
-	// is loaded each time project is changed or the configuration file is
-	// modified.
-	//
-	// @param	file_name		string		Name of file to try and load
-	//
-	// @return Promise to return JSCS configuration object.
-	//
+	/**
+	 * Loads project-wide JSCS configuration.
+	 * @method loadProjectConfig
+	 * 
+	 * JSCS project file should be located at <Project Root>/.jscs.json. It
+	 * is loaded each time project is changed or the configuration file is
+	 * modified.
+	 * 
+	 * @param	{string}	file_name		- Name of file to try and load
+	 * 
+	 * @results {functions}	Promise to return JSCS configuration object.
+	 * 
+	 */
 	function loadProjectConfig(file_name) {
 		
 		var result = new $.Deferred(),
@@ -158,11 +162,13 @@ define(function (require, exports, module) {
 	// ==========================================================================================
 	
 
-	// tryLoadConfig()
-	// Attempts to load project configuration file.
-	//
-	// @param	file_paths		array		List of file paths to try and load the config from
-	//
+	/**
+	 * Attempts to load project configuration file.
+	 * @method tryLoadConfig
+	 * 
+	 * @param	{array}		file_paths		- List of file paths to try and load the config from
+	 * 
+	 */
 	function tryLoadConfig(file_paths) {
 		function _refreshCodeInspection() {
 			CodeInspection.toggleEnabled();
