@@ -18,6 +18,10 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.0.9** (2014-04-18)
+
+- Minor change to fix the package.json package name now that Brackets Extension registry allows you to remove extensions
+
 **v0.0.8** (2014-04-05)
 
 - Upgrade to node-jscs 1.3.0
