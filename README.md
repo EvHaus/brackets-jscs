@@ -18,6 +18,11 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.1.0** (2014-05-11)
+
+- Added support for asynchronous linting [Issue #7](https://github.com/globexdesigns/brackets-jscs/issues/7)
+- Will now properly lookup for configuration files starting from the current folder all the way up
+
 **v0.0.9** (2014-04-18)
 
 - Minor change to fix the package.json package name now that Brackets Extension registry allows you to remove extensions

@@ -8,6 +8,7 @@ define(function (require, exports, module) {
 	var AppInit			= brackets.getModule("utils/AppInit"),
 		CodeInspection	= brackets.getModule("language/CodeInspection"),
 		FileSystem		= brackets.getModule("filesystem/FileSystem"),
+		FileUtils               = brackets.getModule("file/FileUtils"),
 		ProjectManager	= brackets.getModule("project/ProjectManager"),
 		DocumentManager	= brackets.getModule("document/DocumentManager"),
         globmatch       = brackets.getModule("thirdparty/globmatch"),
@@ -23,6 +24,7 @@ define(function (require, exports, module) {
 		
 		// Current configuration
 		config = defaultConfig,
+		configLoading,
 		
 		// Files to exclude from validation
 		excludeFiles = [];
@@ -32,21 +34,26 @@ define(function (require, exports, module) {
 	
 	
 	/**
-	 * Main function for the Brackets Linting API
-	 * @method JSCSParser
+	 * Synchronous linting entry point.
+	 * @method handleJSCS
 	 * 
 	 * @param	{string}	text		- The string of code to validate
 	 * @param	{string}	fullPath	- File path to the file
+	 * @param	{object}	config		- Configuration object
 	 * 
+	 * @return	{object}	Results of code inspection.
 	 */
-	function JSCSParser(text, fullPath) {
+	function handleJSCS(text, fullPath, config) {
 		var checker;
+		
+		// Make sure that synchronous linter does not break
+		if (!config) config = defaultConfig;
 		
 		// Initialize JSCS
 		try {
 			var projectRootEntry = ProjectManager.getProjectRoot(),
 				projectBasedPath = fullPath.replace(projectRootEntry.fullPath, '');
-			
+
 			// Skip excluded files
 			for (var i = 0, l = excludeFiles.length; i < l; i++) {
 				if (globmatch(projectBasedPath, excludeFiles[0])) return null;
@@ -120,28 +127,46 @@ define(function (require, exports, module) {
 	
 	// ==========================================================================================
 	
+	
+	/**
+	* Asynchronous linting entry point
+	*
+	* @param	{string}	text		- File contents
+	* @param	{string}	fullPath	- Absolute path to the file
+	*
+	* @return {$.Promise} Promise to return results of code inspection
+	*/
+	function handleJSCSAsync(text, fullPath) {
+		var deferred = new $.Deferred();
+		_loadConfig(fullPath)
+			.done(function (cfg) {
+				deferred.resolve(handleJSCS(text, fullPath, cfg));
+			});
+		
+		return deferred.promise();
+	}
+	
+	
+	// ==========================================================================================
+	
 
 	/**
-	 * Loads project-wide JSCS configuration.
-	 * @method loadProjectConfig
-	 * 
-	 * JSCS project file should be located at <Project Root>/.jscs.json. It
-	 * is loaded each time project is changed or the configuration file is
-	 * modified.
-	 * 
-	 * @param	{string}	file_name		- Name of file to try and load
-	 * 
-	 * @results {functions}	Promise to return JSCS configuration object.
-	 * 
+	 * Reads configuration file in the specified directory.
+	 * Returns a promise for configuration object.
+	 *
+	 * @param	{string}	dir			- Absolute path to a directory
+	 * @param	{string}	file_name	- Name of file to load
+	 *
+	 * @returns {$.Promise} a promise to return configuration object.
 	 */
-	function loadProjectConfig(file_name) {
-		
+	function _readConfig(dir, file_name) {
 		var result = new $.Deferred(),
-			file = FileSystem.getFileForPath(file_name),
-			cfg;
+			file;
 		
+		file = FileSystem.getFileForPath(dir + file_name);
 		file.read(function (err, content) {
 			if (!err) {
+				var cfg = {};
 				try {
 					cfg = JSON.parse(content);
 				} catch (e) {
@@ -149,12 +174,18 @@ define(function (require, exports, module) {
 					result.reject(e);
 					return;
 				}
+				
+				// JSCS handling for excludeFiles
+				if (cfg.excludeFiles) {
+					excludeFiles = cfg.excludeFiles;
+					delete cfg.excludeFiles;
+				}
+				
 				result.resolve(cfg);
 			} else {
 				result.reject(err);
 			}
 		});
-		
 		return result.promise();
 	}
 	
@@ -163,75 +194,100 @@ define(function (require, exports, module) {
 	
 
 	/**
-	 * Attempts to load project configuration file.
-	 * @method tryLoadConfig
-	 * 
-	 * @param	{array}		file_paths		- List of file paths to try and load the config from
-	 * 
+	 * Looks up the configuration file in the filesystem hierarchy and loads it.
+	 *
+	 * @param	{string}	root		- Relative path to directory to start with
+	 * @param	{string}	dir			- Relative directory to scan inside
+	 * @param	{function}	readConfig	- Function to read and load configuration file
+	 *
+	 * @returns {$.Promise} A promise for configuration.
 	 */
-	function tryLoadConfig(file_paths) {
-		function _refreshCodeInspection() {
-			CodeInspection.toggleEnabled();
-			CodeInspection.toggleEnabled();
-		}
-		
-		var tried = 0,
-			loadConfig = function (index) {
-				loadProjectConfig(file_paths[index])
-					.done(function (newConfig) {
-						if (newConfig.excludeFiles) {
-							excludeFiles = newConfig.excludeFiles;
-							delete newConfig.excludeFiles;
-						}
-
-						config = newConfig;
-					})
-					.fail(function () {
-						tried++;
-
-						// Try the next config
-						if (tried < file_paths.length) {
-							loadConfig(tried);
-						} else {
-							// If all config fail to load - load the default
-							config = defaultConfig;
-						}
-					})
-					.always(function () {
-						_refreshCodeInspection();
-					});	
+	function _lookupAndLoad(root, dir, readConfig) {
+		var deferred = new $.Deferred(),
+			done = false,
+			_configFileName,
+			configdone = false,
+			configIndex = 0,
+			cdir = dir,
+			file,
+			iter = {
+				next: function () {
+					if (done) return;
+					cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length - 1));
+					_configFileName = _configFileNames[configIndex];
+					
+					readConfig(root + cdir, _configFileName)
+						.then(function (cfg) {
+							this.stop(cfg);
+						}.bind(this))
+						.fail(function () {
+							if (configIndex < _configFileNames.length) {
+								configIndex++;
+								this.next();
+							}
+							if (!cdir) this.stop(defaultConfig);
+							if (!done) this.next();
+						}.bind(this));
+				},
+				stop: function (cfg) {
+					deferred.resolve(cfg);
+					configdone = true;
+					done = true;
+				}
 			};
-		
-		// Try loading the first config
-		loadConfig(tried);
+		iter.next();
+		return deferred.promise();
 	}
 	
 	
 	// ==========================================================================================
 	
-	AppInit.appReady(function () {
-		
-		CodeInspection.register("javascript", {
-			name: "JSCS",
-			scanFile: JSCSParser
-		});
-		
-		var config_paths = _configFileNames.map(function (fn) {
-			return ProjectManager.getProjectRoot().fullPath + fn;
-		});
-		
-		$(DocumentManager)
-			.on("documentSaved.jscs documentRefreshed.jscs", function (e, document) {
-				if (document.file && config_paths.indexOf(document.file.fullPath) < 0) {
-					tryLoadConfig(config_paths);
-				}
+	
+	/**
+	 * Loads JSCS configuration for the specified file.
+	 *
+	 * If the specified file is outside the current project root, then defaultConfiguration is used.
+	 * Otherwise, the configuration file is looked up starting from the directory where the specified
+	 * file is located, going up to the project root, but no further.
+	 *
+	 * @param {string}		fullPath	- Absolute path for the file linted.
+	 *
+	 * @returns {$.Promise} Promise to return a configuration object.
+	 */
+	function _loadConfig(fullPath) {
+
+		var projectRootEntry = ProjectManager.getProjectRoot(),
+			result = new $.Deferred(),
+			relPath,
+			file,
+			config;
+
+		if (!projectRootEntry) {
+			return result.reject().promise();
+		}
+
+		// for files outside the project root, use default config
+		if (!ProjectManager.isWithinProject(fullPath)) {
+			result.resolve(defaultConfig);
+			return result.promise();
+		}
+
+		relPath = FileUtils.getDirectoryPath(ProjectManager.makeProjectRelativeIfPossible(fullPath));
+
+		_lookupAndLoad(projectRootEntry.fullPath, relPath, _readConfig)
+			.done(function (cfg) {
+				result.resolve(cfg);
 			});
-		
-		$(ProjectManager)
-			.on("projectOpen.jscs", function () {
-				tryLoadConfig(config_paths);
-			});
-		
-		tryLoadConfig(config_paths);
-	});
+		return result.promise();
+	}
+	
+	
+	// ==========================================================================================
+	
+	
+	CodeInspection.register("javascript", {
+        name: "JSCS",
+        scanFile: handleJSCS,
+        scanFileAsync: handleJSCSAsync
+    });
 });
