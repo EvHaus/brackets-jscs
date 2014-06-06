@@ -9,7 +9,7 @@
 		"requireParamTypes": true
 	},
     
-	"requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return"],
+	"requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "function"],
 	"requireSpacesInFunctionExpression": {
 		"beforeOpeningCurlyBrace": true
 	},

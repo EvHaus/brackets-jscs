@@ -5,13 +5,12 @@ define(function (require, exports, module) {
 	"use strict";
 
 	// Brackets Modules
-	var AppInit			= brackets.getModule("utils/AppInit"),
-		CodeInspection	= brackets.getModule("language/CodeInspection"),
-		FileSystem		= brackets.getModule("filesystem/FileSystem"),
-		FileUtils               = brackets.getModule("file/FileUtils"),
-		ProjectManager	= brackets.getModule("project/ProjectManager"),
-		DocumentManager	= brackets.getModule("document/DocumentManager"),
-        globmatch       = brackets.getModule("thirdparty/globmatch"),
+	var CodeInspection		= brackets.getModule("language/CodeInspection"),
+		FileSystem			= brackets.getModule("filesystem/FileSystem"),
+		FileUtils			= brackets.getModule("file/FileUtils"),
+		PreferencesManager	= brackets.getModule("preferences/PreferencesManager"),
+		ProjectManager		= brackets.getModule("project/ProjectManager"),
+		globmatch       	= brackets.getModule("thirdparty/globmatch"),
 		
 		// node-jscs Library
 		JscsStringChecker = require("jscs/jscs-browser"),
@@ -24,12 +23,38 @@ define(function (require, exports, module) {
 		
 		// Current configuration
 		config = defaultConfig,
-		configLoading,
 		
 		// Files to exclude from validation
 		excludeFiles = [];
 
 	
+	// ==========================================================================================
+	
+	
+	var PREF_SCAN_PROJECT_ONLY = "scanProjectOnly",
+		JSCS_NAME = "JSCS";
+	
+	var pm = PreferencesManager.getExtensionPrefs("jscs");
+	
+	pm.definePreference(PREF_SCAN_PROJECT_ONLY, "boolean", false)
+		.on("change", function (e, d) {
+			var val = pm.get(PREF_SCAN_PROJECT_ONLY);
+			if (_scanProjectOnly !== val) {
+				_scanProjectOnly = val;
+				CodeInspection.requestRun(JSCS_NAME);
+			}
+		});
+
+	/**
+	* Extension preference which when set to true will limit the look up for configuration file
+	* to the project sub-tree. If false, the entire file tree will be searched. The default is
+	* false.
+	* @private
+	* @type {boolean}
+	*/
+	var _scanProjectOnly = pm.get(PREF_SCAN_PROJECT_ONLY);
+	
+		
 	// ==========================================================================================
 	
 	
@@ -78,7 +103,7 @@ define(function (require, exports, module) {
 		
 			// Get errors
 			if (errList.length) {
-				errList.forEach(function(error) {
+				errList.forEach(function (error) {
 					result.errors.push({
 						pos: {
 							line: error.line - 1,
@@ -213,9 +238,7 @@ define(function (require, exports, module) {
 			iter = {
 				next: function () {
 					if (done) return;
-					cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length - 1));
 					_configFileName = _configFileNames[configIndex];
-					
 					readConfig(root + cdir, _configFileName)
 						.then(function (cfg) {
 							this.stop(cfg);
@@ -225,8 +248,12 @@ define(function (require, exports, module) {
 								configIndex++;
 								this.next();
 							}
+							configIndex = 0;
 							if (!cdir) this.stop(defaultConfig);
-							if (!done) this.next();
+							if (!done) {
+								cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length - 1));
+								this.next();
+							}
 						}.bind(this));
 				},
 				stop: function (cfg) {
@@ -235,7 +262,13 @@ define(function (require, exports, module) {
 					done = true;
 				}
 			};
-		iter.next();
+		
+		if (cdir === undefined || cdir === null) {
+			deferred.resolve(defaultConfig);	
+		} else {
+			iter.next();	
+		}
+		
 		return deferred.promise();
 	}
 	
@@ -259,6 +292,7 @@ define(function (require, exports, module) {
 		var projectRootEntry = ProjectManager.getProjectRoot(),
 			result = new $.Deferred(),
 			relPath,
+			rootPath,
 			file,
 			config;
 
@@ -266,15 +300,22 @@ define(function (require, exports, module) {
 			return result.reject().promise();
 		}
 
-		// for files outside the project root, use default config
-		if (!ProjectManager.isWithinProject(fullPath)) {
+		if (!_scanProjectOnly) {
+			// scan entire filesystem
+			rootPath = projectRootEntry.fullPath.substring(0, projectRootEntry.fullPath.indexOf("/") + 1);
+		} else {
+			rootPath = projectRootEntry.fullPath;
+		}
+
+		// for files outside the root, use default config
+		if (!(relPath = FileUtils.getRelativeFilename(rootPath, fullPath))) {
 			result.resolve(defaultConfig);
 			return result.promise();
 		}
 
-		relPath = FileUtils.getDirectoryPath(ProjectManager.makeProjectRelativeIfPossible(fullPath));
+		relPath = FileUtils.getDirectoryPath(relPath);
 
-		_lookupAndLoad(projectRootEntry.fullPath, relPath, _readConfig)
+		_lookupAndLoad(rootPath, relPath, _readConfig)
 			.done(function (cfg) {
 				result.resolve(cfg);
 			});
@@ -286,7 +327,7 @@ define(function (require, exports, module) {
 	
 	
 	CodeInspection.register("javascript", {
-        name: "JSCS",
+        name: JSCS_NAME,
         scanFile: handleJSCS,
         scanFileAsync: handleJSCSAsync
     });
