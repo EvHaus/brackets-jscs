@@ -10,32 +10,32 @@ define(function (require, exports, module) {
 		FileUtils			= brackets.getModule("file/FileUtils"),
 		PreferencesManager	= brackets.getModule("preferences/PreferencesManager"),
 		ProjectManager		= brackets.getModule("project/ProjectManager"),
-		globmatch       	= brackets.getModule("thirdparty/globmatch"),
-		
+		globmatch			= brackets.getModule("thirdparty/globmatch"),
+
 		// node-jscs Library
 		JscsStringChecker = require("jscs/jscs-browser"),
-		
+
 		// Config file name
 		_configFileNames = [".jscs.json", ".jscsrc"],
-		
+
 		// Default configuration
 		defaultConfig = {},
-		
+
 		// Current configuration
 		config = defaultConfig,
-		
+
 		// Files to exclude from validation
 		excludeFiles = [];
 
-	
+
 	// ==========================================================================================
-	
-	
+
+
 	var PREF_SCAN_PROJECT_ONLY = "scanProjectOnly",
 		JSCS_NAME = "JSCS";
-	
+
 	var pm = PreferencesManager.getExtensionPrefs("jscs");
-	
+
 	pm.definePreference(PREF_SCAN_PROJECT_ONLY, "boolean", false)
 		.on("change", function (e, d) {
 			var val = pm.get(PREF_SCAN_PROJECT_ONLY);
@@ -53,27 +53,27 @@ define(function (require, exports, module) {
 	* @type {boolean}
 	*/
 	var _scanProjectOnly = pm.get(PREF_SCAN_PROJECT_ONLY);
-	
-		
+
+
 	// ==========================================================================================
-	
-	
+
+
 	/**
 	 * Synchronous linting entry point.
 	 * @method handleJSCS
-	 * 
+	 *
 	 * @param	{string}	text		- The string of code to validate
 	 * @param	{string}	fullPath	- File path to the file
 	 * @param	{object}	config		- Configuration object
-	 * 
+	 *
 	 * @return	{object}	Results of code inspection.
 	 */
 	function handleJSCS(text, fullPath, config) {
 		var checker;
-		
+
 		// Make sure that synchronous linter does not break
 		if (!config) config = defaultConfig;
-		
+
 		// Initialize JSCS
 		try {
 			var projectRootEntry = ProjectManager.getProjectRoot(),
@@ -83,7 +83,7 @@ define(function (require, exports, module) {
 			for (var i = 0, l = excludeFiles.length; i < l; i++) {
 				if (globmatch(projectBasedPath, excludeFiles[0])) return null;
 			}
-			
+
 			// Execute JSCS checker
 			checker = new JscsStringChecker();
 			checker.registerDefaultRules();
@@ -92,7 +92,7 @@ define(function (require, exports, module) {
 			console.error("JSCS failed to initialize: " + e);
 			return null;
 		}
-		
+
 		// Run JSCS
 		try {
 			var errors = checker.checkString(text),
@@ -100,7 +100,7 @@ define(function (require, exports, module) {
 				result = {
 					errors: []
 				};
-		
+
 			// Get errors
 			if (errList.length) {
 				errList.forEach(function (error) {
@@ -113,17 +113,17 @@ define(function (require, exports, module) {
 						type: CodeInspection.Type.WARNING
 					});
 				});
-				
+
 				return result;
 			} else {
-				return null;	
+				return null;
 			}
 		} catch (e) {
 			if (e.message) {
 				// Try to find line number in message
 				var lineCheck = e.message.match('Line ([0-9]+):'),
 					line = lineCheck ? parseInt(lineCheck[1], 10) - 1 : 0;
-				
+
 				return {
 					errors: [{
 						pos: {
@@ -148,11 +148,11 @@ define(function (require, exports, module) {
 			}
 		}
 	}
-	
-	
+
+
 	// ==========================================================================================
-	
-	
+
+
 	/**
 	* Asynchronous linting entry point
 	*
@@ -167,13 +167,13 @@ define(function (require, exports, module) {
 			.done(function (cfg) {
 				deferred.resolve(handleJSCS(text, fullPath, cfg));
 			});
-		
+
 		return deferred.promise();
 	}
-	
-	
+
+
 	// ==========================================================================================
-	
+
 
 	/**
 	 * Reads configuration file in the specified directory.
@@ -187,7 +187,7 @@ define(function (require, exports, module) {
 	function _readConfig(dir, file_name) {
 		var result = new $.Deferred(),
 			file;
-		
+
 		file = FileSystem.getFileForPath(dir + file_name);
 		file.read(function (err, content) {
 			if (!err) {
@@ -199,13 +199,13 @@ define(function (require, exports, module) {
 					result.reject(e);
 					return;
 				}
-				
+
 				// JSCS handling for excludeFiles
 				if (cfg.excludeFiles) {
 					excludeFiles = cfg.excludeFiles;
 					delete cfg.excludeFiles;
 				}
-				
+
 				result.resolve(cfg);
 			} else {
 				result.reject(err);
@@ -213,10 +213,10 @@ define(function (require, exports, module) {
 		});
 		return result.promise();
 	}
-	
-	
+
+
 	// ==========================================================================================
-	
+
 
 	/**
 	 * Looks up the configuration file in the filesystem hierarchy and loads it.
@@ -262,20 +262,20 @@ define(function (require, exports, module) {
 					done = true;
 				}
 			};
-		
+
 		if (cdir === undefined || cdir === null) {
-			deferred.resolve(defaultConfig);	
+			deferred.resolve(defaultConfig);
 		} else {
-			iter.next();	
+			iter.next();
 		}
-		
+
 		return deferred.promise();
 	}
-	
-	
+
+
 	// ==========================================================================================
-	
-	
+
+
 	/**
 	 * Loads JSCS configuration for the specified file.
 	 *
@@ -291,6 +291,7 @@ define(function (require, exports, module) {
 
 		var projectRootEntry = ProjectManager.getProjectRoot(),
 			result = new $.Deferred(),
+			pathPiece,
 			relPath,
 			rootPath,
 			file,
@@ -302,7 +303,8 @@ define(function (require, exports, module) {
 
 		if (!_scanProjectOnly) {
 			// scan entire filesystem
-			rootPath = projectRootEntry.fullPath.substring(0, projectRootEntry.fullPath.indexOf("/") + 1);
+			pathPiece = projectRootEntry.fullPath.indexOf("/") + 1;
+			rootPath = projectRootEntry.fullPath.substring(0, pathPiece);
 		} else {
 			rootPath = projectRootEntry.fullPath;
 		}
@@ -321,14 +323,14 @@ define(function (require, exports, module) {
 			});
 		return result.promise();
 	}
-	
-	
+
+
 	// ==========================================================================================
-	
-	
+
+
 	CodeInspection.register("javascript", {
-        name: JSCS_NAME,
-        scanFile: handleJSCS,
-        scanFileAsync: handleJSCSAsync
-    });
+		name: JSCS_NAME,
+		scanFile: handleJSCS,
+		scanFileAsync: handleJSCSAsync
+	});
 });

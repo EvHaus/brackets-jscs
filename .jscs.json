@@ -1,26 +1,40 @@
 {
-    "excludeFiles": [
-        "jscs/**/*.js"
-    ],
-	
-	"validateJSDoc": {
-		"checkParamNames": true,
-		"checkRedundantParams": true,
-		"requireParamTypes": true
+	"requireOperatorBeforeLineBreak": true,
+	"maximumLineLength": {
+	  "value": 80,
+	  "allowComments": true,
+	  "allowRegex": true
 	},
-    
-	"requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "function"],
+	"disallowMultipleLineStrings": true,
+	"disallowMixedSpacesAndTabs": true,
+	"disallowTrailingWhitespace": true,
+	"requireSpaceAfterKeywords": [
+	  "if",
+	  "else",
+	  "for",
+	  "while",
+	  "do",
+	  "switch",
+	  "return",
+	  "try",
+	  "catch"
+	],
+	"requireSpaceBeforeBinaryOperators": [
+		"=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", ">>>=",
+		"&=", "|=", "^=", "+=",
+
+		"+", "-", "*", "/", "%", "<<", ">>", ">>>", "&",
+		"|", "^", "&&", "||", "===", "==", ">=",
+		"<=", "<", ">", "!=", "!=="
+	],
+	"requireSpaceAfterBinaryOperators": true,
+	"requireSpacesInConditionalExpression": true,
+	"requireSpaceBeforeBlockStatements": true,
 	"requireSpacesInFunctionExpression": {
 		"beforeOpeningCurlyBrace": true
 	},
-	"disallowSpaceAfterObjectKeys": true,
-	"disallowSpacesInsideObjectBrackets": true,
-	"disallowSpacesInsideArrayBrackets": true,
-	"disallowSpacesInsideParentheses": true,
-	"disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~", "!"],
-	"disallowSpaceBeforePostfixUnaryOperators": ["++", "--"],
-	"requireSpaceBeforeBinaryOperators": ["+", "-", "/", "*", "=", "==", "===", "!=", "!=="],
-	"requireSpaceAfterBinaryOperators": ["+", "-", "/", "*", "=", "==", "===", "!=", "!=="],
-	"disallowKeywords": ["with"],
-	"disallowKeywordsOnNewLine": ["else"]
+	"validateJSDoc": {
+		"checkParamNames": true,
+		"requireParamTypes": true
+	}
 }

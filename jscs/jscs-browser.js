@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.JscsStringChecker=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.JscsStringChecker=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * Returns the lines from a file with comments removed. Will report erroneous
  * trailing tokens in multiline comments if an error reporter is provided.
@@ -37,17 +37,21 @@ exports.getLinesWithCommentsRemoved = function(file, errors) {
     return lines;
 };
 
-},{}],2:[function(_dereq_,module,exports){
-var colors = _dereq_('colors');
+},{}],2:[function(require,module,exports){
+var colors = require('colors');
 
 /**
  * Set of errors for specified file.
  *
  * @name Errors
+ * @param {JsFile} file
+ * @param {Boolean} verbose
  */
-var Errors = function(file) {
+var Errors = function(file, verbose) {
     this._errorList = [];
     this._file = file;
+    this._currentRule = '';
+    this._verbose = verbose || false;
 };
 
 Errors.prototype = {
@@ -63,8 +67,14 @@ Errors.prototype = {
             column = line.column;
             line = line.line;
         }
+
+        if (!this._file.isEnabledRule(this._currentRule, line)) {
+            return;
+        }
+
         this._errorList.push({
-            message: message,
+            rule: this._currentRule,
+            message: this._verbose ? this._currentRule + ': ' + message : message,
             line: line,
             column: column || 0
         });
@@ -133,6 +143,16 @@ Errors.prototype = {
         }
         result.unshift(formatErrorMessage(error.message, this.getFilename(), colorize));
         return result.join('\n');
+    },
+
+   /**
+     * Sets the current rule so that errors are aware
+     * of which rule triggered them.
+     *
+     * @param {String} rule
+     */
+    setCurrentRule: function(rule) {
+        this._currentRule = rule;
     }
 
 };
@@ -198,8 +218,8 @@ function renderPointer(column, colorize) {
 
 module.exports = Errors;
 
-},{"colors":88}],3:[function(_dereq_,module,exports){
-var treeIterator = _dereq_('./tree-iterator');
+},{"colors":94}],3:[function(require,module,exports){
+var treeIterator = require('./tree-iterator');
 
 /**
  * File representation for JSCS.
@@ -209,7 +229,7 @@ var treeIterator = _dereq_('./tree-iterator');
 var JsFile = function(filename, source, tree) {
     this._filename = filename;
     this._source = source;
-    this._tree = tree;
+    this._tree = tree || {};
     this._lines = source.split(/\r\n|\r|\n/);
     this._tokenIndex = null;
     var index = this._index = {};
@@ -237,6 +257,8 @@ var JsFile = function(filename, source, tree) {
         }
     });
 
+    this._buildDisabledRuleIndex();
+
     // Part of temporary esprima fix.
     function convertKeywordToIdentifierIfRequired(node) {
         var tokenPos = _this.getTokenPosByRangeStart(node.range[0]);
@@ -250,6 +272,79 @@ var JsFile = function(filename, source, tree) {
 };
 
 JsFile.prototype = {
+    /**
+     * Builds an index of disabled rules by starting line for error suppression.
+     */
+    _buildDisabledRuleIndex: function() {
+        this._disabledRuleIndex = [];
+
+        var comments = this.getComments() || [];
+        var commentRe = /(jscs\s*:\s*(en|dis)able)(.*)/;
+
+        comments.forEach(function(comment) {
+            var enabled;
+            var parsed = commentRe.exec(comment.value.trim());
+
+            if (!parsed || parsed.index !== 0) {
+                return;
+            }
+
+            enabled = parsed[2] === 'en';
+            this._addToDisabledRuleIndex(enabled, parsed[3], comment.loc.start.line);
+        }, this);
+    },
+
+    /**
+     * returns whether a specific rule is disabled on the given line.
+     *
+     * @param {String} rule the rule name being tested
+     * @param {Number} line the line number being tested
+     * @returns {Boolean} true if the rule is enabled
+     */
+    isEnabledRule: function(rule, line) {
+        var enabled = true;
+        this._disabledRuleIndex.some(function(region) {
+            // once the comment we're inspecting occurs after the location of the error,
+            // no longer check for whether the state is enabled or disable
+            if (region.line > line) {
+                return true;
+            }
+
+            if (region.rule === rule || region.rule === '*') {
+                enabled = region.enabled;
+            }
+        }, this);
+
+        return enabled;
+    },
+
+    /**
+     * Adds rules to the disabled index given a string containing rules (or '' for all).
+     *
+     * @param {Boolean} enabled whether the rule is disabled or enabled on this line
+     * @param {String} rulesStr the string containing specific rules to en/disable
+     * @param {Number} line the line the comment appears on
+     */
+    _addToDisabledRuleIndex: function(enabled, rulesStr, line) {
+        rulesStr = rulesStr || '*';
+
+        rulesStr.split(',').forEach(function(rule) {
+            var ruleLength;
+
+            rule = rule.trim();
+
+            if (!rule) {
+                return;
+            }
+
+            this._disabledRuleIndex.push({
+                rule: rule,
+                enabled: enabled,
+                line: line
+            });
+        }, this);
+    },
+
     /**
      * Builds token index by starting pos for futher navigation.
      */
@@ -382,16 +477,20 @@ JsFile.prototype = {
 
 module.exports = JsFile;
 
-},{"./tree-iterator":79}],4:[function(_dereq_,module,exports){
+},{"./tree-iterator":85}],4:[function(require,module,exports){
 var presets = {
-    // https://contribute.jquery.org/style-guide/js/
-    jquery: _dereq_('../../presets/jquery.json'),
+    // http://javascript.crockford.com/code.html
+    crockford: require('../../presets/crockford.json'),
     // https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
-    google: _dereq_('../../presets/google.json'),
-    // https://github.com/ymaps/codestyle/blob/master/js.md
-    yandex: _dereq_('../../presets/yandex.json'),
+    google: require('../../presets/google.json'),
+    // https://contribute.jquery.org/style-guide/js/
+    jquery: require('../../presets/jquery.json'),
+    // https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2
+    mdcs: require('../../presets/mdcs.json'),
     // https://www.mediawiki.org/wiki/Manual:Coding_conventions/JavaScript
-    wikimedia: _dereq_('../../presets/wikimedia.json')
+    wikimedia: require('../../presets/wikimedia.json'),
+    // https://github.com/ymaps/codestyle/blob/master/js.md
+    yandex: require('../../presets/yandex.json')
 };
 
 module.exports = {
@@ -439,8 +538,34 @@ module.exports = {
     }
 };
 
-},{"../../presets/google.json":90,"../../presets/jquery.json":91,"../../presets/wikimedia.json":92,"../../presets/yandex.json":93}],5:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../../presets/crockford.json":96,"../../presets/google.json":97,"../../presets/jquery.json":98,"../../presets/mdcs.json":99,"../../presets/wikimedia.json":100,"../../presets/yandex.json":101}],5:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(disallowAnonymousFunctions) {
+        assert(
+            disallowAnonymousFunctions === true,
+            'disallowAnonymousFunctions option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowAnonymousFunctions';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType(['FunctionExpression', 'FunctionDeclaration'], function(node) {
+            if (node.id === null) {
+                errors.add('Anonymous functions needs to be named', node.loc.start);
+            }
+        });
+    }
+};
+
+},{"assert":87}],6:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -478,8 +603,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],6:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],7:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -525,8 +650,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],7:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],8:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -560,8 +685,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],8:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],9:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -613,8 +738,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],9:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],10:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -651,8 +776,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],10:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],11:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -685,7 +810,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],11:[function(_dereq_,module,exports){
+},{"assert":87}],12:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -711,8 +836,8 @@ module.exports.prototype = {
 
 };
 
-},{}],12:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{}],13:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -772,8 +897,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],13:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],14:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -807,8 +932,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],14:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],15:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -843,8 +968,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],15:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],16:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -877,8 +1002,47 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],16:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],17:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(disallowNewlineBeforeBlockStatements) {
+        assert(
+            typeof disallowNewlineBeforeBlockStatements === 'boolean',
+            'disallowNewlineBeforeBlockStatements option requires boolean value'
+        );
+        assert(
+            disallowNewlineBeforeBlockStatements === true,
+            'disallowNewlineBeforeBlockStatements option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowNewlineBeforeBlockStatements';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('BlockStatement', function(node) {
+            var tokens = file.getTokens();
+
+            var openingBracePos = file.getTokenPosByRangeStart(node.range[0]);
+            var openingBrace = tokens[openingBracePos];
+            var prevToken = tokens[openingBracePos - 1];
+
+            if (openingBrace.loc.start.line !== prevToken.loc.start.line) {
+                errors.add(
+                    'Newline before curly brace for block statement is disallowed',
+                    node.loc.start
+                );
+            }
+        });
+    }
+};
+
+},{"assert":87}],18:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -908,7 +1072,7 @@ module.exports.prototype = {
             var closingBracket = tokens[closingBracketPos];
             var closingLine = closingBracket.loc.start.line;
 
-            if (lines[startLine] === lines[closingLine]) {
+            if (startLine === closingLine) {
                 return;
             }
 
@@ -924,9 +1088,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],17:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var utils = _dereq_('../utils');
+},{"assert":87}],19:[function(require,module,exports){
+var assert = require('assert');
+var utils = require('../utils');
 
 module.exports = function() {};
 
@@ -969,7 +1133,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":80,"assert":81}],18:[function(_dereq_,module,exports){
+},{"../utils":86,"assert":87}],20:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -995,10 +1159,10 @@ module.exports.prototype = {
 
 };
 
-},{}],19:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var tokenHelper = _dereq_('../token-helper');
-var allOperators = _dereq_('../utils').binaryOperators;
+},{}],21:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
+var allOperators = require('../utils').binaryOperators;
 
 module.exports = function() {};
 
@@ -1040,18 +1204,6 @@ module.exports.prototype = {
                     tokenHelper.getPointerEntities(loc.column, token.value.length)
                 );
             }
-        }
-
-        // ":" for object property only but not for ternar
-        if (operators[':']) {
-            file.iterateNodesByType(['ObjectExpression'], function(node) {
-                node.properties.forEach(function(prop) {
-                    var token = tokenHelper.findOperatorByRangeStart(file, prop.range[0], ':'),
-                        tokens = file.getTokens();
-
-                    errorIfApplicable(token, tokens.indexOf(token), tokens, ':');
-                });
-            });
         }
 
         // Comma
@@ -1107,8 +1259,8 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":78,"../utils":80,"assert":81}],20:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../token-helper":84,"../utils":86,"assert":87}],22:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1145,8 +1297,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],21:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],23:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1177,8 +1329,8 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":81}],22:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],24:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1215,9 +1367,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],23:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var defaultOperators = _dereq_('../utils').unaryOperators;
+},{"assert":87}],25:[function(require,module,exports){
+var assert = require('assert');
+var defaultOperators = require('../utils').unaryOperators;
 
 module.exports = function() {};
 
@@ -1263,10 +1415,10 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":80,"assert":81}],24:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var tokenHelper = _dereq_('../token-helper');
-var allOperators = _dereq_('../utils').binaryOperators;
+},{"../utils":86,"assert":87}],26:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
+var allOperators = require('../utils').binaryOperators;
 
 module.exports = function() {};
 
@@ -1309,18 +1461,6 @@ module.exports.prototype = {
                     tokenHelper.getPointerEntities(loc.column, token.value.length)
                 );
             }
-        }
-
-        // ":" for object property only but not for ternar
-        if (operators[':']) {
-            file.iterateNodesByType(['ObjectExpression'], function(node) {
-                node.properties.forEach(function(prop) {
-                    var token = tokenHelper.findOperatorByRangeStart(file, prop.range[0], ':'),
-                        tokens = file.getTokens();
-
-                    errorIfApplicable(token, tokens.indexOf(token), tokens, ':');
-                });
-            });
         }
 
         // Comma
@@ -1369,8 +1509,8 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":78,"../utils":80,"assert":81}],25:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../token-helper":84,"../utils":86,"assert":87}],27:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1407,9 +1547,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],26:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var defaultOperators = _dereq_('../utils').incrementAndDecrementOperators;
+},{"assert":87}],28:[function(require,module,exports){
+var assert = require('assert');
+var defaultOperators = require('../utils').incrementAndDecrementOperators;
 
 module.exports = function() {};
 
@@ -1457,8 +1597,8 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":80,"assert":81}],27:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../utils":86,"assert":87}],29:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1549,8 +1689,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],28:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],30:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1664,8 +1804,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],29:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],31:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1749,8 +1889,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],30:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],32:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1788,6 +1928,97 @@ module.exports.prototype = {
 
     getOptionName: function() {
         return 'disallowSpacesInFunctionExpression';
+    },
+
+    check: function(file, errors) {
+        var beforeOpeningRoundBrace = this._beforeOpeningRoundBrace;
+        var beforeOpeningCurlyBrace = this._beforeOpeningCurlyBrace;
+        var tokens = file.getTokens();
+
+        file.iterateNodesByType('FunctionExpression', function(node) {
+            var parent = node.parentNode;
+
+            // Ignore syntactic sugar for getters and setters.
+            if (parent.type === 'Property' && (parent.kind === 'get' || parent.kind === 'set')) {
+                return;
+            }
+
+            if (beforeOpeningRoundBrace) {
+                var nodeBeforeRoundBrace = node;
+                // named function
+                if (node.id) {
+                    nodeBeforeRoundBrace = node.id;
+                }
+
+                var functionTokenPos = file.getTokenPosByRangeStart(nodeBeforeRoundBrace.range[0]);
+                var functionToken = tokens[functionTokenPos];
+
+                var nextTokenPos = file.getTokenPosByRangeStart(functionToken.range[1]);
+                var nextToken = tokens[nextTokenPos];
+
+                if (!nextToken) {
+                    errors.add(
+                        'Illegal space before opening round brace',
+                        functionToken.loc.start
+                    );
+                }
+            }
+
+            if (beforeOpeningCurlyBrace) {
+                var tokenBeforeBodyPos = file.getTokenPosByRangeStart(node.body.range[0] - 1);
+                var tokenBeforeBody = tokens[tokenBeforeBodyPos];
+
+                if (!tokenBeforeBody) {
+                    errors.add(
+                        'Illegal space before opening curly brace',
+                        node.body.loc.start
+                    );
+                }
+            }
+        });
+    }
+
+};
+
+},{"assert":87}],33:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(options) {
+        assert(
+            typeof options === 'object',
+            'disallowSpacesInFunction option must be the object'
+        );
+
+        if ('beforeOpeningRoundBrace' in options) {
+            assert(
+                options.beforeOpeningRoundBrace === true,
+                'disallowSpacesInFunction.beforeOpeningRoundBrace ' +
+                'property requires true value or should be removed'
+            );
+        }
+
+        if ('beforeOpeningCurlyBrace' in options) {
+            assert(
+                options.beforeOpeningCurlyBrace === true,
+                'disallowSpacesInFunction.beforeOpeningCurlyBrace ' +
+                'property requires true value or should be removed'
+            );
+        }
+
+        assert(
+            options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
+            'disallowSpacesInFunction must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+        );
+
+        this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
+        this._beforeOpeningCurlyBrace = Boolean(options.beforeOpeningCurlyBrace);
+    },
+
+    getOptionName: function() {
+        return 'disallowSpacesInFunction';
     },
 
     check: function(file, errors) {
@@ -1840,8 +2071,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],31:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],34:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1926,8 +2157,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],32:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],35:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -1989,8 +2220,8 @@ function check(brackets, errors, insideTokens) {
     }
 }
 
-},{"assert":81}],33:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],36:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2053,8 +2284,8 @@ function check(brackets, errors, insideTokens) {
     }
 }
 
-},{"assert":81}],34:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],37:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2104,8 +2335,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],35:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],38:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2142,8 +2373,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],36:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],39:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2175,8 +2406,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],37:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],40:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2222,9 +2453,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],38:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var commentHelper = _dereq_('../comment-helper');
+},{"assert":87}],41:[function(require,module,exports){
+var assert = require('assert');
+var commentHelper = require('../comment-helper');
 
 module.exports = function() {};
 
@@ -2303,8 +2534,8 @@ module.exports.prototype = {
 
 };
 
-},{"../comment-helper":1,"assert":81}],39:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../comment-helper":1,"assert":87}],42:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2312,15 +2543,17 @@ module.exports.prototype = {
 
     configure: function(mode) {
         var modes = {
-            'all': true,
-            'skipWithFunction': true,
-            'skipWithLineBreak': true
+            'all': 'all',
+            'ignoreFunction': 'ignoreFunction',
+            'ignoreLineBreak': 'ignoreLineBreak',
+            'skipWithFunction': 'ignoreFunction',
+            'skipWithLineBreak': 'ignoreLineBreak'
         };
         assert(
             typeof mode === 'string' && modes[mode],
-            this.getOptionName() + ' option requires string value \'skipWithFunction\' or \'skipWithLineBreak\''
+            this.getOptionName() + ' requires one of the following values: ' + Object.keys(modes).join(', ')
         );
-        this._mode = mode;
+        this._mode = modes[mode];
     },
 
     getOptionName: function() {
@@ -2335,17 +2568,18 @@ module.exports.prototype = {
                 return;
             }
 
-            var skip = false;
             var maxKeyEndPos = 0;
+            var skip = node.properties.some(function(property, index) {
+                maxKeyEndPos = Math.max(maxKeyEndPos, property.key.loc.end.column);
 
-            node.properties.forEach(function(property, index) {
-                var keyEndPos = property.key.loc.end.column;
-                if (keyEndPos > maxKeyEndPos) {
-                    maxKeyEndPos = keyEndPos;
+                if (mode === 'ignoreFunction' && property.value.type === 'FunctionExpression') {
+                    return true;
                 }
-                skip = skip || (mode === 'skipWithFunction' && property.value.type === 'FunctionExpression') ||
-                    (mode === 'skipWithLineBreak' && index > 0 &&
-                     node.properties[index - 1].loc.end.line !== property.loc.start.line - 1);
+
+                if (mode === 'ignoreLineBreak' && index > 0 &&
+                     node.properties[index - 1].loc.end.line !== property.loc.start.line - 1) {
+                    return true;
+                }
             });
 
             if (skip) {
@@ -2364,8 +2598,34 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],40:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],43:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(requireAnonymousFunctions) {
+        assert(
+            requireAnonymousFunctions === true,
+            'requireAnonymousFunctions option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireAnonymousFunctions';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType(['FunctionExpression', 'FunctionDeclaration'], function(node) {
+            if (node.id !== null) {
+                errors.add('Functions must not be named', node.loc.start);
+            }
+        });
+    }
+};
+
+},{"assert":87}],44:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2413,8 +2673,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],41:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],45:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2457,8 +2717,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],42:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],46:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2495,8 +2755,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],43:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],47:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2534,8 +2794,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],44:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],48:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2619,9 +2879,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],45:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var utils = _dereq_('../utils');
+},{"assert":87}],49:[function(require,module,exports){
+var assert = require('assert');
+var utils = require('../utils');
 
 module.exports = function() {};
 
@@ -2673,8 +2933,8 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":80,"assert":81}],46:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../utils":86,"assert":87}],50:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2711,7 +2971,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],47:[function(_dereq_,module,exports){
+},{"assert":87}],51:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -2737,8 +2997,8 @@ module.exports.prototype = {
 
 };
 
-},{}],48:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{}],52:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -2768,8 +3028,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],49:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],53:[function(require,module,exports){
+var assert = require('assert');
 
 function consecutive(file, errors) {
     file.iterateNodesByType('VariableDeclaration', function(node) {
@@ -2858,10 +3118,49 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":81}],50:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var tokenHelper = _dereq_('../token-helper');
-var defaultOperators = _dereq_('../utils').binaryOperators.slice();
+},{"assert":87}],54:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(requireNewlineBeforeBlockStatements) {
+        assert(
+            typeof requireNewlineBeforeBlockStatements === 'boolean',
+            'requireNewlineBeforeBlockStatements option requires boolean value'
+        );
+        assert(
+            requireNewlineBeforeBlockStatements === true,
+            'requireNewlineBeforeBlockStatements option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireNewlineBeforeBlockStatements';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('BlockStatement', function(node) {
+            var tokens = file.getTokens();
+
+            var openingBracePos = file.getTokenPosByRangeStart(node.range[0]);
+            var openingBrace = tokens[openingBracePos];
+            var prevToken = tokens[openingBracePos - 1];
+
+            if (openingBrace.loc.start.line === prevToken.loc.start.line) {
+                errors.add(
+                    'Missing newline before curly brace for block statement',
+                    node.loc.start
+                );
+            }
+        });
+    }
+};
+
+},{"assert":87}],55:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
+var defaultOperators = require('../utils').binaryOperators.slice();
 
 defaultOperators.push('?');
 
@@ -2894,7 +3193,7 @@ module.exports.prototype = {
     check: function(file, errors) {
         var operators = this._operatorIndex;
         var tokens = file.getTokens();
-        var throughTokens = ['?', ':', ','];
+        var throughTokens = ['?', ','];
 
         function errorIfApplicable(token, i, tokens) {
             var prevToken = tokens[i - 1];
@@ -2951,8 +3250,8 @@ module.exports.prototype = {
     }
 };
 
-},{"../token-helper":78,"../utils":80,"assert":81}],51:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../token-helper":84,"../utils":86,"assert":87}],56:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3015,8 +3314,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],52:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],57:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3077,7 +3376,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],53:[function(_dereq_,module,exports){
+},{"assert":87}],58:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -3103,10 +3402,10 @@ module.exports.prototype = {
 
 };
 
-},{}],54:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var tokenHelper = _dereq_('../token-helper');
-var allOperators = _dereq_('../utils').binaryOperators;
+},{}],59:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
+var allOperators = require('../utils').binaryOperators;
 
 module.exports = function() {};
 
@@ -3149,18 +3448,6 @@ module.exports.prototype = {
                     tokenHelper.getPointerEntities(loc.column, token.value.length)
                 );
             }
-        }
-
-        // ":" for object property only but not for ternar
-        if (operators[':']) {
-            file.iterateNodesByType(['ObjectExpression'], function(node) {
-                node.properties.forEach(function(prop) {
-                    var token = tokenHelper.findOperatorByRangeStart(file, prop.range[0], ':'),
-                        tokens = file.getTokens();
-
-                    errorIfApplicable(token, tokens.indexOf(token), tokens, ':');
-                });
-            });
         }
 
         // Comma
@@ -3214,9 +3501,9 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":78,"../utils":80,"assert":81}],55:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var util = _dereq_('util');
+},{"../token-helper":84,"../utils":86,"assert":87}],60:[function(require,module,exports){
+var assert = require('assert');
+var util = require('util');
 var texts = [
     'Missing space after "%s" keyword',
     'Should be one space instead of %d, after "%s" keyword'
@@ -3277,8 +3564,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81,"util":87}],56:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87,"util":93}],61:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3309,8 +3596,8 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":81}],57:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],62:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3347,9 +3634,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],58:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var defaultOperators = _dereq_('../utils').unaryOperators;
+},{"assert":87}],63:[function(require,module,exports){
+var assert = require('assert');
+var defaultOperators = require('../utils').unaryOperators;
 
 module.exports = function() {};
 
@@ -3405,10 +3692,10 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":80,"assert":81}],59:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var tokenHelper = _dereq_('../token-helper');
-var allOperators = _dereq_('../../lib/utils').binaryOperators.filter(function(operator) {
+},{"../utils":86,"assert":87}],64:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
+var allOperators = require('../../lib/utils').binaryOperators.filter(function(operator) {
     return operator !== ',';
 });
 
@@ -3455,18 +3742,6 @@ module.exports.prototype = {
             }
         }
 
-        // ":" for object property only but not for ternar
-        if (operators[':']) {
-            file.iterateNodesByType(['ObjectExpression'], function(node) {
-                node.properties.forEach(function(prop) {
-                    var token = tokenHelper.findOperatorByRangeStart(file, prop.range[0], ':'),
-                        tokens = file.getTokens();
-
-                    errorIfApplicable(token, tokens.indexOf(token), tokens, ':');
-                });
-            });
-        }
-
         // Comma
         if (operators[',']) {
             file.iterateTokensByType('Punctuator', function(token, i, tokens) {
@@ -3507,8 +3782,8 @@ module.exports.prototype = {
 
 };
 
-},{"../../lib/utils":80,"../token-helper":78,"assert":81}],60:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../../lib/utils":86,"../token-helper":84,"assert":87}],65:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3545,9 +3820,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],61:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var defaultOperators = _dereq_('../utils').incrementAndDecrementOperators;
+},{"assert":87}],66:[function(require,module,exports){
+var assert = require('assert');
+var defaultOperators = require('../utils').incrementAndDecrementOperators;
 
 module.exports = function() {};
 
@@ -3595,8 +3870,8 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":80,"assert":81}],62:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../utils":86,"assert":87}],67:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3686,8 +3961,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],63:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],68:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3796,8 +4071,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],64:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],69:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3881,8 +4156,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],65:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],70:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -3920,6 +4195,97 @@ module.exports.prototype = {
 
     getOptionName: function() {
         return 'requireSpacesInFunctionExpression';
+    },
+
+    check: function(file, errors) {
+        var beforeOpeningRoundBrace = this._beforeOpeningRoundBrace;
+        var beforeOpeningCurlyBrace = this._beforeOpeningCurlyBrace;
+        var tokens = file.getTokens();
+
+        file.iterateNodesByType('FunctionExpression', function(node) {
+            var parent = node.parentNode;
+
+            // Ignore syntactic sugar for getters and setters.
+            if (parent.type === 'Property' && (parent.kind === 'get' || parent.kind === 'set')) {
+                return;
+            }
+
+            if (beforeOpeningRoundBrace) {
+                var nodeBeforeRoundBrace = node;
+                // named function
+                if (node.id) {
+                    nodeBeforeRoundBrace = node.id;
+                }
+
+                var functionTokenPos = file.getTokenPosByRangeStart(nodeBeforeRoundBrace.range[0]);
+                var functionToken = tokens[functionTokenPos];
+
+                var nextTokenPos = file.getTokenPosByRangeStart(functionToken.range[1]);
+                var nextToken = tokens[nextTokenPos];
+
+                if (nextToken) {
+                    errors.add(
+                        'Missing space before opening round brace',
+                        nextToken.loc.start
+                    );
+                }
+            }
+
+            if (beforeOpeningCurlyBrace) {
+                var tokenBeforeBodyPos = file.getTokenPosByRangeStart(node.body.range[0] - 1);
+                var tokenBeforeBody = tokens[tokenBeforeBodyPos];
+
+                if (tokenBeforeBody) {
+                    errors.add(
+                        'Missing space before opening curly brace',
+                        tokenBeforeBody.loc.start
+                    );
+                }
+            }
+        });
+    }
+
+};
+
+},{"assert":87}],71:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(options) {
+        assert(
+            typeof options === 'object',
+            'requireSpacesInFunction option must be the object'
+        );
+
+        if ('beforeOpeningRoundBrace' in options) {
+            assert(
+                options.beforeOpeningRoundBrace === true,
+                'requireSpacesInFunction.beforeOpeningRoundBrace ' +
+                'property requires true value or should be removed'
+            );
+        }
+
+        if ('beforeOpeningCurlyBrace' in options) {
+            assert(
+                options.beforeOpeningCurlyBrace === true,
+                'requireSpacesInFunction.beforeOpeningCurlyBrace ' +
+                'property requires true value or should be removed'
+            );
+        }
+
+        assert(
+            options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
+            'requireSpacesInFunction must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+        );
+
+        this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
+        this._beforeOpeningCurlyBrace = Boolean(options.beforeOpeningCurlyBrace);
+    },
+
+    getOptionName: function() {
+        return 'requireSpacesInFunction';
     },
 
     check: function(file, errors) {
@@ -3972,8 +4338,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],66:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],72:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4057,8 +4423,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],67:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],73:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4119,8 +4485,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],68:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],74:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4175,8 +4541,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],69:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],75:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4255,21 +4621,27 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":81}],70:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],76:[function(require,module,exports){
+var assert = require('assert');
+var tokenHelper = require('../token-helper');
 
 module.exports = function() {};
 
 module.exports.prototype = {
     configure: function(requireTrailingComma) {
-        assert(
-            typeof requireTrailingComma === 'boolean',
-            'requireTrailingComma option requires boolean value'
-        );
-        assert(
-            requireTrailingComma === true,
-            'requireTrailingComma option requires true value or should be removed'
-        );
+        if (typeof requireTrailingComma === 'object') {
+            assert(
+                requireTrailingComma.ignoreSingleValue === true,
+                'requireTrailingComma option ignoreSingleValue requires true value or should be removed'
+            );
+
+            this._ignoreSingleValue = true;
+        } else {
+            assert(
+                requireTrailingComma === true,
+                'requireTrailingComma option requires true value or should be removed'
+            );
+        }
     },
 
     getOptionName: function() {
@@ -4277,29 +4649,25 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        file.iterateTokensByType('Punctuator', function(token, i, tokens) {
-            if (token.value === '}' || token.value === ']') {
-                var prevToken = tokens[i - 1];
-                var error = false;
-                if (prevToken) {
-                    if (prevToken.type !== 'Punctuator') {
-                        error = true;
-                    } else {
-                        if (token.value === '}' && prevToken.value === '{') {
-                            // This is just a new object declaration.
-                        } else if (token.value === ']' && prevToken.value === '[') {
-                            // This is just new array declaration.
-                        } else if (prevToken.value !== ',') {
-                            error = true;
-                        }
-                    }
+        var _this = this;
 
-                    if (error) {
-                        errors.add(
-                            'Require extra comma following the final element of an array or object literal',
-                            token.loc.start
-                        );
-                    }
+        file.iterateNodesByType(['ObjectExpression', 'ArrayExpression'], function(node) {
+            var isObject = node.type === 'ObjectExpression';
+            var message = 'Missing comma before closing ' + (isObject ? ' curly brace' : ' bracket');
+            var entities = isObject ? node.properties : node.elements;
+            var last;
+            var hasTrailingComma;
+
+            if (entities.length) {
+                if (_this._ignoreSingleValue && entities.length === 1) {
+                    return;
+                }
+
+                last = entities[entities.length - 1];
+                hasTrailingComma = tokenHelper.getTokenByRangeStartIfPunctuator(file, last.range[1], ',');
+
+                if (!hasTrailingComma) {
+                    errors.add(message, node.loc.end);
                 }
             }
         });
@@ -4307,8 +4675,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],71:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../token-helper":84,"assert":87}],77:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4354,8 +4722,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],72:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],78:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4428,9 +4796,9 @@ function checkKeywords(name, keywords) {
     return true;
 }
 
-},{"assert":81}],73:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
-var commentHelper = _dereq_('../comment-helper');
+},{"assert":87}],79:[function(require,module,exports){
+var assert = require('assert');
+var commentHelper = require('../comment-helper');
 
 module.exports = function() {};
 
@@ -4596,7 +4964,17 @@ module.exports.prototype = {
 
                 markChildren(node);
                 markPop(node, 1);
-                markPushAndCheck(node.parentNode, 1);
+
+                // The parent of an else block statement is the entire if/else
+                // block. In order to avoid over indenting in the case of a
+                // non-block if with a block else, mark push where the else starts,
+                // not where the if starts!
+                if (node.parentNode.type === 'IfStatement' &&
+                    node.parentNode.alternate === node) {
+                    markPushAndCheck(node, 1);
+                } else {
+                    markPushAndCheck(node.parentNode, 1);
+                }
             });
 
             file.iterateNodesByType('IfStatement', function(node) {
@@ -4700,8 +5078,8 @@ module.exports.prototype = {
 
 };
 
-},{"../comment-helper":1,"assert":81}],74:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"../comment-helper":1,"assert":87}],80:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4793,8 +5171,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],75:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],81:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4843,8 +5221,8 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],76:[function(_dereq_,module,exports){
-var assert = _dereq_('assert');
+},{"assert":87}],82:[function(require,module,exports){
+var assert = require('assert');
 
 module.exports = function() {};
 
@@ -4907,21 +5285,23 @@ module.exports.prototype = {
 
 };
 
-},{"assert":81}],77:[function(_dereq_,module,exports){
-var esprima = _dereq_('esprima');
-var Errors = _dereq_('./errors');
-var JsFile = _dereq_('./js-file');
-var preset = _dereq_('./options/preset');
+},{"assert":87}],83:[function(require,module,exports){
+var esprima = require('esprima');
+var Errors = require('./errors');
+var JsFile = require('./js-file');
+var preset = require('./options/preset');
 
 /**
  * Starts Code Style checking process.
  *
  * @name StringChecker
+ * @param {Boolean} verbose
  */
-var StringChecker = function() {
+var StringChecker = function(verbose) {
     this._rules = [];
     this._activeRules = [];
     this._config = {};
+    this._verbose = verbose || false;
 };
 
 StringChecker.prototype = {
@@ -4938,96 +5318,103 @@ StringChecker.prototype = {
      * Registers built-in Code Style cheking rules.
      */
     registerDefaultRules: function() {
-        this.registerRule(new (_dereq_('./rules/require-curly-braces'))());
-        this.registerRule(new (_dereq_('./rules/require-multiple-var-decl'))());
-        this.registerRule(new (_dereq_('./rules/disallow-multiple-var-decl'))());
-        this.registerRule(new (_dereq_('./rules/disallow-empty-blocks'))());
-        this.registerRule(new (_dereq_('./rules/require-space-after-keywords'))());
-        this.registerRule(new (_dereq_('./rules/disallow-space-after-keywords'))());
-        this.registerRule(new (_dereq_('./rules/require-parentheses-around-iife'))());
+        this.registerRule(new (require('./rules/require-curly-braces'))());
+        this.registerRule(new (require('./rules/require-multiple-var-decl'))());
+        this.registerRule(new (require('./rules/disallow-multiple-var-decl'))());
+        this.registerRule(new (require('./rules/disallow-empty-blocks'))());
+        this.registerRule(new (require('./rules/require-space-after-keywords'))());
+        this.registerRule(new (require('./rules/disallow-space-after-keywords'))());
+        this.registerRule(new (require('./rules/require-parentheses-around-iife'))());
 
         /* deprecated rules */
-        this.registerRule(new (_dereq_('./rules/require-left-sticked-operators'))());
-        this.registerRule(new (_dereq_('./rules/disallow-left-sticked-operators'))());
-        this.registerRule(new (_dereq_('./rules/require-right-sticked-operators'))());
-        this.registerRule(new (_dereq_('./rules/disallow-right-sticked-operators'))());
+        this.registerRule(new (require('./rules/require-left-sticked-operators'))());
+        this.registerRule(new (require('./rules/disallow-left-sticked-operators'))());
+        this.registerRule(new (require('./rules/require-right-sticked-operators'))());
+        this.registerRule(new (require('./rules/disallow-right-sticked-operators'))());
         /* deprecated rules (end) */
 
-        this.registerRule(new (_dereq_('./rules/require-operator-before-line-break'))());
-        this.registerRule(new (_dereq_('./rules/disallow-implicit-type-conversion'))());
-        this.registerRule(new (_dereq_('./rules/require-camelcase-or-uppercase-identifiers'))());
-        this.registerRule(new (_dereq_('./rules/disallow-keywords'))());
-        this.registerRule(new (_dereq_('./rules/disallow-multiple-line-breaks'))());
-        this.registerRule(new (_dereq_('./rules/disallow-multiple-line-strings'))());
-        this.registerRule(new (_dereq_('./rules/validate-line-breaks'))());
-        this.registerRule(new (_dereq_('./rules/validate-quote-marks'))());
-        this.registerRule(new (_dereq_('./rules/validate-indentation'))());
-        this.registerRule(new (_dereq_('./rules/disallow-trailing-whitespace'))());
-        this.registerRule(new (_dereq_('./rules/disallow-mixed-spaces-and-tabs'))());
-        this.registerRule(new (_dereq_('./rules/require-keywords-on-new-line'))());
-        this.registerRule(new (_dereq_('./rules/disallow-keywords-on-new-line'))());
-        this.registerRule(new (_dereq_('./rules/require-line-feed-at-file-end'))());
-        this.registerRule(new (_dereq_('./rules/maximum-line-length'))());
-        this.registerRule(new (_dereq_('./rules/validate-jsdoc'))());
-        this.registerRule(new (_dereq_('./rules/require-yoda-conditions'))());
-        this.registerRule(new (_dereq_('./rules/disallow-yoda-conditions'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-inside-object-brackets'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-inside-array-brackets'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-inside-parentheses'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-inside-object-brackets'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-inside-array-brackets'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-inside-parentheses'))());
-        this.registerRule(new (_dereq_('./rules/require-blocks-on-newline'))());
-        this.registerRule(new (_dereq_('./rules/require-space-after-object-keys'))());
-        this.registerRule(new (_dereq_('./rules/disallow-space-after-object-keys'))());
-        this.registerRule(new (_dereq_('./rules/disallow-quoted-keys-in-objects'))());
-        this.registerRule(new (_dereq_('./rules/disallow-dangling-underscores'))());
-        this.registerRule(new (_dereq_('./rules/require-aligned-object-values'))());
+        this.registerRule(new (require('./rules/require-operator-before-line-break'))());
+        this.registerRule(new (require('./rules/disallow-implicit-type-conversion'))());
+        this.registerRule(new (require('./rules/require-camelcase-or-uppercase-identifiers'))());
+        this.registerRule(new (require('./rules/disallow-keywords'))());
+        this.registerRule(new (require('./rules/disallow-multiple-line-breaks'))());
+        this.registerRule(new (require('./rules/disallow-multiple-line-strings'))());
+        this.registerRule(new (require('./rules/validate-line-breaks'))());
+        this.registerRule(new (require('./rules/validate-quote-marks'))());
+        this.registerRule(new (require('./rules/validate-indentation'))());
+        this.registerRule(new (require('./rules/disallow-trailing-whitespace'))());
+        this.registerRule(new (require('./rules/disallow-mixed-spaces-and-tabs'))());
+        this.registerRule(new (require('./rules/require-keywords-on-new-line'))());
+        this.registerRule(new (require('./rules/disallow-keywords-on-new-line'))());
+        this.registerRule(new (require('./rules/require-line-feed-at-file-end'))());
+        this.registerRule(new (require('./rules/maximum-line-length'))());
+        this.registerRule(new (require('./rules/validate-jsdoc'))());
+        this.registerRule(new (require('./rules/require-yoda-conditions'))());
+        this.registerRule(new (require('./rules/disallow-yoda-conditions'))());
+        this.registerRule(new (require('./rules/require-spaces-inside-object-brackets'))());
+        this.registerRule(new (require('./rules/require-spaces-inside-array-brackets'))());
+        this.registerRule(new (require('./rules/require-spaces-inside-parentheses'))());
+        this.registerRule(new (require('./rules/disallow-spaces-inside-object-brackets'))());
+        this.registerRule(new (require('./rules/disallow-spaces-inside-array-brackets'))());
+        this.registerRule(new (require('./rules/disallow-spaces-inside-parentheses'))());
+        this.registerRule(new (require('./rules/require-blocks-on-newline'))());
+        this.registerRule(new (require('./rules/require-space-after-object-keys'))());
+        this.registerRule(new (require('./rules/disallow-space-after-object-keys'))());
+        this.registerRule(new (require('./rules/disallow-quoted-keys-in-objects'))());
+        this.registerRule(new (require('./rules/disallow-dangling-underscores'))());
+        this.registerRule(new (require('./rules/require-aligned-object-values'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-padding-newlines-in-blocks'))());
-        this.registerRule(new (_dereq_('./rules/require-padding-newlines-in-blocks'))());
+        this.registerRule(new (require('./rules/disallow-padding-newlines-in-blocks'))());
+        this.registerRule(new (require('./rules/require-padding-newlines-in-blocks'))());
+        this.registerRule(new (require('./rules/require-newline-before-block-statements'))());
+        this.registerRule(new (require('./rules/disallow-newline-before-block-statements'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-trailing-comma'))());
-        this.registerRule(new (_dereq_('./rules/require-trailing-comma'))());
+        this.registerRule(new (require('./rules/disallow-trailing-comma'))());
+        this.registerRule(new (require('./rules/require-trailing-comma'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-comma-before-line-break'))());
-        this.registerRule(new (_dereq_('./rules/require-comma-before-line-break'))());
+        this.registerRule(new (require('./rules/disallow-comma-before-line-break'))());
+        this.registerRule(new (require('./rules/require-comma-before-line-break'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-space-before-block-statements.js'))());
-        this.registerRule(new (_dereq_('./rules/require-space-before-block-statements.js'))());
+        this.registerRule(new (require('./rules/disallow-space-before-block-statements.js'))());
+        this.registerRule(new (require('./rules/require-space-before-block-statements.js'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-space-before-postfix-unary-operators.js'))());
-        this.registerRule(new (_dereq_('./rules/require-space-before-postfix-unary-operators.js'))());
+        this.registerRule(new (require('./rules/disallow-space-before-postfix-unary-operators.js'))());
+        this.registerRule(new (require('./rules/require-space-before-postfix-unary-operators.js'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-space-after-prefix-unary-operators.js'))());
-        this.registerRule(new (_dereq_('./rules/require-space-after-prefix-unary-operators.js'))());
+        this.registerRule(new (require('./rules/disallow-space-after-prefix-unary-operators.js'))());
+        this.registerRule(new (require('./rules/require-space-after-prefix-unary-operators.js'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-space-before-binary-operators'))());
-        this.registerRule(new (_dereq_('./rules/require-space-before-binary-operators'))());
+        this.registerRule(new (require('./rules/disallow-space-before-binary-operators'))());
+        this.registerRule(new (require('./rules/require-space-before-binary-operators'))());
 
-        this.registerRule(new (_dereq_('./rules/disallow-space-after-binary-operators'))());
-        this.registerRule(new (_dereq_('./rules/require-space-after-binary-operators'))());
+        this.registerRule(new (require('./rules/disallow-space-after-binary-operators'))());
+        this.registerRule(new (require('./rules/require-space-after-binary-operators'))());
 
-        this.registerRule(new (_dereq_('./rules/require-spaces-in-conditional-expression'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-in-conditional-expression'))());
+        this.registerRule(new (require('./rules/require-spaces-in-conditional-expression'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-conditional-expression'))());
 
-        this.registerRule(new (_dereq_('./rules/require-spaces-in-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-in-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-in-anonymous-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-in-anonymous-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-in-named-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-in-named-function-expression'))());
-        this.registerRule(new (_dereq_('./rules/require-spaces-in-function-declaration'))());
-        this.registerRule(new (_dereq_('./rules/disallow-spaces-in-function-declaration'))());
+        this.registerRule(new (require('./rules/require-spaces-in-function'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-function'))());
+        this.registerRule(new (require('./rules/require-spaces-in-function-expression'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-function-expression'))());
+        this.registerRule(new (require('./rules/require-spaces-in-anonymous-function-expression'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-anonymous-function-expression'))());
+        this.registerRule(new (require('./rules/require-spaces-in-named-function-expression'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-named-function-expression'))());
+        this.registerRule(new (require('./rules/require-spaces-in-function-declaration'))());
+        this.registerRule(new (require('./rules/disallow-spaces-in-function-declaration'))());
 
-        this.registerRule(new (_dereq_('./rules/require-capitalized-constructors'))());
+        this.registerRule(new (require('./rules/require-capitalized-constructors'))());
 
-        this.registerRule(new (_dereq_('./rules/safe-context-keyword'))());
+        this.registerRule(new (require('./rules/safe-context-keyword'))());
 
-        this.registerRule(new (_dereq_('./rules/require-dot-notation'))());
+        this.registerRule(new (require('./rules/require-dot-notation'))());
 
-        this.registerRule(new (_dereq_('./rules/require-space-after-line-comment'))());
-        this.registerRule(new (_dereq_('./rules/disallow-space-after-line-comment'))());
+        this.registerRule(new (require('./rules/require-space-after-line-comment'))());
+        this.registerRule(new (require('./rules/disallow-space-after-line-comment'))());
+
+        this.registerRule(new (require('./rules/require-anonymous-functions'))());
+        this.registerRule(new (require('./rules/disallow-anonymous-functions'))());
     },
 
     /**
@@ -5123,19 +5510,31 @@ StringChecker.prototype = {
      */
     checkString: function(str, filename) {
         filename = filename || 'input';
+        str = str.replace(/^#!?[^\n]+\n/gm, '\n');
+
         var tree;
-        str = str.replace(/^#!?[^\n]+$/gm, '\n');
+        var parseError;
+
         try {
             tree = esprima.parse(str, {loc: true, range: true, comment: true, tokens: true});
         } catch (e) {
-            throw new Error('Syntax error at ' + filename + ': ' + e.message);
+            parseError = e;
         }
         var file = new JsFile(filename, str, tree);
-        var errors = new Errors(file);
+        var errors = new Errors(file, this._verbose);
+
+        if (parseError) {
+            errors.setCurrentRule('parseError');
+            errors.add(parseError.description, parseError.lineNumber, parseError.column);
+
+            return errors;
+        }
+
         this._activeRules.forEach(function(rule) {
 
             // Do not process the rule if it's equals to null (#203)
             if (this._config[rule.getOptionName()] !== null) {
+                errors.setCurrentRule(rule.getOptionName());
                 rule.check(file, errors);
             }
 
@@ -5152,7 +5551,7 @@ StringChecker.prototype = {
 
 module.exports = StringChecker;
 
-},{"./errors":2,"./js-file":3,"./options/preset":4,"./rules/disallow-comma-before-line-break":5,"./rules/disallow-dangling-underscores":6,"./rules/disallow-empty-blocks":7,"./rules/disallow-implicit-type-conversion":8,"./rules/disallow-keywords":10,"./rules/disallow-keywords-on-new-line":9,"./rules/disallow-left-sticked-operators":11,"./rules/disallow-mixed-spaces-and-tabs":12,"./rules/disallow-multiple-line-breaks":13,"./rules/disallow-multiple-line-strings":14,"./rules/disallow-multiple-var-decl":15,"./rules/disallow-padding-newlines-in-blocks":16,"./rules/disallow-quoted-keys-in-objects":17,"./rules/disallow-right-sticked-operators":18,"./rules/disallow-space-after-binary-operators":19,"./rules/disallow-space-after-keywords":20,"./rules/disallow-space-after-line-comment":21,"./rules/disallow-space-after-object-keys":22,"./rules/disallow-space-after-prefix-unary-operators.js":23,"./rules/disallow-space-before-binary-operators":24,"./rules/disallow-space-before-block-statements.js":25,"./rules/disallow-space-before-postfix-unary-operators.js":26,"./rules/disallow-spaces-in-anonymous-function-expression":27,"./rules/disallow-spaces-in-conditional-expression":28,"./rules/disallow-spaces-in-function-declaration":29,"./rules/disallow-spaces-in-function-expression":30,"./rules/disallow-spaces-in-named-function-expression":31,"./rules/disallow-spaces-inside-array-brackets":32,"./rules/disallow-spaces-inside-object-brackets":33,"./rules/disallow-spaces-inside-parentheses":34,"./rules/disallow-trailing-comma":35,"./rules/disallow-trailing-whitespace":36,"./rules/disallow-yoda-conditions":37,"./rules/maximum-line-length":38,"./rules/require-aligned-object-values":39,"./rules/require-blocks-on-newline":40,"./rules/require-camelcase-or-uppercase-identifiers":41,"./rules/require-capitalized-constructors":42,"./rules/require-comma-before-line-break":43,"./rules/require-curly-braces":44,"./rules/require-dot-notation":45,"./rules/require-keywords-on-new-line":46,"./rules/require-left-sticked-operators":47,"./rules/require-line-feed-at-file-end":48,"./rules/require-multiple-var-decl":49,"./rules/require-operator-before-line-break":50,"./rules/require-padding-newlines-in-blocks":51,"./rules/require-parentheses-around-iife":52,"./rules/require-right-sticked-operators":53,"./rules/require-space-after-binary-operators":54,"./rules/require-space-after-keywords":55,"./rules/require-space-after-line-comment":56,"./rules/require-space-after-object-keys":57,"./rules/require-space-after-prefix-unary-operators.js":58,"./rules/require-space-before-binary-operators":59,"./rules/require-space-before-block-statements.js":60,"./rules/require-space-before-postfix-unary-operators.js":61,"./rules/require-spaces-in-anonymous-function-expression":62,"./rules/require-spaces-in-conditional-expression":63,"./rules/require-spaces-in-function-declaration":64,"./rules/require-spaces-in-function-expression":65,"./rules/require-spaces-in-named-function-expression":66,"./rules/require-spaces-inside-array-brackets":67,"./rules/require-spaces-inside-object-brackets":68,"./rules/require-spaces-inside-parentheses":69,"./rules/require-trailing-comma":70,"./rules/require-yoda-conditions":71,"./rules/safe-context-keyword":72,"./rules/validate-indentation":73,"./rules/validate-jsdoc":74,"./rules/validate-line-breaks":75,"./rules/validate-quote-marks":76,"esprima":89}],78:[function(_dereq_,module,exports){
+},{"./errors":2,"./js-file":3,"./options/preset":4,"./rules/disallow-anonymous-functions":5,"./rules/disallow-comma-before-line-break":6,"./rules/disallow-dangling-underscores":7,"./rules/disallow-empty-blocks":8,"./rules/disallow-implicit-type-conversion":9,"./rules/disallow-keywords":11,"./rules/disallow-keywords-on-new-line":10,"./rules/disallow-left-sticked-operators":12,"./rules/disallow-mixed-spaces-and-tabs":13,"./rules/disallow-multiple-line-breaks":14,"./rules/disallow-multiple-line-strings":15,"./rules/disallow-multiple-var-decl":16,"./rules/disallow-newline-before-block-statements":17,"./rules/disallow-padding-newlines-in-blocks":18,"./rules/disallow-quoted-keys-in-objects":19,"./rules/disallow-right-sticked-operators":20,"./rules/disallow-space-after-binary-operators":21,"./rules/disallow-space-after-keywords":22,"./rules/disallow-space-after-line-comment":23,"./rules/disallow-space-after-object-keys":24,"./rules/disallow-space-after-prefix-unary-operators.js":25,"./rules/disallow-space-before-binary-operators":26,"./rules/disallow-space-before-block-statements.js":27,"./rules/disallow-space-before-postfix-unary-operators.js":28,"./rules/disallow-spaces-in-anonymous-function-expression":29,"./rules/disallow-spaces-in-conditional-expression":30,"./rules/disallow-spaces-in-function":33,"./rules/disallow-spaces-in-function-declaration":31,"./rules/disallow-spaces-in-function-expression":32,"./rules/disallow-spaces-in-named-function-expression":34,"./rules/disallow-spaces-inside-array-brackets":35,"./rules/disallow-spaces-inside-object-brackets":36,"./rules/disallow-spaces-inside-parentheses":37,"./rules/disallow-trailing-comma":38,"./rules/disallow-trailing-whitespace":39,"./rules/disallow-yoda-conditions":40,"./rules/maximum-line-length":41,"./rules/require-aligned-object-values":42,"./rules/require-anonymous-functions":43,"./rules/require-blocks-on-newline":44,"./rules/require-camelcase-or-uppercase-identifiers":45,"./rules/require-capitalized-constructors":46,"./rules/require-comma-before-line-break":47,"./rules/require-curly-braces":48,"./rules/require-dot-notation":49,"./rules/require-keywords-on-new-line":50,"./rules/require-left-sticked-operators":51,"./rules/require-line-feed-at-file-end":52,"./rules/require-multiple-var-decl":53,"./rules/require-newline-before-block-statements":54,"./rules/require-operator-before-line-break":55,"./rules/require-padding-newlines-in-blocks":56,"./rules/require-parentheses-around-iife":57,"./rules/require-right-sticked-operators":58,"./rules/require-space-after-binary-operators":59,"./rules/require-space-after-keywords":60,"./rules/require-space-after-line-comment":61,"./rules/require-space-after-object-keys":62,"./rules/require-space-after-prefix-unary-operators.js":63,"./rules/require-space-before-binary-operators":64,"./rules/require-space-before-block-statements.js":65,"./rules/require-space-before-postfix-unary-operators.js":66,"./rules/require-spaces-in-anonymous-function-expression":67,"./rules/require-spaces-in-conditional-expression":68,"./rules/require-spaces-in-function":71,"./rules/require-spaces-in-function-declaration":69,"./rules/require-spaces-in-function-expression":70,"./rules/require-spaces-in-named-function-expression":72,"./rules/require-spaces-inside-array-brackets":73,"./rules/require-spaces-inside-object-brackets":74,"./rules/require-spaces-inside-parentheses":75,"./rules/require-trailing-comma":76,"./rules/require-yoda-conditions":77,"./rules/safe-context-keyword":78,"./rules/validate-indentation":79,"./rules/validate-jsdoc":80,"./rules/validate-line-breaks":81,"./rules/validate-quote-marks":82,"esprima":95}],84:[function(require,module,exports){
 /**
  * Returns token by range start. Ignores ()
  *
@@ -5271,7 +5670,7 @@ exports.getPointerEntities = function(column, length) {
     return column - 1 + Math.ceil(length / 2);
 };
 
-},{}],79:[function(_dereq_,module,exports){
+},{}],85:[function(require,module,exports){
 module.exports = {
     iterate: iterate
 };
@@ -5353,7 +5752,7 @@ function iterate(node, cb, parentNode, parentCollection) {
     }
 }
 
-},{}],80:[function(_dereq_,module,exports){
+},{}],86:[function(require,module,exports){
 // 7.5.2 Keywords
 var ES3_KEYWORDS = {
     'break': true,
@@ -5465,7 +5864,7 @@ exports.binaryOperators = [
     '|', '^', '&&', '||', '===', '==', '>=',
     '<=', '<', '>', '!=', '!==',
 
-    ',', ':'
+    ','
 ];
 
 /**
@@ -5486,7 +5885,7 @@ exports.unaryOperators = ['-', '+', '!', '~'].concat(exports.incrementAndDecreme
  */
 exports.operators = exports.binaryOperators.concat(exports.unaryOperators);
 
-},{}],81:[function(_dereq_,module,exports){
+},{}],87:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -5514,7 +5913,7 @@ exports.operators = exports.binaryOperators.concat(exports.unaryOperators);
 // when used in node, this will actually load the util module we depend on
 // versus loading the builtin util module as happens otherwise
 // this is a bug in node module loading as far as I am concerned
-var util = _dereq_('util/');
+var util = require('util/');
 
 var pSlice = Array.prototype.slice;
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -5848,14 +6247,14 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":83}],82:[function(_dereq_,module,exports){
+},{"util/":89}],88:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],83:[function(_dereq_,module,exports){
+},{}],89:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6382,7 +6781,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = _dereq_('./support/isBuffer');
+exports.isBuffer = require('./support/isBuffer');
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -6426,7 +6825,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = _dereq_('inherits');
+exports.inherits = require('inherits');
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -6444,8 +6843,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("Zbi7gb"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":82,"Zbi7gb":85,"inherits":84}],84:[function(_dereq_,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":88,"_process":91,"inherits":90}],90:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -6470,7 +6869,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],85:[function(_dereq_,module,exports){
+},{}],91:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6535,11 +6934,11 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],86:[function(_dereq_,module,exports){
-module.exports=_dereq_(82)
-},{}],87:[function(_dereq_,module,exports){
-module.exports=_dereq_(83)
-},{"./support/isBuffer":86,"Zbi7gb":85,"inherits":84}],88:[function(_dereq_,module,exports){
+},{}],92:[function(require,module,exports){
+module.exports=require(88)
+},{}],93:[function(require,module,exports){
+module.exports=require(89)
+},{"./support/isBuffer":92,"_process":91,"inherits":90}],94:[function(require,module,exports){
 /*
 colors.js
 
@@ -6758,7 +7157,7 @@ exports.addSequencer('zebra', function (letter, i, exploded) {
 exports.setTheme = function (theme) {
   if (typeof theme === 'string') {
     try {
-      exports.themes[theme] = _dereq_(theme);
+      exports.themes[theme] = require(theme);
       applyTheme(exports.themes[theme]);
       return exports.themes[theme];
     } catch (err) {
@@ -6883,7 +7282,7 @@ addProperty('zalgo', function () {
   return zalgo(this);
 });
 
-},{}],89:[function(_dereq_,module,exports){
+},{}],95:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -10641,7 +11040,73 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],90:[function(_dereq_,module,exports){
+},{}],96:[function(require,module,exports){
+module.exports={
+    "requireCurlyBraces": [
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "try",
+        "catch"
+    ],
+    "requireSpaceAfterKeywords": [
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "case",
+        "return",
+        "try",
+        "catch",
+        "function",
+        "typeof"
+    ],
+    "requireSpaceBeforeBlockStatements": true,
+    "requireParenthesesAroundIIFE": true,
+    "requireSpacesInConditionalExpression": true,
+    "disallowSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireMultipleVarDecl": "onevar",
+    "requireBlocksOnNewline": 1,
+    "disallowEmptyBlocks": true,
+    "disallowSpacesInsideArrayBrackets": true,
+    "disallowSpacesInsideParentheses": true,
+    "disallowQuotedKeysInObjects": true,
+    "disallowDanglingUnderscores": true,
+    "disallowSpaceAfterObjectKeys": true,
+    "requireCommaBeforeLineBreak": true,
+    "disallowSpaceAfterPrefixUnaryOperators": true,
+    "disallowSpaceBeforePostfixUnaryOperators": true,
+    "disallowSpaceBeforeBinaryOperators": [
+        ","
+    ],
+    "requireSpaceBeforeBinaryOperators": true,
+    "requireSpaceAfterBinaryOperators": true,
+    "requireCamelCaseOrUpperCaseIdentifiers": true,
+    "disallowKeywords": [ "with" ],
+    "disallowMultipleLineBreaks": true,
+    "validateLineBreaks": "LF",
+    "validateQuoteMarks": "'",
+    "validateIndentation": 4,
+    "disallowMixedSpacesAndTabs": true,
+    "disallowTrailingWhitespace": true,
+    "disallowTrailingComma": true,
+    "disallowKeywordsOnNewLine": [ "else" ],
+    "requireLineFeedAtFileEnd": true,
+    "requireCapitalizedConstructors": true,
+    "requireDotNotation": true,
+    "disallowYodaConditions": true
+}
+
+},{}],97:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -10693,6 +11158,11 @@ module.exports={
     "requireSpacesInFunctionExpression": {
         "beforeOpeningCurlyBrace": true
     },
+    "disallowSpacesInsideObjectBrackets": "all",
+    "disallowSpacesInsideArrayBrackets": "all",
+    "disallowSpacesInsideParentheses": true,
+
+
     "validateJSDoc": {
         "checkParamNames": true,
         "requireParamTypes": true
@@ -10701,7 +11171,7 @@ module.exports={
     "disallowMultipleLineBreaks": true
 }
 
-},{}],91:[function(_dereq_,module,exports){
+},{}],98:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -10785,7 +11255,36 @@ module.exports={
     "disallowMultipleLineBreaks": true
 }
 
-},{}],92:[function(_dereq_,module,exports){
+},{}],99:[function(require,module,exports){
+module.exports={
+    "requireCurlyBraces": ["while", "do", "try", "catch"],
+    "requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "try", "catch"],
+    "requireSpacesInFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "requirePaddingNewlinesInBlocks": true,
+    "requireSpacesInsideObjectBrackets": "all",
+    "requireSpacesInsideArrayBrackets": "allButNested",
+    "requireSpaceBeforeBlockStatements": true,
+    "disallowKeywords": [ "with" ],
+    "requireLineFeedAtFileEnd": true,
+    "validateLineBreaks": "LF",
+    "validateIndentation": "\t",
+
+    "requireSpaceAfterPrefixUnaryOperators": ["++", "--"],
+    "requireSpaceBeforePostfixUnaryOperators": ["++", "--"],
+    "requireSpaceBeforeBinaryOperators": [ "+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=" ],
+    "requireSpaceAfterBinaryOperators": [ "+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=" ],
+    "disallowSpaceBeforeBinaryOperators": [","],
+    "requireSpacesInConditionalExpression": {
+        "afterTest": true,
+        "beforeConsequent": true,
+        "afterConsequent": true,
+        "beforeAlternate": true
+    }
+}
+
+},{}],100:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -10803,10 +11302,12 @@ module.exports={
         "while",
         "do",
         "switch",
+        "case",
         "return",
         "try",
         "catch",
-        "function"
+        "function",
+        "typeof"
     ],
     "requireSpaceBeforeBlockStatements": true,
     "requireParenthesesAroundIIFE": true,
@@ -10867,7 +11368,7 @@ module.exports={
     "disallowYodaConditions": true
 }
 
-},{}],93:[function(_dereq_,module,exports){
+},{}],101:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -10884,7 +11385,6 @@ module.exports={
         "do",
         "switch",
         "return",
-        "function",
         "catch"
     ],
     "disallowKeywords": [
@@ -10965,6 +11465,7 @@ module.exports={
         "value": 120,
         "allowUrlComments": true
     },
+    "requireSpaceAfterLineComment": true,
     "requireLineFeedAtFileEnd": true,
     "disallowMultipleLineBreaks": true,
     "disallowMixedSpacesAndTabs": true,
@@ -10972,6 +11473,5 @@ module.exports={
     "validateLineBreaks": "LF"
 }
 
-},{}]},{},[77])
-(77)
+},{}]},{},[83])(83)
 });
