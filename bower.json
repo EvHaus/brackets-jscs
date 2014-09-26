@@ -1,0 +1,8 @@
+{
+  "name": "brackets-jscs",
+  "version": "0.1.4",
+  "main": "main.js",
+  "dependencies": {
+	"react": "*"
+  }
+}

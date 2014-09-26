@@ -218,7 +218,7 @@ function renderPointer(column, colorize) {
 
 module.exports = Errors;
 
-},{"colors":94}],3:[function(require,module,exports){
+},{"colors":97}],3:[function(require,module,exports){
 var treeIterator = require('./tree-iterator');
 
 /**
@@ -229,11 +229,14 @@ var treeIterator = require('./tree-iterator');
 var JsFile = function(filename, source, tree) {
     this._filename = filename;
     this._source = source;
-    this._tree = tree || {};
+    this._tree = tree || {tokens: []};
     this._lines = source.split(/\r\n|\r|\n/);
     this._tokenIndex = null;
     var index = this._index = {};
     var _this = this;
+
+    this._buildTokenIndex();
+
     this.iterate(function(node, parentNode, parentCollection) {
         if (node) {
             var type = node.type;
@@ -353,6 +356,7 @@ JsFile.prototype = {
         var tokenIndex = {};
         for (var i = 0, l = tokens.length; i < l; i++) {
             tokenIndex[tokens[i].range[0]] = i;
+            tokens[i]._tokenIndex = i;
         }
         this._tokenIndex = tokenIndex;
     },
@@ -362,10 +366,81 @@ JsFile.prototype = {
      * @returns {Object}
      */
     getTokenPosByRangeStart: function(start) {
-        if (!this._tokenIndex) {
-            this._buildTokenIndex();
-        }
         return this._tokenIndex[start];
+    },
+    /**
+     * Returns token using range start from the index.
+     *
+     * @returns {Object|undefined}
+     */
+    getTokenByRangeStart: function(start) {
+        var tokenIndex = this._tokenIndex[start];
+        return tokenIndex === undefined ? undefined : this._tree.tokens[tokenIndex];
+    },
+    /**
+     * Returns first token for the node from the AST.
+     *
+     * @param {Object} node
+     * @returns {Object}
+     */
+    getFirstNodeToken: function(node) {
+        return this.getTokenByRangeStart(node.range[0]);
+    },
+    /**
+     * Returns the first token before the given.
+     *
+     * @param {Object} token
+     * @returns {Object|undefined}
+     */
+    getPrevToken: function(token) {
+        var index = token._tokenIndex - 1;
+        return index >= 0 ? this._tree.tokens[index] : undefined;
+    },
+    /**
+     * Returns the first token after the given.
+     *
+     * @param {Object} token
+     * @returns {Object|undefined}
+     */
+    getNextToken: function(token) {
+        var index = token._tokenIndex + 1;
+        return index < this._tree.tokens.length ? this._tree.tokens[index] : undefined;
+    },
+    /**
+     * Returns the first token before the given which matches type (and value).
+     *
+     * @param {Object} token
+     * @param {String} type
+     * @param {String} [value]
+     * @returns {Object|undefined}
+     */
+    findPrevToken: function(token, type, value) {
+        var prevToken = this.getPrevToken(token);
+        while (prevToken) {
+            if (prevToken.type === type && (value === undefined || prevToken.value === value)) {
+                return prevToken;
+            }
+            prevToken = this.getPrevToken(prevToken);
+        }
+        return prevToken;
+    },
+    /**
+     * Returns the first token after the given which matches type (and value).
+     *
+     * @param {Object} token
+     * @param {String} type
+     * @param {String} [value]
+     * @returns {Object|undefined}
+     */
+    findNextToken: function(token, type, value) {
+        var nextToken = this.getNextToken(token);
+        while (nextToken) {
+            if (nextToken.type === type && (value === undefined || nextToken.value === value)) {
+                return nextToken;
+            }
+            nextToken = this.getNextToken(nextToken);
+        }
+        return nextToken;
     },
     /**
      * Iterates through the token tree using tree iterator.
@@ -428,6 +503,26 @@ JsFile.prototype = {
         });
     },
     /**
+     * Iterates token by value from the token array.
+     * Calls passed function for every matched token.
+     *
+     * @param {String|String[]} name
+     * @param {Function} cb
+     */
+    iterateTokenByValue: function(name, cb) {
+        var names = (typeof name === 'string') ? [name] : name;
+        var nameIndex = {};
+        names.forEach(function(type) {
+            nameIndex[type] = true;
+        });
+
+        this.getTokens().forEach(function(token, index, tokens) {
+            if (nameIndex[token.value]) {
+                cb(token, index, tokens);
+            }
+        });
+    },
+    /**
      * Returns string representing contents of the file.
      *
      * @returns {String}
@@ -477,8 +572,10 @@ JsFile.prototype = {
 
 module.exports = JsFile;
 
-},{"./tree-iterator":85}],4:[function(require,module,exports){
+},{"./tree-iterator":90}],4:[function(require,module,exports){
 var presets = {
+    // https://github.com/airbnb/javascript
+    airbnb: require('../../presets/airbnb.json'),
     // http://javascript.crockford.com/code.html
     crockford: require('../../presets/crockford.json'),
     // https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
@@ -529,7 +626,7 @@ module.exports = {
 
         delete config.preset;
         for (var rule in preset) {
-            if (!(rule in config)) {
+            if (preset.hasOwnProperty(rule) && !(rule in config)) {
                 config[rule] = preset[rule];
             }
         }
@@ -538,7 +635,7 @@ module.exports = {
     }
 };
 
-},{"../../presets/crockford.json":96,"../../presets/google.json":97,"../../presets/jquery.json":98,"../../presets/mdcs.json":99,"../../presets/wikimedia.json":100,"../../presets/yandex.json":101}],5:[function(require,module,exports){
+},{"../../presets/airbnb.json":99,"../../presets/crockford.json":100,"../../presets/google.json":101,"../../presets/jquery.json":102,"../../presets/mdcs.json":103,"../../presets/wikimedia.json":104,"../../presets/yandex.json":105}],5:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -564,7 +661,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],6:[function(require,module,exports){
+},{"assert":92}],6:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -603,7 +700,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],7:[function(require,module,exports){
+},{"assert":92}],7:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -650,7 +747,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],8:[function(require,module,exports){
+},{"assert":92}],8:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -685,7 +782,31 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],9:[function(require,module,exports){
+},{"assert":92}],9:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(disallowFunctionDeclarations) {
+        assert(
+            disallowFunctionDeclarations === true,
+            'disallowFunctionDeclarations option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowFunctionDeclarations';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('FunctionDeclaration', function(node) {
+            errors.add('Illegal function declaration', node.loc.start);
+        });
+    }
+};
+
+},{"assert":92}],10:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -738,7 +859,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],10:[function(require,module,exports){
+},{"assert":92}],11:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -776,7 +897,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],11:[function(require,module,exports){
+},{"assert":92}],12:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -810,7 +931,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],12:[function(require,module,exports){
+},{"assert":92}],13:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -836,7 +957,7 @@ module.exports.prototype = {
 
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -897,7 +1018,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],14:[function(require,module,exports){
+},{"assert":92}],15:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -932,7 +1053,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],15:[function(require,module,exports){
+},{"assert":92}],16:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -968,7 +1089,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],16:[function(require,module,exports){
+},{"assert":92}],17:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -977,13 +1098,11 @@ module.exports.prototype = {
 
     configure: function(disallowMultipleVarDecl) {
         assert(
-            typeof disallowMultipleVarDecl === 'boolean',
-            'disallowMultipleVarDecl option requires boolean value'
+            disallowMultipleVarDecl === true || disallowMultipleVarDecl === 'strict',
+            'disallowMultipleVarDecl option requires true or "strict" value'
         );
-        assert(
-            disallowMultipleVarDecl === true,
-            'disallowMultipleVarDecl option requires true value or should be removed'
-        );
+
+        this.strictMode = disallowMultipleVarDecl === 'strict';
     },
 
     getOptionName: function() {
@@ -991,10 +1110,12 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
+        var inStrictMode = this.strictMode;
+
         file.iterateNodesByType('VariableDeclaration', function(node) {
-            // allow multiple var declarations in for statement
+            // allow multiple var declarations in for statement unless we're in strict mode
             // for (var i = 0, j = myArray.length; i < j; i++) {}
-            if (node.declarations.length > 1 && node.parentNode.type !== 'ForStatement') {
+            if (node.declarations.length > 1 && (inStrictMode || node.parentNode.type !== 'ForStatement')) {
                 errors.add('Multiple var declaration', node.loc.start);
             }
         });
@@ -1002,7 +1123,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],17:[function(require,module,exports){
+},{"assert":92}],18:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1041,7 +1162,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],18:[function(require,module,exports){
+},{"assert":92}],19:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1088,7 +1209,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],19:[function(require,module,exports){
+},{"assert":92}],20:[function(require,module,exports){
 var assert = require('assert');
 var utils = require('../utils');
 
@@ -1133,7 +1254,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":86,"assert":87}],20:[function(require,module,exports){
+},{"../utils":91,"assert":92}],21:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -1159,7 +1280,7 @@ module.exports.prototype = {
 
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 var allOperators = require('../utils').binaryOperators;
@@ -1259,15 +1380,24 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":84,"../utils":86,"assert":87}],22:[function(require,module,exports){
+},{"../token-helper":89,"../utils":91,"assert":92}],23:[function(require,module,exports){
 var assert = require('assert');
+var defaultKeywords = require('../utils').spacedKeywords;
 
 module.exports = function() {};
 
 module.exports.prototype = {
 
     configure: function(keywords) {
-        assert(Array.isArray(keywords), 'disallowSpaceAfterKeywords option requires array value');
+        assert(
+            Array.isArray(keywords) || keywords === true,
+            'disallowSpaceAfterKeywords option requires array or true value'
+        );
+
+        if (keywords === true) {
+            keywords = defaultKeywords;
+        }
+
         this._keywordIndex = {};
         for (var i = 0, l = keywords.length; i < l; i++) {
             this._keywordIndex[keywords[i]] = true;
@@ -1297,7 +1427,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],23:[function(require,module,exports){
+},{"../utils":91,"assert":92}],24:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1329,7 +1459,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],24:[function(require,module,exports){
+},{"assert":92}],25:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1367,7 +1497,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],25:[function(require,module,exports){
+},{"assert":92}],26:[function(require,module,exports){
 var assert = require('assert');
 var defaultOperators = require('../utils').unaryOperators;
 
@@ -1415,7 +1545,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":86,"assert":87}],26:[function(require,module,exports){
+},{"../utils":91,"assert":92}],27:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 var allOperators = require('../utils').binaryOperators;
@@ -1509,7 +1639,7 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":84,"../utils":86,"assert":87}],27:[function(require,module,exports){
+},{"../token-helper":89,"../utils":91,"assert":92}],28:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1547,7 +1677,45 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],28:[function(require,module,exports){
+},{"assert":92}],29:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(disallow) {
+        assert(
+            typeof disallow === 'boolean',
+            this.getOptionName() + ' option requires boolean value'
+        );
+        assert(
+            disallow === true,
+            this.getOptionName() + ' option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowSpaceBeforeObjectValues';
+    },
+
+    check: function(file, errors) {
+        var tokens = file.getTokens();
+        file.iterateNodesByType('ObjectExpression', function(node) {
+            node.properties.forEach(function(property) {
+                var value = property.value;
+                var valuePos = file.getTokenPosByRangeStart(value.range[0]);
+                var colon = tokens[valuePos - 1];
+                if (colon.range[1] !== value.range[0]) {
+                    errors.add('Illegal space after key colon', colon.loc.end);
+                }
+            });
+        });
+    }
+
+};
+
+},{"assert":92}],30:[function(require,module,exports){
 var assert = require('assert');
 var defaultOperators = require('../utils').incrementAndDecrementOperators;
 
@@ -1597,7 +1765,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":86,"assert":87}],29:[function(require,module,exports){
+},{"../utils":91,"assert":92}],31:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1689,7 +1857,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],30:[function(require,module,exports){
+},{"assert":92}],32:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1804,7 +1972,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],31:[function(require,module,exports){
+},{"assert":92}],33:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1889,7 +2057,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],32:[function(require,module,exports){
+},{"assert":92}],34:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -1980,7 +2148,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],33:[function(require,module,exports){
+},{"assert":92}],35:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2071,7 +2239,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],34:[function(require,module,exports){
+},{"assert":92}],36:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2157,7 +2325,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],35:[function(require,module,exports){
+},{"assert":92}],37:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2220,7 +2388,7 @@ function check(brackets, errors, insideTokens) {
     }
 }
 
-},{"assert":87}],36:[function(require,module,exports){
+},{"assert":92}],38:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2284,7 +2452,7 @@ function check(brackets, errors, insideTokens) {
     }
 }
 
-},{"assert":87}],37:[function(require,module,exports){
+},{"assert":92}],39:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2335,7 +2503,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],38:[function(require,module,exports){
+},{"assert":92}],40:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2373,7 +2541,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],39:[function(require,module,exports){
+},{"assert":92}],41:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2406,7 +2574,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],40:[function(require,module,exports){
+},{"assert":92}],42:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2453,7 +2621,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],41:[function(require,module,exports){
+},{"assert":92}],43:[function(require,module,exports){
 var assert = require('assert');
 var commentHelper = require('../comment-helper');
 
@@ -2500,8 +2668,12 @@ module.exports.prototype = {
     check: function(file, errors) {
         var maximumLineLength = this._maximumLineLength;
 
-        var lines = this._allowComments ? commentHelper.getLinesWithCommentsRemoved(file) : file.getLines();
         var line;
+        var lines = this._allowComments ?
+            commentHelper.getLinesWithCommentsRemoved(file) : file.getLines();
+
+        // This check should not be destructive
+        lines = lines.slice();
 
         if (this._allowRegex) {
             file.iterateTokensByType('RegularExpression', function(token) {
@@ -2534,7 +2706,7 @@ module.exports.prototype = {
 
 };
 
-},{"../comment-helper":1,"assert":87}],42:[function(require,module,exports){
+},{"../comment-helper":1,"assert":92}],44:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2598,7 +2770,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],43:[function(require,module,exports){
+},{"assert":92}],45:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2624,7 +2796,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],44:[function(require,module,exports){
+},{"assert":92}],46:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2673,7 +2845,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],45:[function(require,module,exports){
+},{"assert":92}],47:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2717,7 +2889,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],46:[function(require,module,exports){
+},{"assert":92}],48:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2755,7 +2927,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],47:[function(require,module,exports){
+},{"assert":92}],49:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2794,15 +2966,24 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],48:[function(require,module,exports){
+},{"assert":92}],50:[function(require,module,exports){
 var assert = require('assert');
+var defaultKeywords = require('../utils').curlyBracedKeywords;
 
 module.exports = function() {};
 
 module.exports.prototype = {
 
     configure: function(statementTypes) {
-        assert(Array.isArray(statementTypes), 'requireCurlyBraces option requires array value');
+        assert(
+            Array.isArray(statementTypes) || statementTypes === true,
+            'requireCurlyBraces option requires array or true value'
+        );
+
+        if (statementTypes === true) {
+            statementTypes = defaultKeywords;
+        }
+
         this._typeIndex = {};
         for (var i = 0, l = statementTypes.length; i < l; i++) {
             this._typeIndex[statementTypes[i]] = true;
@@ -2879,7 +3060,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],49:[function(require,module,exports){
+},{"../utils":91,"assert":92}],51:[function(require,module,exports){
 var assert = require('assert');
 var utils = require('../utils');
 
@@ -2933,7 +3114,46 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":86,"assert":87}],50:[function(require,module,exports){
+},{"../utils":91,"assert":92}],52:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(requireFunctionDeclarations) {
+        assert(
+            requireFunctionDeclarations === true,
+            'requireFunctionDeclarations option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireFunctionDeclarations';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType(
+            'VariableDeclarator',
+            function(node) {
+                if (node.init && node.init.type === 'FunctionExpression') {
+                    errors.add('Use a function declaration instead', node.loc.start);
+                }
+            }
+        );
+
+        file.iterateNodesByType(
+            'AssignmentExpression',
+            function(node) {
+                if (node.left.type !== 'MemberExpression' &&
+                    node.right.type === 'FunctionExpression') {
+                    errors.add('Use a function declaration instead', node.loc.start);
+                }
+            }
+        );
+    }
+};
+
+},{"assert":92}],53:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -2971,7 +3191,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],51:[function(require,module,exports){
+},{"assert":92}],54:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -2997,7 +3217,7 @@ module.exports.prototype = {
 
 };
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3028,7 +3248,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],53:[function(require,module,exports){
+},{"assert":92}],56:[function(require,module,exports){
 var assert = require('assert');
 
 function consecutive(file, errors) {
@@ -3118,7 +3338,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],54:[function(require,module,exports){
+},{"assert":92}],57:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3157,7 +3377,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],55:[function(require,module,exports){
+},{"assert":92}],58:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 var defaultOperators = require('../utils').binaryOperators.slice();
@@ -3250,7 +3470,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../token-helper":84,"../utils":86,"assert":87}],56:[function(require,module,exports){
+},{"../token-helper":89,"../utils":91,"assert":92}],59:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3314,7 +3534,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],57:[function(require,module,exports){
+},{"assert":92}],60:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3376,7 +3596,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],58:[function(require,module,exports){
+},{"assert":92}],61:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -3402,7 +3622,7 @@ module.exports.prototype = {
 
 };
 
-},{}],59:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 var allOperators = require('../utils').binaryOperators;
@@ -3501,7 +3721,7 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":84,"../utils":86,"assert":87}],60:[function(require,module,exports){
+},{"../token-helper":89,"../utils":91,"assert":92}],63:[function(require,module,exports){
 var assert = require('assert');
 var util = require('util');
 var texts = [
@@ -3509,12 +3729,21 @@ var texts = [
     'Should be one space instead of %d, after "%s" keyword'
 ];
 
+var defaultKeywords = require('../utils').spacedKeywords;
+
 module.exports = function() {};
 
 module.exports.prototype = {
 
     configure: function(keywords) {
-        assert(Array.isArray(keywords), 'requireSpaceAfterKeywords option requires array value');
+        assert(
+            Array.isArray(keywords) || keywords === true,
+            'requireSpaceAfterKeywords option requires array or true value');
+
+        if (keywords === true) {
+            keywords = defaultKeywords;
+        }
+
         this._keywordIndex = {};
         for (var i = 0, l = keywords.length; i < l; i++) {
             this._keywordIndex[keywords[i]] = true;
@@ -3564,7 +3793,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87,"util":93}],61:[function(require,module,exports){
+},{"../utils":91,"assert":92,"util":96}],64:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3573,9 +3802,12 @@ module.exports.prototype = {
 
     configure: function(requireSpaceAfterLineComment) {
         assert(
-            requireSpaceAfterLineComment === true,
-            'requireSpaceAfterLineComment option requires the value true'
+            requireSpaceAfterLineComment === true ||
+            requireSpaceAfterLineComment === 'allowSlash',
+            'requireSpaceAfterLineComment option requires the value true or `allowSlash`'
         );
+
+        this._allowSlash = requireSpaceAfterLineComment === 'allowSlash';
     },
 
     getOptionName: function() {
@@ -3584,11 +3816,22 @@ module.exports.prototype = {
 
     check: function(file, errors) {
         var comments = file.getComments();
+        var allowSlash = this._allowSlash;
 
         comments.forEach(function(comment) {
             if (comment.type === 'Line') {
                 var value = comment.value;
-                if (value.length > 0 && value[0] !== ' ') {
+
+                // don't check triple slashed comments, microsoft js doc convention. see #593
+                if (allowSlash && value[0] === '/') {
+                    value = value.substr(1);
+                }
+
+                if (value.length === 0) {
+                    return;
+                }
+
+                if (value[0] !== ' ') {
                     errors.add('Missing space after line comment', comment.loc.start);
                 }
             }
@@ -3596,7 +3839,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],62:[function(require,module,exports){
+},{"assert":92}],65:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3634,7 +3877,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],63:[function(require,module,exports){
+},{"assert":92}],66:[function(require,module,exports){
 var assert = require('assert');
 var defaultOperators = require('../utils').unaryOperators;
 
@@ -3692,7 +3935,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":86,"assert":87}],64:[function(require,module,exports){
+},{"../utils":91,"assert":92}],67:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 var allOperators = require('../../lib/utils').binaryOperators.filter(function(operator) {
@@ -3782,7 +4025,7 @@ module.exports.prototype = {
 
 };
 
-},{"../../lib/utils":86,"../token-helper":84,"assert":87}],65:[function(require,module,exports){
+},{"../../lib/utils":91,"../token-helper":89,"assert":92}],68:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3820,7 +4063,45 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],66:[function(require,module,exports){
+},{"assert":92}],69:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(disallow) {
+        assert(
+            typeof disallow === 'boolean',
+            this.getOptionName() + ' option requires boolean value'
+        );
+        assert(
+            disallow === true,
+            this.getOptionName() + ' option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireSpaceBeforeObjectValues';
+    },
+
+    check: function(file, errors) {
+        var tokens = file.getTokens();
+        file.iterateNodesByType('ObjectExpression', function(node) {
+            node.properties.forEach(function(property) {
+                var value = property.value;
+                var valuePos = file.getTokenPosByRangeStart(value.range[0]);
+                var colon = tokens[valuePos - 1];
+                if (colon.range[1] === value.range[0]) {
+                    errors.add('Missing space after key colon', colon.loc.end);
+                }
+            });
+        });
+    }
+
+};
+
+},{"assert":92}],70:[function(require,module,exports){
 var assert = require('assert');
 var defaultOperators = require('../utils').incrementAndDecrementOperators;
 
@@ -3870,7 +4151,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":86,"assert":87}],67:[function(require,module,exports){
+},{"../utils":91,"assert":92}],71:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -3961,7 +4242,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],68:[function(require,module,exports){
+},{"assert":92}],72:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4071,7 +4352,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],69:[function(require,module,exports){
+},{"assert":92}],73:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4156,7 +4437,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],70:[function(require,module,exports){
+},{"assert":92}],74:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4247,7 +4528,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],71:[function(require,module,exports){
+},{"assert":92}],75:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4338,7 +4619,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],72:[function(require,module,exports){
+},{"assert":92}],76:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4423,7 +4704,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],73:[function(require,module,exports){
+},{"assert":92}],77:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4485,7 +4766,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],74:[function(require,module,exports){
+},{"assert":92}],78:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4541,7 +4822,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],75:[function(require,module,exports){
+},{"assert":92}],79:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4621,7 +4902,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":87}],76:[function(require,module,exports){
+},{"assert":92}],80:[function(require,module,exports){
 var assert = require('assert');
 var tokenHelper = require('../token-helper');
 
@@ -4675,7 +4956,7 @@ module.exports.prototype = {
 
 };
 
-},{"../token-helper":84,"assert":87}],77:[function(require,module,exports){
+},{"../token-helper":89,"assert":92}],81:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4722,7 +5003,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],78:[function(require,module,exports){
+},{"assert":92}],82:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -4796,7 +5077,7 @@ function checkKeywords(name, keywords) {
     return true;
 }
 
-},{"assert":87}],79:[function(require,module,exports){
+},{"assert":92}],83:[function(require,module,exports){
 var assert = require('assert');
 var commentHelper = require('../comment-helper');
 
@@ -4859,33 +5140,10 @@ module.exports.prototype = {
         }
 
         function markChildren(node) {
-            var childrenProperty = indentableNodes[node.type],
-                children = node[childrenProperty];
+            var childrenProperty = indentableNodes[node.type];
+            var children = node[childrenProperty];
 
             children.forEach(function(childNode, i) {
-                /* temporary fix for holes in arrays: https://github.com/ariya/esprima/pull/241 */
-                if (childNode === null) {
-                    var leftLine, rightLine, j;
-                    for (j = i - 1; j >= 0; j -= 1) {
-                        if (children[j]) {
-                            leftLine = children[j].loc.end.line;
-                            break;
-                        }
-                    }
-                    for (j = i + 1; j < children.length; j += 1) {
-                        if (children[j]) {
-                            rightLine = children[j].loc.start.line;
-                            break;
-                        }
-                    }
-                    leftLine = leftLine || node.loc.start.line;
-                    rightLine = rightLine || node.loc.end.line;
-                    for (j = leftLine; j < rightLine; j++) {
-                        linesToCheck[j - 1].check = lines[j - 1].replace(/[\s\t]/g, '').length > 0;
-                    }
-                    return;
-                }
-                /* /fix */
                 if (childNode.loc.start.line !== node.loc.start.line) {
                     linesToCheck[childNode.loc.start.line - 1].check = true;
                 }
@@ -4894,14 +5152,10 @@ module.exports.prototype = {
 
         function checkIndentations() {
             linesToCheck.forEach(function(line, i) {
-                var expectedIndentation;
                 var actualIndentation = getIndentationFromLine(i);
 
-                if (line.pop !== null) {
-                    expectedIndentation = indentStack.pop() - (indentSize * line.pop);
-                } else {
-                    expectedIndentation = indentStack[indentStack.length - 1];
-                }
+                var expectedIndentation = getExpectedIndentation(line, actualIndentation);
+
                 if (line.check) {
                     if (actualIndentation !== expectedIndentation) {
                         errors.add(
@@ -4920,9 +5174,55 @@ module.exports.prototype = {
                 }
 
                 if (line.push !== null) {
-                    indentStack.push(actualIndentation + (indentSize * line.push));
+                    pushExpectedIndentations(line, actualIndentation);
                 }
             });
+        }
+
+        function getExpectedIndentation(line, actual) {
+            var outdent = indentSize * line.pop;
+            var expected;
+            var idx = indentStack.length - 1;
+
+            if (line.pop === null) {
+                expected = indentStack[idx];
+            } else {
+                expected = indentStack.pop();
+
+                if (Array.isArray(expected)) {
+                    expected[0] -= outdent;
+                    expected[1] -= outdent;
+                } else {
+                    expected -= outdent;
+                }
+            }
+
+            // when the expected is an array, resolve the value
+            // back into a Number by checking both values are the actual indentation
+            if (line.check && Array.isArray(expected)) {
+                if (actual === expected[1]) {
+                    indentStack[idx] = expected[1];
+                } else {
+                    indentStack[idx] = expected[0];
+                }
+                expected = indentStack[idx];
+            }
+
+            return expected;
+        }
+
+        function pushExpectedIndentations(line, actualIndentation) {
+            var expectedIndentation = actualIndentation + (indentSize * line.push);
+            var expectedIndentation2;
+
+            // when a line has an alternate indentation, push an array of possible values
+            // on the stack, to be resolved when checked against an actual indentation
+            if (line.pushAltLine !== null) {
+                expectedIndentation2 = getIndentationFromLine(line.pushAltLine) + (indentSize * line.push);
+                indentStack.push([expectedIndentation, expectedIndentation2]);
+            } else {
+                indentStack.push(expectedIndentation);
+            }
         }
 
         function checkAlternateBlockStatement(node, property) {
@@ -4942,19 +5242,6 @@ module.exports.prototype = {
                 }
 
                 markChildren(node);
-            });
-
-            file.iterateNodesByType([
-                'ObjectExpression',
-                'ArrayExpression'
-            ], function(node) {
-                if (!isMultiline(node)) {
-                    return;
-                }
-
-                markChildren(node);
-                markPop(node, 1);
-                markPushAndCheck(node, 1);
             });
 
             file.iterateNodesByType('BlockStatement', function(node) {
@@ -4980,8 +5267,8 @@ module.exports.prototype = {
             file.iterateNodesByType('IfStatement', function(node) {
                 checkAlternateBlockStatement(node, 'alternate');
 
-                var test = node.test,
-                    endLine = test.loc.end.line - 1;
+                var test = node.test;
+                var endLine = test.loc.end.line - 1;
 
                 if (isMultiline(test) && linesToCheck[endLine].pop !== null) {
                     linesToCheck[endLine].push = 1;
@@ -5033,6 +5320,13 @@ module.exports.prototype = {
                 }
             });
 
+            // indentations inside of function expressions can be offset from
+            // either the start of the function or the end of the function, therefore
+            // mark all starting lines of functions as potential indentations
+            file.iterateNodesByType(['FunctionDeclaration', 'FunctionExpression'], function(node) {
+                linesToCheck[node.loc.start.line - 1].pushAltLine = node.loc.end.line - 1;
+            });
+
             file.iterateNodesByType('VariableDeclaration', function(node) {
                 var startLine = node.loc.start.line - 1;
                 var decls = node.declarations;
@@ -5066,6 +5360,7 @@ module.exports.prototype = {
         var linesToCheck = lines.map(function() {
             return {
                 push: null,
+                pushAltLine: null,
                 pop: null,
                 popAfter: null,
                 check: null
@@ -5078,7 +5373,7 @@ module.exports.prototype = {
 
 };
 
-},{"../comment-helper":1,"assert":87}],80:[function(require,module,exports){
+},{"../comment-helper":1,"assert":92}],84:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -5171,7 +5466,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],81:[function(require,module,exports){
+},{"assert":92}],85:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -5221,7 +5516,81 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],82:[function(require,module,exports){
+},{"assert":92}],86:[function(require,module,exports){
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(validateParameterSeparator) {
+        assert(
+            typeof validateParameterSeparator === 'string' && /^[ ]?,[ ]?$/.test(validateParameterSeparator),
+            'validateParameterSpacing option requires string value containing only a comma and optional spaces'
+        );
+
+        this._separator = validateParameterSeparator;
+    },
+
+    getOptionName: function() {
+        return 'validateParameterSeparator';
+    },
+
+    check: function(file, errors) {
+
+        var tokens = file.getTokens();
+        var validateTokens = this._separator.split('');
+        var separatorBefore = validateTokens[0];
+        var separatorAfter = validateTokens[validateTokens.length - 1];
+
+        file.iterateNodesByType(['FunctionDeclaration', 'FunctionExpression'], function(node) {
+
+            node.params.forEach(function(param) {
+
+                var paramTokenPos = file.getTokenPosByRangeStart(param.range[0]);
+                var punctuatorToken = tokens[paramTokenPos + 1];
+
+                if (punctuatorToken.value === ',') {
+
+                    var nextParamToken = tokens[paramTokenPos + 2];
+
+                    if (separatorBefore === ',' &&
+                        punctuatorToken.range[0] !== param.range[1] &&
+                        param.loc.start.line === nextParamToken.loc.start.line) {
+
+                        errors.add(
+                            'Unexpected space after function parameter \'' + param.name + '\'',
+                            punctuatorToken.loc.start
+                        );
+                    } else if (separatorBefore === ' ' && punctuatorToken.range[0] === param.range[1]) {
+                        errors.add(
+                            'Missing space after function parameter \'' + param.name + '\'',
+                            punctuatorToken.loc.start
+                        );
+                    }
+
+                    if (separatorAfter === ',' &&
+                        punctuatorToken.range[1] < nextParamToken.range[0] &&
+                        param.loc.start.line === nextParamToken.loc.start.line) {
+
+                        errors.add(
+                            'Unexpected space before function parameter \'' + nextParamToken.value + '\'',
+                            nextParamToken.loc.start
+                        );
+                    } else if (separatorAfter === ' ' && punctuatorToken.range[1] === nextParamToken.range[0]) {
+                        errors.add(
+                            'Missing space before function parameter \'' + nextParamToken.value + '\'',
+                            nextParamToken.loc.start
+                        );
+                    }
+                }
+            });
+        });
+    }
+
+};
+
+},{"assert":92}],87:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -5285,7 +5654,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":87}],83:[function(require,module,exports){
+},{"assert":92}],88:[function(require,module,exports){
 var esprima = require('esprima');
 var Errors = require('./errors');
 var JsFile = require('./js-file');
@@ -5331,6 +5700,7 @@ StringChecker.prototype = {
         this.registerRule(new (require('./rules/disallow-left-sticked-operators'))());
         this.registerRule(new (require('./rules/require-right-sticked-operators'))());
         this.registerRule(new (require('./rules/disallow-right-sticked-operators'))());
+        this.registerRule(new (require('./rules/validate-jsdoc'))());
         /* deprecated rules (end) */
 
         this.registerRule(new (require('./rules/require-operator-before-line-break'))());
@@ -5348,7 +5718,6 @@ StringChecker.prototype = {
         this.registerRule(new (require('./rules/disallow-keywords-on-new-line'))());
         this.registerRule(new (require('./rules/require-line-feed-at-file-end'))());
         this.registerRule(new (require('./rules/maximum-line-length'))());
-        this.registerRule(new (require('./rules/validate-jsdoc'))());
         this.registerRule(new (require('./rules/require-yoda-conditions'))());
         this.registerRule(new (require('./rules/disallow-yoda-conditions'))());
         this.registerRule(new (require('./rules/require-spaces-inside-object-brackets'))());
@@ -5359,7 +5728,9 @@ StringChecker.prototype = {
         this.registerRule(new (require('./rules/disallow-spaces-inside-parentheses'))());
         this.registerRule(new (require('./rules/require-blocks-on-newline'))());
         this.registerRule(new (require('./rules/require-space-after-object-keys'))());
+        this.registerRule(new (require('./rules/require-space-before-object-values'))());
         this.registerRule(new (require('./rules/disallow-space-after-object-keys'))());
+        this.registerRule(new (require('./rules/disallow-space-before-object-values'))());
         this.registerRule(new (require('./rules/disallow-quoted-keys-in-objects'))());
         this.registerRule(new (require('./rules/disallow-dangling-underscores'))());
         this.registerRule(new (require('./rules/require-aligned-object-values'))());
@@ -5404,6 +5775,8 @@ StringChecker.prototype = {
         this.registerRule(new (require('./rules/require-spaces-in-function-declaration'))());
         this.registerRule(new (require('./rules/disallow-spaces-in-function-declaration'))());
 
+        this.registerRule(new (require('./rules/validate-parameter-separator'))());
+
         this.registerRule(new (require('./rules/require-capitalized-constructors'))());
 
         this.registerRule(new (require('./rules/safe-context-keyword'))());
@@ -5415,6 +5788,9 @@ StringChecker.prototype = {
 
         this.registerRule(new (require('./rules/require-anonymous-functions'))());
         this.registerRule(new (require('./rules/disallow-anonymous-functions'))());
+
+        this.registerRule(new (require('./rules/require-function-declarations'))());
+        this.registerRule(new (require('./rules/disallow-function-declarations'))());
     },
 
     /**
@@ -5510,7 +5886,7 @@ StringChecker.prototype = {
      */
     checkString: function(str, filename) {
         filename = filename || 'input';
-        str = str.replace(/^#!?[^\n]+\n/gm, '\n');
+        str = str.replace(/^#!?[^\n]+\n/gm, '');
 
         var tree;
         var parseError;
@@ -5551,7 +5927,7 @@ StringChecker.prototype = {
 
 module.exports = StringChecker;
 
-},{"./errors":2,"./js-file":3,"./options/preset":4,"./rules/disallow-anonymous-functions":5,"./rules/disallow-comma-before-line-break":6,"./rules/disallow-dangling-underscores":7,"./rules/disallow-empty-blocks":8,"./rules/disallow-implicit-type-conversion":9,"./rules/disallow-keywords":11,"./rules/disallow-keywords-on-new-line":10,"./rules/disallow-left-sticked-operators":12,"./rules/disallow-mixed-spaces-and-tabs":13,"./rules/disallow-multiple-line-breaks":14,"./rules/disallow-multiple-line-strings":15,"./rules/disallow-multiple-var-decl":16,"./rules/disallow-newline-before-block-statements":17,"./rules/disallow-padding-newlines-in-blocks":18,"./rules/disallow-quoted-keys-in-objects":19,"./rules/disallow-right-sticked-operators":20,"./rules/disallow-space-after-binary-operators":21,"./rules/disallow-space-after-keywords":22,"./rules/disallow-space-after-line-comment":23,"./rules/disallow-space-after-object-keys":24,"./rules/disallow-space-after-prefix-unary-operators.js":25,"./rules/disallow-space-before-binary-operators":26,"./rules/disallow-space-before-block-statements.js":27,"./rules/disallow-space-before-postfix-unary-operators.js":28,"./rules/disallow-spaces-in-anonymous-function-expression":29,"./rules/disallow-spaces-in-conditional-expression":30,"./rules/disallow-spaces-in-function":33,"./rules/disallow-spaces-in-function-declaration":31,"./rules/disallow-spaces-in-function-expression":32,"./rules/disallow-spaces-in-named-function-expression":34,"./rules/disallow-spaces-inside-array-brackets":35,"./rules/disallow-spaces-inside-object-brackets":36,"./rules/disallow-spaces-inside-parentheses":37,"./rules/disallow-trailing-comma":38,"./rules/disallow-trailing-whitespace":39,"./rules/disallow-yoda-conditions":40,"./rules/maximum-line-length":41,"./rules/require-aligned-object-values":42,"./rules/require-anonymous-functions":43,"./rules/require-blocks-on-newline":44,"./rules/require-camelcase-or-uppercase-identifiers":45,"./rules/require-capitalized-constructors":46,"./rules/require-comma-before-line-break":47,"./rules/require-curly-braces":48,"./rules/require-dot-notation":49,"./rules/require-keywords-on-new-line":50,"./rules/require-left-sticked-operators":51,"./rules/require-line-feed-at-file-end":52,"./rules/require-multiple-var-decl":53,"./rules/require-newline-before-block-statements":54,"./rules/require-operator-before-line-break":55,"./rules/require-padding-newlines-in-blocks":56,"./rules/require-parentheses-around-iife":57,"./rules/require-right-sticked-operators":58,"./rules/require-space-after-binary-operators":59,"./rules/require-space-after-keywords":60,"./rules/require-space-after-line-comment":61,"./rules/require-space-after-object-keys":62,"./rules/require-space-after-prefix-unary-operators.js":63,"./rules/require-space-before-binary-operators":64,"./rules/require-space-before-block-statements.js":65,"./rules/require-space-before-postfix-unary-operators.js":66,"./rules/require-spaces-in-anonymous-function-expression":67,"./rules/require-spaces-in-conditional-expression":68,"./rules/require-spaces-in-function":71,"./rules/require-spaces-in-function-declaration":69,"./rules/require-spaces-in-function-expression":70,"./rules/require-spaces-in-named-function-expression":72,"./rules/require-spaces-inside-array-brackets":73,"./rules/require-spaces-inside-object-brackets":74,"./rules/require-spaces-inside-parentheses":75,"./rules/require-trailing-comma":76,"./rules/require-yoda-conditions":77,"./rules/safe-context-keyword":78,"./rules/validate-indentation":79,"./rules/validate-jsdoc":80,"./rules/validate-line-breaks":81,"./rules/validate-quote-marks":82,"esprima":95}],84:[function(require,module,exports){
+},{"./errors":2,"./js-file":3,"./options/preset":4,"./rules/disallow-anonymous-functions":5,"./rules/disallow-comma-before-line-break":6,"./rules/disallow-dangling-underscores":7,"./rules/disallow-empty-blocks":8,"./rules/disallow-function-declarations":9,"./rules/disallow-implicit-type-conversion":10,"./rules/disallow-keywords":12,"./rules/disallow-keywords-on-new-line":11,"./rules/disallow-left-sticked-operators":13,"./rules/disallow-mixed-spaces-and-tabs":14,"./rules/disallow-multiple-line-breaks":15,"./rules/disallow-multiple-line-strings":16,"./rules/disallow-multiple-var-decl":17,"./rules/disallow-newline-before-block-statements":18,"./rules/disallow-padding-newlines-in-blocks":19,"./rules/disallow-quoted-keys-in-objects":20,"./rules/disallow-right-sticked-operators":21,"./rules/disallow-space-after-binary-operators":22,"./rules/disallow-space-after-keywords":23,"./rules/disallow-space-after-line-comment":24,"./rules/disallow-space-after-object-keys":25,"./rules/disallow-space-after-prefix-unary-operators.js":26,"./rules/disallow-space-before-binary-operators":27,"./rules/disallow-space-before-block-statements.js":28,"./rules/disallow-space-before-object-values":29,"./rules/disallow-space-before-postfix-unary-operators.js":30,"./rules/disallow-spaces-in-anonymous-function-expression":31,"./rules/disallow-spaces-in-conditional-expression":32,"./rules/disallow-spaces-in-function":35,"./rules/disallow-spaces-in-function-declaration":33,"./rules/disallow-spaces-in-function-expression":34,"./rules/disallow-spaces-in-named-function-expression":36,"./rules/disallow-spaces-inside-array-brackets":37,"./rules/disallow-spaces-inside-object-brackets":38,"./rules/disallow-spaces-inside-parentheses":39,"./rules/disallow-trailing-comma":40,"./rules/disallow-trailing-whitespace":41,"./rules/disallow-yoda-conditions":42,"./rules/maximum-line-length":43,"./rules/require-aligned-object-values":44,"./rules/require-anonymous-functions":45,"./rules/require-blocks-on-newline":46,"./rules/require-camelcase-or-uppercase-identifiers":47,"./rules/require-capitalized-constructors":48,"./rules/require-comma-before-line-break":49,"./rules/require-curly-braces":50,"./rules/require-dot-notation":51,"./rules/require-function-declarations":52,"./rules/require-keywords-on-new-line":53,"./rules/require-left-sticked-operators":54,"./rules/require-line-feed-at-file-end":55,"./rules/require-multiple-var-decl":56,"./rules/require-newline-before-block-statements":57,"./rules/require-operator-before-line-break":58,"./rules/require-padding-newlines-in-blocks":59,"./rules/require-parentheses-around-iife":60,"./rules/require-right-sticked-operators":61,"./rules/require-space-after-binary-operators":62,"./rules/require-space-after-keywords":63,"./rules/require-space-after-line-comment":64,"./rules/require-space-after-object-keys":65,"./rules/require-space-after-prefix-unary-operators.js":66,"./rules/require-space-before-binary-operators":67,"./rules/require-space-before-block-statements.js":68,"./rules/require-space-before-object-values":69,"./rules/require-space-before-postfix-unary-operators.js":70,"./rules/require-spaces-in-anonymous-function-expression":71,"./rules/require-spaces-in-conditional-expression":72,"./rules/require-spaces-in-function":75,"./rules/require-spaces-in-function-declaration":73,"./rules/require-spaces-in-function-expression":74,"./rules/require-spaces-in-named-function-expression":76,"./rules/require-spaces-inside-array-brackets":77,"./rules/require-spaces-inside-object-brackets":78,"./rules/require-spaces-inside-parentheses":79,"./rules/require-trailing-comma":80,"./rules/require-yoda-conditions":81,"./rules/safe-context-keyword":82,"./rules/validate-indentation":83,"./rules/validate-jsdoc":84,"./rules/validate-line-breaks":85,"./rules/validate-parameter-separator":86,"./rules/validate-quote-marks":87,"esprima":98}],89:[function(require,module,exports){
 /**
  * Returns token by range start. Ignores ()
  *
@@ -5670,7 +6046,7 @@ exports.getPointerEntities = function(column, length) {
     return column - 1 + Math.ceil(length / 2);
 };
 
-},{}],85:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 module.exports = {
     iterate: iterate
 };
@@ -5752,7 +6128,7 @@ function iterate(node, cb, parentNode, parentCollection) {
     }
 }
 
-},{}],86:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 // 7.5.2 Keywords
 var ES3_KEYWORDS = {
     'break': true,
@@ -5821,6 +6197,43 @@ var ES3_FUTURE_RESERVED_WORDS = {
 var IDENTIFIER_NAME_RE = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
 
 /**
+ * All keywords where spaces are a stylistic choice
+ * @type {Array}
+ */
+exports.spacedKeywords = [
+    'do',
+    'for',
+    'if',
+    'else',
+    'switch',
+    'case',
+    'try',
+    'catch',
+    'void',
+    'while',
+    'with',
+    'return',
+    'typeof',
+    'function'
+];
+
+/**
+ * All keywords where curly braces are a stylistic choice
+ * @type {Array}
+ */
+exports.curlyBracedKeywords = [
+    'if',
+    'else',
+    'for',
+    'while',
+    'do',
+    'try',
+    'catch',
+    'case',
+    'default'
+];
+
+/**
  * Returns true if word is keyword in ECMAScript 3 specification.
  *
  * @param {String} word
@@ -5885,7 +6298,7 @@ exports.unaryOperators = ['-', '+', '!', '~'].concat(exports.incrementAndDecreme
  */
 exports.operators = exports.binaryOperators.concat(exports.unaryOperators);
 
-},{}],87:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -6247,14 +6660,104 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":89}],88:[function(require,module,exports){
+},{"util/":96}],93:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],94:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],95:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],89:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6844,101 +7347,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":88,"_process":91,"inherits":90}],90:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],91:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],92:[function(require,module,exports){
-module.exports=require(88)
-},{}],93:[function(require,module,exports){
-module.exports=require(89)
-},{"./support/isBuffer":92,"_process":91,"inherits":90}],94:[function(require,module,exports){
+},{"./support/isBuffer":95,"_process":94,"inherits":93}],97:[function(require,module,exports){
 /*
 colors.js
 
@@ -7282,7 +7691,7 @@ addProperty('zalgo', function () {
   return zalgo(this);
 });
 
-},{}],95:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -11040,7 +11449,71 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],96:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
+module.exports={
+    "disallowSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowEmptyBlocks": true,
+    "disallowSpacesInsideArrayBrackets": true,
+    "disallowSpacesInsideParentheses": true,
+    "disallowQuotedKeysInObjects": true,
+    "disallowSpaceAfterObjectKeys": true,
+    "disallowSpaceAfterPrefixUnaryOperators": true,
+    "disallowSpaceBeforePostfixUnaryOperators": true,
+    "disallowSpaceBeforeBinaryOperators": [
+        ","
+    ],
+    "disallowMixedSpacesAndTabs": true,
+    "disallowTrailingWhitespace": true,
+    "disallowTrailingComma": true,
+    "disallowYodaConditions": true,
+    "disallowKeywords": [ "with" ],
+    "disallowMultipleLineBreaks": true,
+    "requireSpaceBeforeBlockStatements": true,
+    "requireParenthesesAroundIIFE": true,
+    "requireSpacesInConditionalExpression": true,
+    "requireMultipleVarDecl": "onevar",
+    "requireBlocksOnNewline": 1,
+    "requireCommaBeforeLineBreak": true,
+    "requireSpaceBeforeBinaryOperators": true,
+    "requireSpaceAfterBinaryOperators": true,
+    "requireCamelCaseOrUpperCaseIdentifiers": true,
+    "requireLineFeedAtFileEnd": true,
+    "requireCapitalizedConstructors": true,
+    "requireDotNotation": true,
+    "requireCurlyBraces": [
+        "do"
+    ],
+    "requireSpaceAfterKeywords": [
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "case",
+        "return",
+        "try",
+        "catch",
+        "typeof"
+    ],
+    "safeContextKeyword": "_this",
+    "validateLineBreaks": "LF",
+    "validateQuoteMarks": "'",
+    "validateIndentation": 2
+}
+
+},{}],100:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -11093,7 +11566,6 @@ module.exports={
     "requireCamelCaseOrUpperCaseIdentifiers": true,
     "disallowKeywords": [ "with" ],
     "disallowMultipleLineBreaks": true,
-    "validateLineBreaks": "LF",
     "validateQuoteMarks": "'",
     "validateIndentation": 4,
     "disallowMixedSpacesAndTabs": true,
@@ -11103,10 +11575,11 @@ module.exports={
     "requireLineFeedAtFileEnd": true,
     "requireCapitalizedConstructors": true,
     "requireDotNotation": true,
-    "disallowYodaConditions": true
+    "disallowYodaConditions": true,
+    "disallowNewlineBeforeBlockStatements": true
 }
 
-},{}],97:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -11130,7 +11603,8 @@ module.exports={
     "disallowMultipleLineStrings": true,
     "disallowMixedSpacesAndTabs": true,
     "disallowTrailingWhitespace": true,
-
+    "disallowSpaceAfterPrefixUnaryOperators": true,
+    "disallowMultipleVarDecl": true,
 
     "requireSpaceAfterKeywords": [
       "if",
@@ -11158,6 +11632,9 @@ module.exports={
     "requireSpacesInFunctionExpression": {
         "beforeOpeningCurlyBrace": true
     },
+    "disallowSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
     "disallowSpacesInsideObjectBrackets": "all",
     "disallowSpacesInsideArrayBrackets": "all",
     "disallowSpacesInsideParentheses": true,
@@ -11168,10 +11645,11 @@ module.exports={
         "requireParamTypes": true
     },
 
-    "disallowMultipleLineBreaks": true
+    "disallowMultipleLineBreaks": true,
+    "disallowNewlineBeforeBlockStatements": true
 }
 
-},{}],98:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -11255,7 +11733,7 @@ module.exports={
     "disallowMultipleLineBreaks": true
 }
 
-},{}],99:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": ["while", "do", "try", "catch"],
     "requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "try", "catch"],
@@ -11284,7 +11762,7 @@ module.exports={
     }
 }
 
-},{}],100:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -11368,7 +11846,7 @@ module.exports={
     "disallowYodaConditions": true
 }
 
-},{}],101:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -11473,5 +11951,5 @@ module.exports={
     "validateLineBreaks": "LF"
 }
 
-},{}]},{},[83])(83)
+},{}]},{},[88])(88)
 });
