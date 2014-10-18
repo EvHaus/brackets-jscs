@@ -18,9 +18,14 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
-**v0.1.4** (2014-10-18)
+**v0.1.5** (2014-10-18)
 
 - Upgrade to node-jscs 1.7.3
+
+**v0.1.4** (2014-09-26)
+
+- Upgrade to node-jscs 1.6.2
+- Add support for .jsx files
 
 **v0.1.3** (2014-08-17)
 
@@ -82,6 +87,15 @@ Release Notes
 **v0.0.1** (2013-12-02)
 
 - Initial release
+
+Building This Extension
+=====
+
+```
+npm install
+bower install
+grunt build
+```
 
 Credit
 =====

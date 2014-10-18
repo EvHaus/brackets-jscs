@@ -36,5 +36,8 @@
 	"validateJSDoc": {
 		"checkParamNames": true,
 		"requireParamTypes": true
-	}
+	},
+	"excludeFiles": [
+		"jscs/*.js"
+	]
 }
