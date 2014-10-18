@@ -18,6 +18,10 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.1.4** (2014-10-18)
+
+- Upgrade to node-jscs 1.7.3
+
 **v0.1.3** (2014-08-17)
 
 - Upgrade to node-jscs 1.5.9
