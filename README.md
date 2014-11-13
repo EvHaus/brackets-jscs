@@ -18,6 +18,12 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.1.6** (2014-11-13)
+
+- Upgrade to latest node-jscs
+- Upgrade React to v0.12
+- All .js and .jsx files now run through the JSXTransformer first (as JSX files can no longer be identified)
+
 **v0.1.5** (2014-10-18)
 
 - Upgrade to node-jscs 1.7.3

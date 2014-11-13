@@ -386,22 +386,8 @@ define(function (require, exports, module) {
 
 	CodeInspection.register("javascript", {
 		name: JSCS_NAME,
-		scanFile: function (text, fullPath, config) {
-			// If 'javascript' file has a /** @jsx React.DOM */ comment -- run through JSX parser
-			if (text.search('@jsx React.DOM') < 0) {
-				return handleJSXJSCS(text, fullPath, config);
-			} else {
-				return handleJSCS(text, fullPath, config);
-			}
-		},
-		scanFileAsync: function (text, fullPath, config) {
-			// If 'javascript' file has a /** @jsx React.DOM */ comment -- run through JSX parser
-			if (text.search('@jsx React.DOM') < 0) {
-				return handleJSXJSCSAsync(text, fullPath, config);
-			} else {
-				return handleJSCSAsync(text, fullPath, config);
-			}
-		}
+		scanFile: handleJSXJSCS,
+		scanFileAsync: handleJSXJSCSAsync
 	});
 
 	CodeInspection.register("jsx", {
