@@ -18,6 +18,10 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.1.7** (2014-11-13)
+
+- Enable JSXTransform harmony mode
+
 **v0.1.6** (2014-11-13)
 
 - Upgrade to latest node-jscs

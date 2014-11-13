@@ -168,7 +168,7 @@ define(function (require, exports, module) {
 			};
 
 		try {
-			JSXCode = JSXTransformer.transform(text).code;
+			JSXCode = JSXTransformer.transform(text, {harmony: true}).code;
 		} catch (e) {
 			// Try to find a line number
 			var line = null,
