@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 		compress: {
 			build: {
 				options: {
-					archive: 'build/brackets-jscshint-<%= pkg.version %>.zip'
+					archive: 'build/brackets-jscs-<%= pkg.version %>.zip'
 				},
 				files: [{
 					src: [
