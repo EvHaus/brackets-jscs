@@ -270,30 +270,32 @@ define(function (require, exports, module) {
 		return result.promise();
 	}
 
+	// ==========================================================================================
 
-  /**
-     * Removes JavaScript comments from a string by replacing
-     * everything between block comments and everything after
-     * single-line comments in a non-greedy way.
-     *
-     * English version of the regex:
-     *   match '/*'
-     *   then match zero or more instances of any character (incl. \n)
-     *   except for instances of '* /' (without a space, obv.)
-     *   then match '* /' (again, without a space)
-     *
-     * @param {string} str a string with potential JavaScript comments.
-     * @returns {string} a string without JavaScript comments.
-     */
+	/**
+	 * Removes JavaScript comments from a string by replacing
+	 * everything between block comments and everything after
+	 * single-line comments in a non-greedy way.
+	 *
+	 * English version of the regex:
+	 *   match '/*'
+	 *   then match zero or more instances of any character (incl. \n)
+	 *   except for instances of '* /' (without a space, obv.)
+	 *   then match '* /' (again, without a space)
+	 *
+	 * @param	{string}	str		- a string with potential JavaScript comments.
+	 *
+	 * @returns	{string} a string without JavaScript comments.
+	*/
 	function removeComments(str) {
-        str = str || "";
+		str = str || "";
 
-        str = str.replace(/\/\*(?:(?!\*\/)[\s\S])*\*\//g, "");
-        str = str.replace(/\/\/[^\n\r]*/g, ""); // Everything after '//'
+		str = str.replace(/\/\*(?:(?!\*\/)[\s\S])*\*\//g, "");
+		str = str.replace(/\/\/[^\n\r]*/g, ""); // Everything after '//'
 
-        return str;
-    }
-  
+		return str;
+	}
+
 	// ==========================================================================================
 
 

@@ -18,6 +18,10 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.2.0** (2015-01-24)
+
+- Extension now supports comments in the JSCS config files (Thanks to xlitter)
+
 **v0.1.7** (2014-11-13)
 
 - Enable JSXTransform harmony mode
