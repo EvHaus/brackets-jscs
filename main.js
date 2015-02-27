@@ -169,6 +169,9 @@ define(function (require, exports, module) {
 
 		try {
 			JSXCode = JSXTransformer.transform(text, {harmony: true}).code;
+
+			// Trim trailing whitespace
+			JSXCode = JSXCode.replace(/( +)\n/g, '');
 		} catch (e) {
 			// Try to find a line number
 			var line = null,

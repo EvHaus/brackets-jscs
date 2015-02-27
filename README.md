@@ -18,6 +18,11 @@ This extension will search for a **.jscs.json** file in your project's root dire
 Release Notes
 =====
 
+**v0.2.1** (2015-02-27)
+
+- Upgrade to latest node-jscs
+- Whitespace is now trimmed from JSX files to fix whitespace errors during JSX->JS compilation
+
 **v0.2.0** (2015-01-24)
 
 - Extension now supports comments in the JSCS config files (Thanks to xlitter)
