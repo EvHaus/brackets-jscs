@@ -15,6 +15,25 @@ Configuration Files
 
 This extension will search for a **.jscs.json** file in your project's root directory, if not found, it will look for a **.jscsrc** file in your project's root directory, and if that isn't found either, JSCS will use a default configuration spec with no rules defined.
 
+Enabling the Extension
+=====
+
+If you have disabled the default Brackets JSLinting service, you will need to manually enable JSCS in your prefs file:
+
+- Go to Debug > Open Preferences File
+- Make sure your `language.javascript.linting.prefer` definition includes "JSCS" as such:
+
+```
+"language": {
+	"javascript": {
+		"linting.prefer": [
+			"JSXHint",
+			"JSCS"
+		]
+	}
+},
+```
+
 Release Notes
 =====
 
