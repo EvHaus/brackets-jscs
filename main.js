@@ -171,7 +171,7 @@ define(function (require, exports, module) {
 			JSXCode = JSXTransformer.transform(text, {harmony: true}).code;
 
 			// Trim trailing whitespace
-			JSXCode = JSXCode.replace(/( +)\n/g, '');
+			JSXCode = JSXCode.replace(/( +)\n/g, '\n');
 		} catch (e) {
 			// Try to find a line number
 			var line = null,

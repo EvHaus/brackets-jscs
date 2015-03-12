@@ -37,6 +37,10 @@ If you have disabled the default Brackets JSLinting service, you will need to ma
 Release Notes
 =====
 
+**v0.2.2** (2015-03-12)
+
+- Fix for #15 Trailing space in comment breaks brackets-jscs
+
 **v0.2.1** (2015-02-27)
 
 - Upgrade to latest node-jscs
