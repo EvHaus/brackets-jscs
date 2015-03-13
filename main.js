@@ -162,6 +162,13 @@ define(function (require, exports, module) {
 	 * @return	{object}	Results of code inspection.
 	 */
 	function handleJSXJSCS(text, fullPath, config) {
+		// Remove any shebang in beginning of file before analysing the file further
+		// For example if file start with: 
+		// #!/usr/bin/env node
+		// 
+		// This is needed since JSXTransformer does not handle shebangs.
+		text = text.replace(/^#!.+\n/, '');
+
 		var JSXCode,
 			result = {
 				errors: []
