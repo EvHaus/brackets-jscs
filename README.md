@@ -140,7 +140,6 @@ Building This Extension
 
 ```
 npm install
-bower install
 grunt build
 ```
 
