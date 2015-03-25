@@ -1,1 +1,1 @@
-var test ={"this line should fail due to bad operator spacing and length":"test"};
+var test = {"this line should fail due to bad operator spacing and length":"test"};

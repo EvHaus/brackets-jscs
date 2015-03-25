@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.JscsStringChecker=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.JscsStringChecker = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var assert = require('assert');
 var path = require('path');
 var minimatch = require('minimatch');
@@ -565,6 +565,7 @@ Configuration.prototype.registerDefaultRules = function() {
     this.registerRule(require('../rules/disallow-keywords'));
     this.registerRule(require('../rules/disallow-multiple-line-breaks'));
     this.registerRule(require('../rules/disallow-multiple-line-strings'));
+    this.registerRule(require('../rules/disallow-multiple-spaces'));
     this.registerRule(require('../rules/validate-line-breaks'));
     this.registerRule(require('../rules/validate-quote-marks'));
     this.registerRule(require('../rules/validate-indentation'));
@@ -612,6 +613,8 @@ Configuration.prototype.registerDefaultRules = function() {
 
     this.registerRule(require('../rules/disallow-trailing-comma'));
     this.registerRule(require('../rules/require-trailing-comma'));
+
+    this.registerRule(require('../rules/require-dollar-before-jquery-assignment'));
 
     this.registerRule(require('../rules/disallow-comma-before-line-break'));
     this.registerRule(require('../rules/require-comma-before-line-break'));
@@ -671,12 +674,17 @@ Configuration.prototype.registerDefaultRules = function() {
     this.registerRule(require('../rules/disallow-capitalized-comments'));
 
     this.registerRule(require('../rules/require-line-break-after-variable-assignment'));
+    this.registerRule(require('../rules/require-padding-newline-after-variable-declaration'));
 
+    this.registerRule(require('../rules/require-semicolons'));
     this.registerRule(require('../rules/disallow-semicolons'));
 
     this.registerRule(require('../rules/require-spaces-in-for-statement'));
     this.registerRule(require('../rules/disallow-spaces-in-for-statement'));
+
     this.registerRule(require('../rules/disallow-keywords-in-comments'));
+
+    this.registerRule(require('../rules/disallow-identifier-names'));
 };
 
 /**
@@ -701,8 +709,14 @@ Configuration.prototype.registerDefaultPresets = function() {
     // https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2
     this.registerPreset('mdcs', require('../../presets/mdcs.json'));
 
+    // https://github.com/felixge/node-style-guide#nodejs-style-guide
+    this.registerPreset('node-style-guide', require('../../presets/node-style-guide.json'));
+
     // https://www.mediawiki.org/wiki/Manual:Coding_conventions/JavaScript
     this.registerPreset('wikimedia', require('../../presets/wikimedia.json'));
+
+    // https://make.wordpress.org/core/handbook/coding-standards/javascript/
+    this.registerPreset('wordpress', require('../../presets/wordpress.json'));
 
     // https://github.com/yandex/codestyle/blob/master/javascript.md
     this.registerPreset('yandex', require('../../presets/yandex.json'));
@@ -719,9 +733,9 @@ function copyConfiguration(source, dest) {
     }
 }
 
-},{"../../presets/airbnb.json":146,"../../presets/crockford.json":147,"../../presets/google.json":148,"../../presets/grunt.json":149,"../../presets/jquery.json":150,"../../presets/mdcs.json":151,"../../presets/wikimedia.json":152,"../../presets/yandex.json":153,"../rules/disallow-anonymous-functions":4,"../rules/disallow-capitalized-comments":5,"../rules/disallow-comma-before-line-break":6,"../rules/disallow-curly-braces":7,"../rules/disallow-dangling-underscores":8,"../rules/disallow-empty-blocks":9,"../rules/disallow-function-declarations":10,"../rules/disallow-implicit-type-conversion":11,"../rules/disallow-keywords":14,"../rules/disallow-keywords-in-comments":12,"../rules/disallow-keywords-on-new-line":13,"../rules/disallow-left-sticked-operators":15,"../rules/disallow-mixed-spaces-and-tabs":16,"../rules/disallow-multiple-line-breaks":17,"../rules/disallow-multiple-line-strings":18,"../rules/disallow-multiple-var-decl":19,"../rules/disallow-newline-before-block-statements":20,"../rules/disallow-operator-before-line-break":21,"../rules/disallow-padding-newlines-after-blocks":22,"../rules/disallow-padding-newlines-before-keywords":23,"../rules/disallow-padding-newlines-before-line-comments":24,"../rules/disallow-padding-newlines-in-blocks":25,"../rules/disallow-padding-newlines-in-objects":26,"../rules/disallow-quoted-keys-in-objects":27,"../rules/disallow-right-sticked-operators":28,"../rules/disallow-semicolons":29,"../rules/disallow-space-after-binary-operators":30,"../rules/disallow-space-after-keywords":31,"../rules/disallow-space-after-line-comment":32,"../rules/disallow-space-after-object-keys":33,"../rules/disallow-space-after-prefix-unary-operators.js":34,"../rules/disallow-space-before-binary-operators":35,"../rules/disallow-space-before-block-statements.js":36,"../rules/disallow-space-before-keywords":37,"../rules/disallow-space-before-object-values":38,"../rules/disallow-space-before-postfix-unary-operators.js":39,"../rules/disallow-space-between-arguments":40,"../rules/disallow-spaces-in-anonymous-function-expression":41,"../rules/disallow-spaces-in-call-expression":42,"../rules/disallow-spaces-in-conditional-expression":43,"../rules/disallow-spaces-in-for-statement":44,"../rules/disallow-spaces-in-function":47,"../rules/disallow-spaces-in-function-declaration":45,"../rules/disallow-spaces-in-function-expression":46,"../rules/disallow-spaces-in-named-function-expression":48,"../rules/disallow-spaces-inside-array-brackets":49,"../rules/disallow-spaces-inside-brackets":50,"../rules/disallow-spaces-inside-object-brackets":51,"../rules/disallow-spaces-inside-parentheses":52,"../rules/disallow-trailing-comma":53,"../rules/disallow-trailing-whitespace":54,"../rules/disallow-yoda-conditions":55,"../rules/maximum-line-length":56,"../rules/require-aligned-object-values":57,"../rules/require-anonymous-functions":58,"../rules/require-blocks-on-newline":59,"../rules/require-camelcase-or-uppercase-identifiers":60,"../rules/require-capitalized-comments":61,"../rules/require-capitalized-constructors":62,"../rules/require-comma-before-line-break":63,"../rules/require-curly-braces":64,"../rules/require-dot-notation":65,"../rules/require-function-declarations":66,"../rules/require-keywords-on-new-line":67,"../rules/require-left-sticked-operators":68,"../rules/require-line-break-after-variable-assignment":69,"../rules/require-line-feed-at-file-end":70,"../rules/require-multiple-var-decl":71,"../rules/require-newline-before-block-statements":72,"../rules/require-operator-before-line-break":73,"../rules/require-padding-newlines-after-blocks":74,"../rules/require-padding-newlines-before-keywords":75,"../rules/require-padding-newlines-before-line-comments":76,"../rules/require-padding-newlines-in-blocks":77,"../rules/require-padding-newlines-in-objects":78,"../rules/require-parentheses-around-iife":79,"../rules/require-quoted-keys-in-objects":80,"../rules/require-right-sticked-operators":81,"../rules/require-space-after-binary-operators":82,"../rules/require-space-after-keywords":83,"../rules/require-space-after-line-comment":84,"../rules/require-space-after-object-keys":85,"../rules/require-space-after-prefix-unary-operators.js":86,"../rules/require-space-before-binary-operators":87,"../rules/require-space-before-block-statements.js":88,"../rules/require-space-before-keywords":89,"../rules/require-space-before-object-values":90,"../rules/require-space-before-postfix-unary-operators.js":91,"../rules/require-space-between-arguments":92,"../rules/require-spaces-in-anonymous-function-expression":93,"../rules/require-spaces-in-call-expression":94,"../rules/require-spaces-in-conditional-expression":95,"../rules/require-spaces-in-for-statement":96,"../rules/require-spaces-in-function":99,"../rules/require-spaces-in-function-declaration":97,"../rules/require-spaces-in-function-expression":98,"../rules/require-spaces-in-named-function-expression":100,"../rules/require-spaces-inside-array-brackets":101,"../rules/require-spaces-inside-brackets":102,"../rules/require-spaces-inside-object-brackets":103,"../rules/require-spaces-inside-parentheses":104,"../rules/require-trailing-comma":105,"../rules/require-yoda-conditions":106,"../rules/safe-context-keyword":107,"../rules/validate-indentation":108,"../rules/validate-jsdoc":109,"../rules/validate-line-breaks":110,"../rules/validate-parameter-separator":111,"../rules/validate-quote-marks":112,"assert":117,"minimatch":138,"path":120}],2:[function(require,module,exports){
+},{"../../presets/airbnb.json":148,"../../presets/crockford.json":149,"../../presets/google.json":150,"../../presets/grunt.json":151,"../../presets/jquery.json":152,"../../presets/mdcs.json":153,"../../presets/node-style-guide.json":154,"../../presets/wikimedia.json":155,"../../presets/wordpress.json":156,"../../presets/yandex.json":157,"../rules/disallow-anonymous-functions":4,"../rules/disallow-capitalized-comments":5,"../rules/disallow-comma-before-line-break":6,"../rules/disallow-curly-braces":7,"../rules/disallow-dangling-underscores":8,"../rules/disallow-empty-blocks":9,"../rules/disallow-function-declarations":10,"../rules/disallow-identifier-names":11,"../rules/disallow-implicit-type-conversion":12,"../rules/disallow-keywords":15,"../rules/disallow-keywords-in-comments":13,"../rules/disallow-keywords-on-new-line":14,"../rules/disallow-left-sticked-operators":16,"../rules/disallow-mixed-spaces-and-tabs":17,"../rules/disallow-multiple-line-breaks":18,"../rules/disallow-multiple-line-strings":19,"../rules/disallow-multiple-spaces":20,"../rules/disallow-multiple-var-decl":21,"../rules/disallow-newline-before-block-statements":22,"../rules/disallow-operator-before-line-break":23,"../rules/disallow-padding-newlines-after-blocks":24,"../rules/disallow-padding-newlines-before-keywords":25,"../rules/disallow-padding-newlines-before-line-comments":26,"../rules/disallow-padding-newlines-in-blocks":27,"../rules/disallow-padding-newlines-in-objects":28,"../rules/disallow-quoted-keys-in-objects":29,"../rules/disallow-right-sticked-operators":30,"../rules/disallow-semicolons":31,"../rules/disallow-space-after-binary-operators":32,"../rules/disallow-space-after-keywords":33,"../rules/disallow-space-after-line-comment":34,"../rules/disallow-space-after-object-keys":35,"../rules/disallow-space-after-prefix-unary-operators.js":36,"../rules/disallow-space-before-binary-operators":37,"../rules/disallow-space-before-block-statements.js":38,"../rules/disallow-space-before-keywords":39,"../rules/disallow-space-before-object-values":40,"../rules/disallow-space-before-postfix-unary-operators.js":41,"../rules/disallow-space-between-arguments":42,"../rules/disallow-spaces-in-anonymous-function-expression":43,"../rules/disallow-spaces-in-call-expression":44,"../rules/disallow-spaces-in-conditional-expression":45,"../rules/disallow-spaces-in-for-statement":46,"../rules/disallow-spaces-in-function":49,"../rules/disallow-spaces-in-function-declaration":47,"../rules/disallow-spaces-in-function-expression":48,"../rules/disallow-spaces-in-named-function-expression":50,"../rules/disallow-spaces-inside-array-brackets":51,"../rules/disallow-spaces-inside-brackets":52,"../rules/disallow-spaces-inside-object-brackets":53,"../rules/disallow-spaces-inside-parentheses":54,"../rules/disallow-trailing-comma":55,"../rules/disallow-trailing-whitespace":56,"../rules/disallow-yoda-conditions":57,"../rules/maximum-line-length":58,"../rules/require-aligned-object-values":59,"../rules/require-anonymous-functions":60,"../rules/require-blocks-on-newline":61,"../rules/require-camelcase-or-uppercase-identifiers":62,"../rules/require-capitalized-comments":63,"../rules/require-capitalized-constructors":64,"../rules/require-comma-before-line-break":65,"../rules/require-curly-braces":66,"../rules/require-dollar-before-jquery-assignment":67,"../rules/require-dot-notation":68,"../rules/require-function-declarations":69,"../rules/require-keywords-on-new-line":70,"../rules/require-left-sticked-operators":71,"../rules/require-line-break-after-variable-assignment":72,"../rules/require-line-feed-at-file-end":73,"../rules/require-multiple-var-decl":74,"../rules/require-newline-before-block-statements":75,"../rules/require-operator-before-line-break":76,"../rules/require-padding-newline-after-variable-declaration":77,"../rules/require-padding-newlines-after-blocks":78,"../rules/require-padding-newlines-before-keywords":79,"../rules/require-padding-newlines-before-line-comments":80,"../rules/require-padding-newlines-in-blocks":81,"../rules/require-padding-newlines-in-objects":82,"../rules/require-parentheses-around-iife":83,"../rules/require-quoted-keys-in-objects":84,"../rules/require-right-sticked-operators":85,"../rules/require-semicolons":86,"../rules/require-space-after-binary-operators":87,"../rules/require-space-after-keywords":88,"../rules/require-space-after-line-comment":89,"../rules/require-space-after-object-keys":90,"../rules/require-space-after-prefix-unary-operators.js":91,"../rules/require-space-before-binary-operators":92,"../rules/require-space-before-block-statements.js":93,"../rules/require-space-before-keywords":94,"../rules/require-space-before-object-values":95,"../rules/require-space-before-postfix-unary-operators.js":96,"../rules/require-space-between-arguments":97,"../rules/require-spaces-in-anonymous-function-expression":98,"../rules/require-spaces-in-call-expression":99,"../rules/require-spaces-in-conditional-expression":100,"../rules/require-spaces-in-for-statement":101,"../rules/require-spaces-in-function":104,"../rules/require-spaces-in-function-declaration":102,"../rules/require-spaces-in-function-expression":103,"../rules/require-spaces-in-named-function-expression":105,"../rules/require-spaces-inside-array-brackets":106,"../rules/require-spaces-inside-brackets":107,"../rules/require-spaces-inside-object-brackets":108,"../rules/require-spaces-inside-parentheses":109,"../rules/require-trailing-comma":110,"../rules/require-yoda-conditions":111,"../rules/safe-context-keyword":112,"../rules/validate-indentation":113,"../rules/validate-jsdoc":114,"../rules/validate-line-breaks":115,"../rules/validate-parameter-separator":116,"../rules/validate-quote-marks":117,"assert":122,"minimatch":140,"path":125}],2:[function(require,module,exports){
 var assert = require('assert');
-var colors = require('colors');
+var chalk = require('chalk');
 var TokenAssert = require('./token-assert');
 
 /**
@@ -876,7 +890,7 @@ Errors.prototype = {
         return result.join('\n');
     },
 
-   /**
+    /**
      * Sets the current rule so that errors are aware
      * of which rule triggered them.
      *
@@ -897,9 +911,9 @@ Errors.prototype = {
  * @returns {String}
  */
 function formatErrorMessage(message, filename, colorize) {
-    return (colorize ? colors.bold(message) : message) +
+    return (colorize ? chalk.bold(message) : message) +
         ' at ' +
-        (colorize ? colors.green(filename) : filename) + ' :';
+        (colorize ? chalk.green(filename) : filename) + ' :';
 }
 
 /**
@@ -931,7 +945,7 @@ function renderLine(n, line, colorize) {
 
     // "n + 1" to print lines in human way (counted from 1)
     var lineNumber = prependSpaces((n + 1).toString(), 5) + ' |';
-    return ' ' + (colorize ? colors.grey(lineNumber) : lineNumber) + line;
+    return ' ' + (colorize ? chalk.grey(lineNumber) : lineNumber) + line;
 }
 
 /**
@@ -944,12 +958,12 @@ function renderLine(n, line, colorize) {
  */
 function renderPointer(column, colorize) {
     var res = (new Array(column + 9)).join('-') + '^';
-    return colorize ? colors.grey(res) : res;
+    return colorize ? chalk.grey(res) : res;
 }
 
 module.exports = Errors;
 
-},{"./token-assert":114,"assert":117,"colors":128}],3:[function(require,module,exports){
+},{"./token-assert":119,"assert":122,"chalk":129}],3:[function(require,module,exports){
 var treeIterator = require('./tree-iterator');
 
 /**
@@ -975,6 +989,7 @@ var JsFile = function(filename, source, tree, options) {
     this._es3 = options.es3 || false;
     this._es6 = options.es6 || false;
 
+    this._lineBreaks = null;
     this._lines = source.split(/\r\n|\r|\n/);
 
     this._tree.tokens = this._fixEs6Tokens(this._tree.tokens);
@@ -994,6 +1009,29 @@ var JsFile = function(filename, source, tree, options) {
 };
 
 JsFile.prototype = {
+    /**
+     * Returns the first line break character encountered in the file.
+     * Assumes LF if the file is only one line.
+     *
+     * @returns {String}
+     */
+    getLineBreakStyle: function() {
+        var lineBreaks = this.getLineBreaks();
+        return lineBreaks.length ? lineBreaks[0] : '\n';
+    },
+
+    /**
+     * Returns all line break characters from the file.
+     *
+     * @returns {String[]}
+     */
+    getLineBreaks: function() {
+        if (this._lineBreaks === null) {
+            this._lineBreaks = this._source.match(/\r\n|\r|\n/g) || [];
+        }
+        return this._lineBreaks;
+    },
+
     /**
      * Builds an index of disabled rules by starting line for error suppression.
      *
@@ -1499,12 +1537,10 @@ JsFile.prototype = {
 
     /**
      * Returns array of source lines for the file with comments removed.
-     * Will report erroneous trailing tokens in multiline comments if an error reporter is provided.
      *
-     * @param {Errors} [errors=null] errors
      * @returns {Array}
      */
-    getLinesWithCommentsRemoved: function(errors) {
+    getLinesWithCommentsRemoved: function() {
         var lines = this.getLines().concat();
 
         this.getComments().concat().reverse().forEach(function(comment) {
@@ -1522,14 +1558,6 @@ JsFile.prototype = {
                     lines[x] = '';
                 }
                 lines[x] = lines[x].substring(endCol);
-
-                if (errors && lines[x] !== '') {
-                    errors.add(
-                        'Multiline comments should not have tokens on its ending line',
-                        x + 1,
-                        endCol
-                    );
-                }
             }
         });
 
@@ -1770,13 +1798,13 @@ JsFile.parse = function(source, esprima, esprimaOptions) {
 
 module.exports = JsFile;
 
-},{"./tree-iterator":115}],4:[function(require,module,exports){
+},{"./tree-iterator":120}],4:[function(require,module,exports){
 /**
  * Requires that a function expression be named.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -1814,10 +1842,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowAnonymousFunctions) {
+    configure: function(options) {
         assert(
-            disallowAnonymousFunctions === true,
-            'disallowAnonymousFunctions option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -1828,13 +1856,13 @@ module.exports.prototype = {
     check: function(file, errors) {
         file.iterateNodesByType(['FunctionExpression', 'FunctionDeclaration'], function(node) {
             if (node.id === null) {
-                errors.add('Anonymous functions needs to be named', node.loc.start);
+                errors.add('Anonymous functions need to be named', node.loc.start);
             }
         });
     }
 };
 
-},{"assert":117}],5:[function(require,module,exports){
+},{"assert":122}],5:[function(require,module,exports){
 /**
  * Requires the first alphabetical character of a comment to be lowercase.
  *
@@ -1879,10 +1907,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowCapitalizedComments) {
+    configure: function(options) {
         assert(
-            disallowCapitalizedComments === true,
-            'disallowCapitalizedComments option requires a value of true or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -1908,13 +1936,13 @@ module.exports.prototype = {
     }
 };
 
-},{"../../patterns/L":143,"../../patterns/Ll":144,"assert":117}],6:[function(require,module,exports){
+},{"../../patterns/L":145,"../../patterns/Ll":146,"assert":122}],6:[function(require,module,exports){
 /**
  * Disallows commas as last token on a line in lists.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`laxcomma`](http://www.jshint.com/docs/options/#laxcomma)
  *
@@ -1950,10 +1978,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowCommaBeforeLineBreak) {
+    configure: function(options) {
         assert(
-            disallowCommaBeforeLineBreak === true,
-            'disallowCommaBeforeLineBreak option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -1973,11 +2001,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],7:[function(require,module,exports){
+},{"assert":122}],7:[function(require,module,exports){
 /**
  * Disallows curly braces after statements.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to disallow curly braces after the following keywords:
  *
@@ -2092,7 +2120,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],8:[function(require,module,exports){
+},{"../utils":121,"assert":122}],8:[function(require,module,exports){
 /**
  * Disallows identifiers that start or end in `_`. Some popular identifiers are automatically listed as exceptions:
  *
@@ -2103,7 +2131,7 @@ module.exports.prototype = {
  *  - `super_` (node.js, used by
  *    [`util.inherits`](http://nodejs.org/docs/latest/api/util.html#util_util_inherits_constructor_superconstructor))
  *
- * Type: `Boolean` or `Object`
+ * Types: `Boolean` or `Object`
  *
  * Values:
  *  - `true`
@@ -2115,7 +2143,7 @@ module.exports.prototype = {
  * #### Example
  *
  * ```js
- * "disallowDanglingUnderscores": { allExcept: ["_exception"] }
+ * "disallowDanglingUnderscores": { "allExcept": ["_exception"] }
  * ```
  *
  * ##### Valid
@@ -2153,12 +2181,12 @@ module.exports.prototype = {
             'or an object with String[] `allExcept` property'
         );
 
-         // verify first item in `allExcept` property in object (if it's an object)
+        // verify first item in `allExcept` property in object (if it's an object)
         assert(
             typeof identifiers !== 'object' ||
             Array.isArray(identifiers.allExcept) &&
             typeof identifiers.allExcept[0] === 'string',
-            'Property `allExcept` in requireSpaceAfterLineComment should be an array of strings'
+            'Property `allExcept` in ' + this.getOptionName() + ' should be an array of strings'
         );
 
         var isTrue = identifiers === true;
@@ -2205,13 +2233,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],9:[function(require,module,exports){
+},{"assert":122}],9:[function(require,module,exports){
 /**
  * Disallows empty blocks (except for catch blocks).
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`noempty`](http://jshint.com/docs/options/#noempty)
  *
@@ -2241,14 +2269,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowEmptyBlocks) {
+    configure: function(options) {
         assert(
-            typeof disallowEmptyBlocks === 'boolean',
-            'disallowEmptyBlocks option requires boolean value'
-        );
-        assert(
-            disallowEmptyBlocks === true,
-            'disallowEmptyBlocks option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -2269,13 +2293,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],10:[function(require,module,exports){
+},{"assert":122}],10:[function(require,module,exports){
 /**
  * Disallows function declarations.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -2313,10 +2337,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowFunctionDeclarations) {
+    configure: function(options) {
         assert(
-            disallowFunctionDeclarations === true,
-            'disallowFunctionDeclarations option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -2331,7 +2355,81 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],11:[function(require,module,exports){
+},{"assert":122}],11:[function(require,module,exports){
+/**
+ * Disallows a specified set of identifier names.
+ *
+ * Type: `Array`
+ *
+ * Values: Array of strings, which should be disallowed as identifier names
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowIdentifierNames": ['temp', 'foo']
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var good = 1;
+ * object['fine'] = 2;
+ * object.fine = 3;
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var temp = 1;
+ * object['foo'] = 2;
+ * object.foo = 3;
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(identifiers) {
+        assert(
+            Array.isArray(identifiers),
+            'disallowIdentifierNames option requires an array'
+        );
+
+        this._identifierIndex = {};
+        for (var i = 0, l = identifiers.length; i < l; i++) {
+            this._identifierIndex[identifiers[i]] = true;
+        }
+    },
+
+    getOptionName: function() {
+        return 'disallowIdentifierNames';
+    },
+
+    check: function(file, errors) {
+        var disallowedIdentifiers = this._identifierIndex;
+
+        file.iterateNodesByType('Identifier', function(node) {
+            if (disallowedIdentifiers[node.name]) {
+                errors.add('Illegal Identifier name: ' + node.name, node.loc.start);
+            }
+        });
+
+        file.iterateNodesByType('MemberExpression', function(node) {
+            if (node.property.type === 'Literal') {
+                if (disallowedIdentifiers[node.property.value]) {
+                    errors.add('Illegal Identifier name: ' + node.property.value, node.property.loc.start);
+                }
+            }
+        });
+
+    }
+
+};
+
+},{"assert":122}],12:[function(require,module,exports){
 /**
  * Disallows implicit type conversion.
  *
@@ -2371,7 +2469,7 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(types) {
-        assert(Array.isArray(types), 'disallowImplicitTypeConversion option requires array value');
+        assert(Array.isArray(types), this.getOptionName() + ' option requires array value');
         this._typeIndex = {};
         for (var i = 0, l = types.length; i < l; i++) {
             this._typeIndex[types[i]] = true;
@@ -2416,11 +2514,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],12:[function(require,module,exports){
+},{"assert":122}],13:[function(require,module,exports){
 /**
  * Disallows keywords in your comments, such as TODO or FIXME
  *
- * Type: `Boolean` or `String` or `Array`
+ * Types: `Boolean`, `String` or `Array`
  *
  * Values:
  * - `true`
@@ -2480,27 +2578,27 @@ function getCommentErrors(comment, keywordRegEx) {
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowKeywordsInComments) {
+    configure: function(keywords) {
         this._message = 'Comments cannot contain the following keywords: ';
         this._keywords = ['todo', 'fixme'];
 
         switch (true) {
-            case Array.isArray(disallowKeywordsInComments):
+            case Array.isArray(keywords):
                 // use the array of strings provided to build RegExp pattern
-                this._keywords = disallowKeywordsInComments;
+                this._keywords = keywords;
                 /* falls through */
-            case disallowKeywordsInComments:
+            case keywords:
                 // use default keywords
                 this._message += this._keywords.join(', ');
                 this._keywordRegEx = new RegExp('\\b(' + this._keywords.join('|') + ')\\b', 'gi');
                 break;
-            case typeof disallowKeywordsInComments === 'string':
+            case typeof keywords === 'string':
                 // use string passed in as the RegExp pattern
                 this._message = 'Comments cannot contain keywords based on the expression you provided';
-                this._keywordRegEx = new RegExp(disallowKeywordsInComments, 'gi');
+                this._keywordRegEx = new RegExp(keywords, 'gi');
                 break;
             default:
-                assert(false, 'disallowKeywordsInComments option requires a value of true, a string or an array');
+                assert(false, this.getOptionName() + ' option requires a true value, a string or an array');
         }
     },
 
@@ -2515,9 +2613,9 @@ module.exports.prototype = {
             }.bind(this));
         }.bind(this));
     }
-  };
+};
 
-},{"assert":117}],13:[function(require,module,exports){
+},{"assert":122}],14:[function(require,module,exports){
 /**
  * Disallows placing keywords on a new line.
  *
@@ -2560,11 +2658,8 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(keywords) {
-        assert(Array.isArray(keywords), 'disallowKeywordsOnNewLine option requires array value');
-        this._keywordIndex = {};
-        for (var i = 0, l = keywords.length; i < l; i++) {
-            this._keywordIndex[keywords[i]] = true;
-        }
+        assert(Array.isArray(keywords), this.getOptionName() + ' option requires array value');
+        this._keywords = keywords;
     },
 
     getOptionName: function() {
@@ -2572,29 +2667,25 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var keywordIndex = this._keywordIndex;
+        file.iterateTokensByTypeAndValue('Keyword', this._keywords, function(token) {
+            var prevToken = file.getPrevToken(token);
 
-        file.iterateTokensByType('Keyword', function(token) {
-            if (keywordIndex[token.value]) {
-                var prevToken = file.getPrevToken(token);
-
-                // Special case for #905, even though it contradicts rule meaning,
-                // it makes more sense that way.
-                if (token.value === 'else' && prevToken.value !== '}') {
-                    return;
-                }
-
-                errors.assert.sameLine({
-                    token: file.getPrevToken(token),
-                    nextToken: token
-                });
+            // Special case for #905, even though it contradicts rule meaning,
+            // it makes more sense that way.
+            if (token.value === 'else' && prevToken.value !== '}') {
+                return;
             }
+
+            errors.assert.sameLine({
+                token: prevToken,
+                nextToken: token
+            });
         });
     }
 
 };
 
-},{"assert":117}],14:[function(require,module,exports){
+},{"assert":122}],15:[function(require,module,exports){
 /**
  * Disallows usage of specified keywords.
  *
@@ -2624,7 +2715,7 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(keywords) {
-        assert(Array.isArray(keywords), 'disallowKeywords option requires array value');
+        assert(Array.isArray(keywords), this.getOptionName() + ' option requires array value');
         this._keywords = keywords;
     },
 
@@ -2643,7 +2734,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],15:[function(require,module,exports){
+},{"assert":122}],16:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -2669,12 +2760,12 @@ module.exports.prototype = {
 
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Requires lines to not contain both spaces and tabs consecutively,
  * or spaces after tabs only for alignment if "smart"
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values: `true` or `"smart"`
  *
@@ -2727,13 +2818,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowMixedSpacesAndTabs) {
+    configure: function(options) {
         assert(
-            disallowMixedSpacesAndTabs === true || disallowMixedSpacesAndTabs === 'smart',
-            'disallowMixedSpacesAndTabs option requires true or "smart" value'
+            options === true || options === 'smart',
+            this.getOptionName() + ' option requires a true value or "smart"'
         );
 
-        this._disallowMixedSpacesAndTabs = disallowMixedSpacesAndTabs;
+        this._options = options;
     },
 
     getOptionName: function() {
@@ -2741,7 +2832,7 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var test = this._disallowMixedSpacesAndTabs === true ?
+        var test = this._options === true ?
             (/ \t|\t [^\*]|\t $/) :
             (/ \t/);
 
@@ -2754,13 +2845,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],17:[function(require,module,exports){
+},{"assert":122}],18:[function(require,module,exports){
 /**
  * Disallows multiple blank lines in a row.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -2790,14 +2881,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowMultipleLineBreaks) {
+    configure: function(options) {
         assert(
-            typeof disallowMultipleLineBreaks === 'boolean',
-            'disallowMultipleLineBreaks option requires boolean value'
-        );
-        assert(
-            disallowMultipleLineBreaks === true,
-            'disallowMultipleLineBreaks option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -2806,25 +2893,31 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var lines = file.getLines();
-        for (var i = 1, l = lines.length; i < l; i++) {
-            var line = lines[i];
-            if (line === '' && lines[i - 1] === '') {
-                while (++i < l && lines[i] === '') {}
-                errors.add('Multiple line break', i - 1, 0);
+        // Iterate over all tokens (including comments)
+        file.getTokens().forEach(function(token, index, tokens) {
+            // If there are no trailing tokens, exit early
+            var nextToken = tokens[index + 1];
+            if (!nextToken) {
+                return;
             }
-        }
+
+            errors.assert.linesBetween({
+                token: token,
+                nextToken: nextToken,
+                atMost: 2,
+            });
+        });
     }
 
 };
 
-},{"assert":117}],18:[function(require,module,exports){
+},{"assert":122}],19:[function(require,module,exports){
 /**
  * Disallows strings that span multiple lines without using concatenation.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`multistr`](http://www.jshint.com/docs/options/#multistr)
  *
@@ -2854,10 +2947,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowMultipleLineStrings) {
+    configure: function(options) {
         assert(
-            disallowMultipleLineStrings === true,
-            'disallowMultipleLineStrings option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -2879,11 +2972,87 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],19:[function(require,module,exports){
+},{"assert":122}],20:[function(require,module,exports){
+/**
+ * Disallows multiple spaces between identifiers, keywords, and any other token
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowMultipleSpaces": true
+ * ```
+ *
+ * ##### Valid
+ * ```js
+ * var x = "hello";
+ * function y() {}
+ * ```
+ *
+ * ##### Invalid
+ * ```js
+ * var x  = "hello";
+ * function y() {}
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(options) {
+        assert(
+            options === true ||
+            typeof options === 'object' &&
+            options.allowEOLComments === true,
+            'options option requires true value ' +
+            'or an object with `allowEOLComments` property'
+        );
+
+        this.allowEOLComments = options.allowEOLComments;
+    },
+
+    getOptionName: function() {
+        return 'disallowMultipleSpaces';
+    },
+
+    check: function(file, errors) {
+        // Iterate over all tokens (including comments)
+        var _this = this;
+        file.getTokens().forEach(function(token, index, tokens) {
+            // If there are no trailing tokens, exit early
+            var nextToken = tokens[index + 1];
+            if (!nextToken) {
+                return;
+            }
+
+            // If we are allowing EOL comments and the next token is an EOL comment skip it
+            // We don't need to check the current token since EOL comments must be on separate lines from the next one
+            if (_this.allowEOLComments && nextToken.type === 'Line') {
+                return;
+            }
+
+            // Verify we have at most 1 space between this token and the next (won't fail for different lines)
+            errors.assert.spacesBetween({
+                token: token,
+                nextToken: nextToken,
+                atMost: 1,
+            });
+        });
+    }
+
+};
+
+},{"assert":122}],21:[function(require,module,exports){
 /**
  * Disallows multiple `var` declaration (except for-loop).
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values:
  *
@@ -2939,16 +3108,16 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowMultipleVarDecl) {
+    configure: function(options) {
         assert(
-            disallowMultipleVarDecl === true ||
-            disallowMultipleVarDecl === 'strict' ||
-            disallowMultipleVarDecl === 'exceptUndefined',
-            'disallowMultipleVarDecl option requires true, "strict", or "exceptUndefined" value'
+            options === true ||
+            options === 'strict' ||
+            options === 'exceptUndefined',
+            this.getOptionName() + ' option requires a true value, "strict", or "exceptUndefined"'
         );
 
-        this.strictMode = disallowMultipleVarDecl === 'strict';
-        this.exceptUndefined = disallowMultipleVarDecl === 'exceptUndefined';
+        this.strictMode = options === 'strict';
+        this.exceptUndefined = options === 'exceptUndefined';
     },
 
     getOptionName: function() {
@@ -2983,13 +3152,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],20:[function(require,module,exports){
+},{"assert":122}],22:[function(require,module,exports){
 /**
  * Disallows newline before opening curly brace of all block statements.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -3060,10 +3229,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowNewlineBeforeBlockStatements) {
+    configure: function(options) {
         assert(
-            disallowNewlineBeforeBlockStatements === true,
-            'disallowNewlineBeforeBlockStatements option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3085,11 +3254,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],21:[function(require,module,exports){
+},{"assert":122}],23:[function(require,module,exports){
 /**
  * Requires putting certain operators on the next line rather than on the current line before a line break.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of operators to apply to or `true`
  *
@@ -3128,7 +3297,7 @@ module.exports = function() {};
 module.exports.prototype = {
     configure: function(operators) {
         assert(Array.isArray(operators) || operators === true,
-            'disallowOperatorBeforeLineBreak option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (operators === true) {
             operators = defaultOperators;
@@ -3151,13 +3320,13 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],22:[function(require,module,exports){
+},{"../utils":121,"assert":122}],24:[function(require,module,exports){
 /**
  * Disallow a newline after blocks
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -3219,12 +3388,8 @@ module.exports.prototype = {
 
     configure: function(value) {
         assert(
-            typeof value === 'boolean',
-            'disallowPaddingNewLinesAfterBlocks option requires boolean value'
-        );
-        assert(
             value === true,
-            'disallowPaddingNewLinesAfterBlocks option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3237,7 +3402,7 @@ module.exports.prototype = {
             var closingBracket = file.getLastNodeToken(node);
             var nextToken = file.getNextToken(closingBracket);
 
-            while (nextToken !== undefined) {
+            while (nextToken.type !== 'EOF') {
                 if (closingBracket.loc.end.line === nextToken.loc.start.line) {
                     nextToken = file.getNextToken(nextToken);
                     continue;
@@ -3256,11 +3421,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],23:[function(require,module,exports){
+},{"assert":122}],25:[function(require,module,exports){
 /**
  * Disallow an empty line above the specified keywords.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted types or `true` to disallow padding new lines after all of the keywords below.
  *
@@ -3331,16 +3496,13 @@ module.exports.prototype = {
 
     configure: function(keywords) {
         assert(Array.isArray(keywords) || keywords === true,
-            'disallowPaddingNewlinesBeforeKeywords option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (keywords === true) {
             keywords = defaultKeywords;
         }
 
-        this._keywordIndex = {};
-        for (var i = 0, l = keywords.length; i < l; i++) {
-            this._keywordIndex[keywords[i]] = true;
-        }
+        this._keywords = keywords;
     },
 
     getOptionName: function() {
@@ -3348,32 +3510,24 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var keywordIndex = this._keywordIndex;
-
-        file.iterateTokensByType('Keyword', function(token) {
-            if (keywordIndex[token.value]) {
-                var prevToken = file.getPrevToken(token);
-
-                if (prevToken) {
-                    errors.assert.linesBetween({
-                        token: prevToken,
-                        nextToken: token,
-                        atMost: 1,
-                        message: 'Keyword `' + token.value + '` should not have an empty line above it'
-                    });
-                }
-            }
+        file.iterateTokensByTypeAndValue('Keyword', this._keywords, function(token) {
+            errors.assert.linesBetween({
+                token: file.getPrevToken(token),
+                nextToken: token,
+                atMost: 1,
+                message: 'Keyword `' + token.value + '` should not have an empty line above it'
+            });
         });
     }
 };
 
-},{"../utils":116,"assert":117}],24:[function(require,module,exports){
+},{"../utils":121,"assert":122}],26:[function(require,module,exports){
 /**
  * Disallows newline before line comments
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -3408,7 +3562,7 @@ module.exports.prototype = {
     configure: function(value) {
         assert(
             value === true,
-            'disallowPaddingNewLinesBeforeLineComments option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3432,13 +3586,13 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],25:[function(require,module,exports){
+},{"assert":122}],27:[function(require,module,exports){
 /**
  * Disallows blocks from beginning and ending with 2 newlines.
  *
  * Type: `Boolean`
  *
- * Values: `true` validates all non-empty blocks.
+ * Value: `true` validates all non-empty blocks.
  *
  * #### Example
  *
@@ -3473,10 +3627,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowPaddingNewlinesInBlocks) {
+    configure: function(options) {
         assert(
-            disallowPaddingNewlinesInBlocks === true,
-            'disallowPaddingNewlinesInBlocks option requires the value true or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3508,13 +3662,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],26:[function(require,module,exports){
+},{"assert":122}],28:[function(require,module,exports){
 /**
  * Disallows newline inside curly braces of all objects.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -3552,7 +3706,7 @@ module.exports.prototype = {
     configure: function(value) {
         assert(
             value === true,
-            'disallowPaddingNewLinesInObjects option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3587,11 +3741,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],27:[function(require,module,exports){
+},{"assert":122}],29:[function(require,module,exports){
 /**
  * Disallows quoted keys in object if possible.
  *
- * Type: `String` or `Boolean`
+ * Types: `String` or `Boolean`
  *
  * Values:
  *
@@ -3631,13 +3785,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowQuotedKeysInObjects) {
+    configure: function(options) {
         assert(
-            disallowQuotedKeysInObjects === true || disallowQuotedKeysInObjects === 'allButReserved',
-            this.getOptionName() + ' options should be true or "allButReserved" value'
+            options === true || options === 'allButReserved',
+            this.getOptionName() + ' option requires a true value or "allButReserved"'
         );
 
-        this._mode = disallowQuotedKeysInObjects;
+        this._mode = options;
     },
 
     getOptionName: function() {
@@ -3668,7 +3822,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],28:[function(require,module,exports){
+},{"../utils":121,"assert":122}],30:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -3694,7 +3848,7 @@ module.exports.prototype = {
 
 };
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Disallows lines from ending in a semicolon.
  *
@@ -3728,10 +3882,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowSemicolons) {
+    configure: function(options) {
         assert(
-            disallowSemicolons === true,
-            'disallowSemicolons option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -3750,11 +3904,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],30:[function(require,module,exports){
+},{"assert":122}],32:[function(require,module,exports){
 /**
  * Requires sticking binary operators to the right.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to disallow space after all possible binary operators
  *
@@ -3800,7 +3954,7 @@ module.exports.prototype = {
 
         assert(
             Array.isArray(operators) || isTrue,
-            'disallowSpaceAfterBinaryOperators option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (isTrue) {
@@ -3822,14 +3976,12 @@ module.exports.prototype = {
 
         // Comma
         if (operators[',']) {
-            file.iterateTokensByType('Punctuator', function(token) {
-                if (token.value === ',') {
-                    errors.assert.noWhitespaceBetween({
-                        token: token,
-                        nextToken: file.getNextToken(token),
-                        message: 'Operator , should stick to following expression'
-                    });
-                }
+            file.iterateTokensByTypeAndValue('Punctuator', ',', function(token) {
+                errors.assert.noWhitespaceBetween({
+                    token: token,
+                    nextToken: file.getNextToken(token),
+                    message: 'Operator , should stick to following expression'
+                });
             });
         }
 
@@ -3872,11 +4024,11 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],31:[function(require,module,exports){
+},{"../utils":121,"assert":122}],33:[function(require,module,exports){
 /**
  * Disallows space after keyword.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to disallow spaces after all possible keywords.
  *
@@ -3922,17 +4074,14 @@ module.exports.prototype = {
     configure: function(keywords) {
         assert(
             Array.isArray(keywords) || keywords === true,
-            'disallowSpaceAfterKeywords option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (keywords === true) {
             keywords = defaultKeywords;
         }
 
-        this._keywordIndex = {};
-        for (var i = 0, l = keywords.length; i < l; i++) {
-            this._keywordIndex[keywords[i]] = true;
-        }
+        this._keywords = keywords;
     },
 
     getOptionName: function() {
@@ -3940,27 +4089,23 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var keywordIndex = this._keywordIndex;
-
-        file.iterateTokensByType('Keyword', function(token) {
-            if (keywordIndex[token.value]) {
-                errors.assert.noWhitespaceBetween({
-                    token: token,
-                    nextToken: file.getNextToken(token)
-                });
-            }
+        file.iterateTokensByTypeAndValue('Keyword', this._keywords, function(token) {
+            errors.assert.noWhitespaceBetween({
+                token: token,
+                nextToken: file.getNextToken(token)
+            });
         });
     }
 
 };
 
-},{"../utils":116,"assert":117}],32:[function(require,module,exports){
+},{"../utils":121,"assert":122}],34:[function(require,module,exports){
 /**
  * Requires that a line comment (`//`) not be followed by a space.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -3988,10 +4133,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowSpaceAfterLineComment) {
+    configure: function(options) {
         assert(
-            disallowSpaceAfterLineComment === true,
-            'disallowSpaceAfterLineComment option requires the value true'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -4009,11 +4154,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],33:[function(require,module,exports){
+},{"assert":122}],35:[function(require,module,exports){
 /**
  * Disallows space after object keys.
  *
- * Type: `Boolean`
+ * Types: `Boolean` or `String`
  *
  * Values:
  *  - `true`
@@ -4087,11 +4232,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],34:[function(require,module,exports){
+},{"assert":122}],36:[function(require,module,exports){
 /**
  * Requires sticking unary operators to the right.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to disallow space after prefix for all unary operators
  *
@@ -4160,11 +4305,11 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],35:[function(require,module,exports){
+},{"../utils":121,"assert":122}],37:[function(require,module,exports){
 /**
  * Requires sticking binary operators to the left.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to disallow space before all possible binary operators
  *
@@ -4211,7 +4356,7 @@ module.exports.prototype = {
 
         assert(
             Array.isArray(operators) || isTrue,
-            'disallowSpaceBeforeBinaryOperators option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (isTrue) {
@@ -4235,7 +4380,7 @@ module.exports.prototype = {
         if (operators[',']) {
             file.iterateTokensByTypeAndValue('Punctuator', ',', function(token) {
                 errors.assert.noWhitespaceBetween({
-                    token: file.getPrevToken(token),
+                    token: file.getPrevToken(token, {includeComments: true}),
                     nextToken: token,
                     message: 'Operator , should stick to previous expression'
                 });
@@ -4266,7 +4411,7 @@ module.exports.prototype = {
                     operator
                 );
 
-                var prevToken = file.getPrevToken(operatorToken);
+                var prevToken = file.getPrevToken(operatorToken, {includeComments: true});
 
                 if (operators[operator]) {
                     errors.assert.noWhitespaceBetween({
@@ -4281,13 +4426,13 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],36:[function(require,module,exports){
+},{"../utils":121,"assert":122}],38:[function(require,module,exports){
 /**
  * Disallows space before block statements (for loops, control structures).
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -4337,14 +4482,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowSpaceBeforeBlockStatements) {
+    configure: function(options) {
         assert(
-            typeof disallowSpaceBeforeBlockStatements === 'boolean',
-            'disallowSpaceBeforeBlockStatements option requires boolean value'
-        );
-        assert(
-            disallowSpaceBeforeBlockStatements === true,
-            'disallowSpaceBeforeBlockStatements option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -4366,11 +4507,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],37:[function(require,module,exports){
+},{"assert":122}],39:[function(require,module,exports){
 /**
  * Disallows space before keyword.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to disallow spaces before all possible keywords.
  *
@@ -4411,7 +4552,7 @@ module.exports.prototype = {
     configure: function(keywords) {
         assert(
             Array.isArray(keywords) || keywords === true,
-            'disallowSpaceBeforeKeywords option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (keywords === true) {
             keywords = defaultKeywords;
@@ -4443,13 +4584,13 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],38:[function(require,module,exports){
+},{"../utils":121,"assert":122}],40:[function(require,module,exports){
 /**
  * Disallows space after object keys.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -4476,7 +4617,7 @@ module.exports.prototype = {
     configure: function(disallow) {
         assert(
             disallow === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -4505,11 +4646,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],39:[function(require,module,exports){
+},{"assert":122}],41:[function(require,module,exports){
 /**
  * Requires sticking unary operators to the left.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to disallow space before postfix for all unary operators
  * (i.e. increment/decrement operators)
@@ -4580,7 +4721,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],40:[function(require,module,exports){
+},{"../utils":121,"assert":122}],42:[function(require,module,exports){
 /**
  * Ensure there are no spaces after argument separators in call expressions.
  *
@@ -4613,14 +4754,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowSpaceBetweenArguments) {
+    configure: function(options) {
         assert(
-            typeof disallowSpaceBetweenArguments === 'boolean',
-            this.getOptionName() + ' option requires boolean value'
-        );
-        assert(
-            disallowSpaceBetweenArguments === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -4646,7 +4783,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],41:[function(require,module,exports){
+},{"assert":122}],43:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in anonymous function expressions.
  *
@@ -4693,13 +4830,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'disallowSpacesInAnonymousFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'disallowSpacesInAnonymousFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -4707,14 +4844,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'disallowSpacesInAnonymousFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'disallowSpacesInAnonymousFunctionExpression must have beforeOpeningCurlyBrace ' +
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace ' +
             ' or beforeOpeningRoundBrace property'
         );
 
@@ -4765,13 +4902,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],42:[function(require,module,exports){
+},{"assert":122}],44:[function(require,module,exports){
 /**
  * Disallows space before `()` in call expressions.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -4797,10 +4934,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireSpacesInCallExpression) {
+    configure: function(options) {
         assert(
-            requireSpacesInCallExpression === true,
-            'disallowSpacesInCallExpression option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -4822,11 +4959,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],43:[function(require,module,exports){
+},{"assert":122}],45:[function(require,module,exports){
 /**
  * Disallows space before and/or after `?` or `:` in conditional expressions.
  *
- * Type: `Object` or `Boolean`
+ * Types: `Object` or `Boolean`
  *
  * Values: `"afterTest"`, `"beforeConsequent"`, `"afterConsequent"`, `"beforeAlternate"` as child properties,
  * or `true` to set all properties to true. Child properties must be set to `true`. These token names correspond to:
@@ -4894,7 +5031,7 @@ module.exports.prototype = {
 
         assert(
             typeof options === 'object',
-            optionName + ' option must be an object or boolean true'
+            optionName + ' option requires a true value or an object'
         );
 
         var isProperlyConfigured = validProperties.some(function(key) {
@@ -4979,13 +5116,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],44:[function(require,module,exports){
+},{"assert":122}],46:[function(require,module,exports){
 /**
  * Disallow spaces in between for statement.
  *
  * Type: `Boolean`
  *
- * Values: `true` to disallow spaces in between for statement.
+ * Value: `true` to disallow spaces in between for statement.
  *
  * #### Example
  *
@@ -5027,10 +5164,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowSpacesInForStatement) {
+    configure: function(options) {
         assert(
-            disallowSpacesInForStatement === true,
-            'disallowSpacesInForStatement option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -5060,7 +5197,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],45:[function(require,module,exports){
+},{"assert":122}],47:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in function declarations.
  *
@@ -5101,13 +5238,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'disallowSpacesInFunctionDeclaration option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'disallowSpacesInFunctionDeclaration.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -5115,14 +5252,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'disallowSpacesInFunctionDeclaration.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'disallowSpacesInFunctionDeclaration must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -5161,7 +5298,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],46:[function(require,module,exports){
+},{"assert":122}],48:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in function expressions (both [named](#disallowspacesinnamedfunctionexpression)
  * and [anonymous](#disallowspacesinanonymousfunctionexpression)).
@@ -5207,13 +5344,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'disallowSpacesInFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'disallowSpacesInFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -5221,14 +5358,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'disallowSpacesInFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'disallowSpacesInFunctionExpression must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -5274,7 +5411,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],47:[function(require,module,exports){
+},{"assert":122}],49:[function(require,module,exports){
 /**
  * Expression
  *
@@ -5326,13 +5463,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'disallowSpacesInFunction option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'disallowSpacesInFunction.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -5340,14 +5477,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'disallowSpacesInFunction.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'disallowSpacesInFunction must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -5393,7 +5530,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],48:[function(require,module,exports){
+},{"assert":122}],50:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in named function expressions.
  *
@@ -5434,13 +5571,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'disallowSpacesInNamedFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'disallowSpacesInNamedFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -5448,14 +5585,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'disallowSpacesInNamedFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'disallowSpacesInNamedFunctionExpression must have beforeOpeningCurlyBrace ' +
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace ' +
             'or beforeOpeningRoundBrace property'
         );
 
@@ -5499,11 +5636,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],49:[function(require,module,exports){
+},{"assert":122}],51:[function(require,module,exports){
 /**
  * Disallows space after opening array square bracket and before closing.
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean`, `String` or `Object`
  *
  * Values: `"all"` or `true` for strict mode, `"nested"` (*deprecated* use `"allExcept": [ "[", "]" ]`)
  * ignores closing brackets in a row.
@@ -5561,7 +5698,7 @@ module.exports.prototype = {
         };
         var isObject = typeof value === 'object';
 
-        var error = 'disallowSpacesInsideArrayBrackets rule' +
+        var error = this.getOptionName() + ' rule' +
         ' requires string value "all" or "nested" or object';
 
         if (typeof value === 'string' || value === true) {
@@ -5598,9 +5735,9 @@ module.exports.prototype = {
 
         file.iterateNodesByType('ArrayExpression', function(node) {
             var openBracket = file.getFirstNodeToken(node);
-            var afterOpen = file.getNextToken(openBracket);
+            var afterOpen = file.getNextToken(openBracket, {includeComments: true});
             var closeBracket = file.getLastNodeToken(node);
-            var beforeClose = file.getPrevToken(closeBracket);
+            var beforeClose = file.getPrevToken(closeBracket, {includeComments: true});
 
             // Skip for empty array brackets
             if (afterOpen.value === ']') {
@@ -5626,11 +5763,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],50:[function(require,module,exports){
+},{"assert":122}],52:[function(require,module,exports){
 /**
  * Disallows space after opening square bracket and before closing.
  *
- * Type: `Boolean` or `Object`
+ * Types: `Boolean` or `Object`
  *
  * Values: `true` for strict mode, or `"allExcept": [ "[", "]" ]`
  * ignores closing brackets in a row.
@@ -5676,7 +5813,7 @@ module.exports.prototype = {
     configure: function(value) {
         var isObject = typeof value === 'object';
 
-        var error = 'disallowSpacesInsideBrackets rule requires string value true or object';
+        var error = this.getOptionName() + ' rule requires string value true or object';
 
         if (isObject) {
             assert('allExcept' in value, error);
@@ -5742,11 +5879,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],51:[function(require,module,exports){
+},{"assert":122}],53:[function(require,module,exports){
 /**
  * Disallows space after opening object curly brace and before closing.
  *
- * Type: `Object`, `Boolean` or `String`
+ * Types: `Object`, `Boolean` or `String`
  *
  * Values: `"all"` or `true` for strict mode, `"nested"` (*deprecated* use `"allExcept": ['}']`)
  * ignores closing brackets in a row.
@@ -5801,7 +5938,7 @@ module.exports.prototype = {
         };
         var isObject = typeof value === 'object';
 
-        var error = 'disallowSpacesInsideObjectBrackets rule' +
+        var error = this.getOptionName() + ' rule' +
         ' requires string "all" or "nested", true value or object';
 
         if (typeof value === 'string' || value === true) {
@@ -5862,13 +5999,13 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],52:[function(require,module,exports){
+},{"assert":122}],54:[function(require,module,exports){
 /**
  * Disallows space after opening round bracket and before closing.
  *
- * Type: `Object` or `Boolean`
+ * Types: `Object` or `Boolean`
  *
- * Values: `true` or Object with either `"only"` with array of tokens
+ * Values: Either `true` or Object with `"only"` property as an array of tokens
  *
  * #### Example
  *
@@ -5909,7 +6046,7 @@ module.exports.prototype = {
     configure: function(option) {
         var isObject = typeof option === 'object';
 
-        var error = 'disallowSpacesInsideParentheses option requires' +
+        var error = this.getOptionName() + ' option requires' +
             ' true or object value with "only" properties ';
 
         // backcompat for 1.10: {all: true} #1027
@@ -5984,13 +6121,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],53:[function(require,module,exports){
+},{"assert":122}],55:[function(require,module,exports){
 /**
  * Disallows an extra comma following the final element of an array or object literal.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`es3`](http://jshint.com/docs/options/#es3)
  *
@@ -6020,14 +6157,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(disallowTrailingComma) {
+    configure: function(options) {
         assert(
-            typeof disallowTrailingComma === 'boolean',
-            'disallowTrailingComma option requires boolean value'
-        );
-        assert(
-            disallowTrailingComma === true,
-            'disallowTrailingComma option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -6049,11 +6182,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],54:[function(require,module,exports){
+},{"assert":122}],56:[function(require,module,exports){
 /**
  * Requires all lines to end on a non-whitespace character
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values:
  *  - `true`
@@ -6102,12 +6235,12 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowTrailingWhitespace) {
+    configure: function(options) {
         assert(
-            disallowTrailingWhitespace === true || disallowTrailingWhitespace === 'ignoreEmptyLines',
-            'disallowTrailingWhitespace option requires true value or "ignoreEmptyLines" string'
+            options === true || options === 'ignoreEmptyLines',
+            this.getOptionName() + ' option requires a true value or "ignoreEmptyLines"'
         );
-        this._ignoreEmptyLines = disallowTrailingWhitespace === 'ignoreEmptyLines';
+        this._ignoreEmptyLines = options === 'ignoreEmptyLines';
     },
 
     getOptionName: function() {
@@ -6127,13 +6260,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],55:[function(require,module,exports){
+},{"assert":122}],57:[function(require,module,exports){
 /**
  * Requires the variable to be the left hand operator when doing a boolean comparison
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -6164,14 +6297,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallowYodaConditions) {
+    configure: function(options) {
         assert(
-            typeof disallowYodaConditions === 'boolean',
-            'disallowYodaConditions option requires boolean value'
-        );
-        assert(
-            disallowYodaConditions === true,
-            'disallowYodaConditions option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
         this._operatorIndex = {
             '==': true,
@@ -6204,11 +6333,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],56:[function(require,module,exports){
+},{"assert":122}],58:[function(require,module,exports){
 /**
  * Requires all lines to be at most the number of characters specified
  *
- * Type: `Integer` or `Object`
+ * Types: `Integer` or `Object`
  *
  * Values:
  *  - `Integer`: lines should be at most the number of characters specified
@@ -6255,7 +6384,7 @@ module.exports.prototype = {
         if (typeof maximumLineLength === 'object') {
             assert(
                 typeof maximumLineLength.value === 'number',
-                'maximumLineLength option requires the "value" property to be defined'
+                this.getOptionName() + ' option requires the "value" property to be defined'
             );
 
             this._maximumLineLength = maximumLineLength.value;
@@ -6271,7 +6400,7 @@ module.exports.prototype = {
         } else {
             assert(
                 typeof maximumLineLength === 'number',
-                'maximumLineLength option requires number value or options object'
+                this.getOptionName() + ' option requires number value or options object'
             );
 
             this._maximumLineLength = maximumLineLength;
@@ -6323,7 +6452,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],57:[function(require,module,exports){
+},{"assert":122}],59:[function(require,module,exports){
 /**
  * Requires proper alignment in object literals.
  *
@@ -6416,22 +6545,25 @@ module.exports.prototype = {
             node.properties.forEach(function(property) {
                 var keyToken = file.getFirstNodeToken(property.key);
                 var colon = file.getNextToken(keyToken);
-                if (colon.loc.start.column !== maxKeyEndPos + 1) {
-                    errors.add('Alignment required', colon.loc.start);
-                }
+                errors.assert.spacesBetween({
+                    token: keyToken,
+                    nextToken: colon,
+                    exactly: maxKeyEndPos - keyToken.loc.end.column + 1,
+                    message: 'Alignment required'
+                });
             });
         });
     }
 
 };
 
-},{"assert":117}],58:[function(require,module,exports){
+},{"assert":122}],60:[function(require,module,exports){
 /**
  * Requires that a function expression be anonymous.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -6469,10 +6601,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireAnonymousFunctions) {
+    configure: function(options) {
         assert(
-            requireAnonymousFunctions === true,
-            'requireAnonymousFunctions option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -6489,11 +6621,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],59:[function(require,module,exports){
+},{"assert":122}],61:[function(require,module,exports){
 /**
  * Requires blocks to begin and end with a newline
  *
- * Type: `Boolean` or `Integer`
+ * Types: `Boolean` or `Integer`
  *
  * Values: `true` validates all non-empty blocks,
  * `Integer` specifies a minimum number of statements in the block before validating.
@@ -6543,13 +6675,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireBlocksOnNewline) {
+    configure: function(options) {
         assert(
-            requireBlocksOnNewline === true || typeof requireBlocksOnNewline === 'number',
-            'requireBlocksOnNewline option requires the value true or an Integer'
+            options === true || typeof options === 'number',
+            this.getOptionName() + ' option requires the value true or an Integer'
         );
 
-        this._minStatements = requireBlocksOnNewline === true ? 0 : requireBlocksOnNewline;
+        this._minStatements = options === true ? 0 : options;
     },
 
     getOptionName: function() {
@@ -6586,11 +6718,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],60:[function(require,module,exports){
+},{"assert":122}],62:[function(require,module,exports){
 /**
  * Requires identifiers to be camelCased or UPPERCASE_WITH_UNDERSCORES
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values: `true` or `"ignoreProperties"`
  *
@@ -6648,13 +6780,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireCamelCase) {
+    configure: function(options) {
         assert(
-            requireCamelCase === true || requireCamelCase === 'ignoreProperties',
-            'requireCamelCaseOrUpperCaseIdentifiers option requires true value or `ignoreProperties` string'
+            options === true || options === 'ignoreProperties',
+            this.getOptionName() + ' option requires a true value or `ignoreProperties`'
         );
 
-        this._ignoreProperties = (requireCamelCase === 'ignoreProperties');
+        this._ignoreProperties = (options === 'ignoreProperties');
     },
 
     getOptionName: function() {
@@ -6689,13 +6821,18 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],61:[function(require,module,exports){
+},{"assert":122}],63:[function(require,module,exports){
 /**
  * Requires the first alphabetical character of a comment to be uppercase, unless it is part of a multi-line textblock.
  *
- * Type: `Boolean`
+ * By default, the prefix for inline comments `jscs` is ignored.
  *
- * Value: `true`
+ * Types: `Boolean` or `Object`
+ *
+ * Values:
+ *  - `true`
+ *  - `Object`:
+ *     - `allExcept`: array of quoted exceptions
  *
  * #### Example
  *
@@ -6737,6 +6874,44 @@ module.exports.prototype = {
  *  * invalid
  *  *\/
  * ```
+ *
+ * ```js
+ * "requireCapitalizedComments": { allExcept: ["jshint"] }
+ * ```
+ *
+ * Valid:
+ *
+ * ```
+ * function sayHello() {
+ *     \/* jshint: -W071 *\/
+ *
+ *     // I can now say hello in lots of statements, if I like.
+ *     return "Hello";
+ * }
+ * ```
+ *
+ * * Invalid:
+ *
+ * ```
+ * function sayHello() {
+ *     \/* jshint: -W071 *\/
+ *
+ *     // i can now say hello in lots of statements, if I like.
+ *     return "Hello";
+ * }
+ * ```
+ *
+ * * Invalid:
+ *
+ * ```
+ * function sayHello() {
+ *     \/* istanbul ignore next *\/
+ *
+ *     // I'd like to ignore this statement in coverage reports.
+ *     return "Hello";
+ * }
+ * ```
+ *
  */
 
 var assert = require('assert');
@@ -6744,11 +6919,38 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireCapitalizedComments) {
+    configure: function(options) {
+        // except comments that begin with `jscs`, since these are used to
+        // selectively enable/disable rules within a file
+        this._exceptions = {
+            'jscs': true
+        };
+
+        var optionName = this.getOptionName();
+
+        var isObject = typeof options === 'object';
+
         assert(
-            requireCapitalizedComments === true,
-            'requireCapitalizedComments option requires a value of true or should be removed'
+            options === true ||
+            isObject,
+            optionName + ' option requires a true value ' +
+            'or an object with String[] `allExcept` property'
         );
+
+        if (isObject) {
+            var exceptions = options.allExcept;
+
+            // verify items in `allExcept` property in object are string values
+            assert(
+                Array.isArray(exceptions) &&
+                exceptions.every(function(el) { return typeof el === 'string'; }),
+                'Property `allExcept` in ' + optionName + ' should be an array of strings'
+            );
+
+            for (var i = 0, l = exceptions.length; i < l; i++) {
+                this._exceptions[exceptions[i]] = true;
+            }
+        }
     },
 
     getOptionName: function() {
@@ -6757,11 +6959,20 @@ module.exports.prototype = {
 
     check: function(file, errors) {
         var inTextBlock = null;
+        var exceptions = this._exceptions;
 
         var letterPattern = require('../../patterns/L');
         var upperCasePattern = require('../../patterns/Lu');
 
         file.iterateTokensByType(['Line', 'Block'], function(comment) {
+            // strip leading whitespace and any asterisks
+            // split on whitespace and colons
+            var splitComment = comment.value.replace(/(^\s+|[\*])/g, '').split(/[\s\:]/g);
+
+            if (exceptions[splitComment[0]]) {
+                return;
+            }
+
             var stripped = comment.value.replace(/[\n\s\*]/g, '');
             var firstChar = stripped[0];
             var isLetter = firstChar && letterPattern.test(firstChar);
@@ -6786,11 +6997,11 @@ module.exports.prototype = {
     }
 };
 
-},{"../../patterns/L":143,"../../patterns/Lu":145,"assert":117}],62:[function(require,module,exports){
+},{"../../patterns/L":145,"../../patterns/Lu":147,"assert":122}],64:[function(require,module,exports){
 /**
  * Requires constructors to be capitalized (except for `this`)
  *
- * Type: `Boolean` or `Object`
+ * Types: `Boolean` or `Object`
  *
  * Values: `true` or Object with `allExcept` Array of quoted identifiers which are exempted
  *
@@ -6825,14 +7036,14 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireCapitalizedConstructors) {
+    configure: function(options) {
         assert(
-            requireCapitalizedConstructors === true || Array.isArray(requireCapitalizedConstructors.allExcept),
-            'requireCapitalizedConstructors option requires object of exceptions or true value'
+            options === true || Array.isArray(options.allExcept),
+            this.getOptionName() + ' option requires a true value or an object of exceptions'
         );
         this._allowedConstructors = {};
 
-        var allExcept = requireCapitalizedConstructors.allExcept;
+        var allExcept = options.allExcept;
         if (allExcept) {
             for (var i = 0, l = allExcept.length; i < l; i++) {
                 this._allowedConstructors[allExcept[i]] = true;
@@ -6863,13 +7074,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],63:[function(require,module,exports){
+},{"assert":122}],65:[function(require,module,exports){
 /**
  * Requires commas as last token on a line in lists.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`laxcomma`](http://www.jshint.com/docs/options/#laxcomma)
  *
@@ -6905,10 +7116,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireCommaBeforeLineBreak) {
+    configure: function(options) {
         assert(
-            requireCommaBeforeLineBreak === true,
-            'requireCommaBeforeLineBreak option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -6928,11 +7139,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],64:[function(require,module,exports){
+},{"assert":122}],66:[function(require,module,exports){
 /**
  * Requires curly braces after statements.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to require curly braces after the following keywords:
  *
@@ -6979,7 +7190,7 @@ module.exports.prototype = {
     configure: function(statementTypes) {
         assert(
             Array.isArray(statementTypes) || statementTypes === true,
-            'requireCurlyBraces option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (statementTypes === true) {
@@ -7073,11 +7284,127 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],65:[function(require,module,exports){
+},{"../utils":121,"assert":122}],67:[function(require,module,exports){
+/**
+ * Require a $ before variable names that are jquery assignments.
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ *
+ * #### Example
+ *
+ * ```js
+ * "requireDollarBeforejQueryAssignment": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var $x = $(".foo");
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var x = $(".foo");
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(requireDollarBeforejQueryAssignment) {
+        assert(
+            requireDollarBeforejQueryAssignment === true,
+            'requireDollarBeforejQueryAssignment option requires true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireDollarBeforejQueryAssignment';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType(['VariableDeclarator', 'AssignmentExpression', 'ObjectExpression'], function(token) {
+            var type = token.type;
+            var left;
+            var varName;
+            var right;
+
+            if (type === 'VariableDeclarator') {
+                left = token.id;
+                varName = left.name;
+                right = token.init;
+            } else if (type === 'AssignmentExpression') {
+                left = token.left;
+                if (left.computed) {
+                    return;
+                }
+
+                varName = left.name || left.property.name;
+                right = token.right;
+            } else {// type === 'ObjectExpression'
+                var props = token.properties[0];
+
+                if (!props) {
+                    return;
+                }
+
+                left = props.key;
+
+                if (!left.name) {
+                    return;
+                }
+
+                varName = left.name;
+                right = props.value;
+            }
+
+            if (varName[0] === '$') {
+                return;
+            }
+
+            if (!right || right.type !== 'CallExpression') {
+                return;
+            }
+
+            var nextToken = file.getTokenByRangeStart(right.callee.range[0]);
+            if (nextToken.value !== '$') {
+                return;
+            }
+
+            nextToken = file.getNextToken(nextToken);
+            if (nextToken.value !== '(') {
+                return;
+            }
+
+            while (!(nextToken.type === 'Punctuator' && nextToken.value === ')')) {
+                nextToken = file.getNextToken(nextToken);
+            }
+
+            nextToken = file.getNextToken(nextToken);
+
+            if (!nextToken || !(nextToken.type === 'Punctuator' && nextToken.value === '.')) {
+                errors.add(
+                    'jQuery identifiers must start with a $',
+                    left.loc.start.line,
+                    left.loc.start.column
+                );
+            }
+        });
+    }
+};
+
+},{"assert":122}],68:[function(require,module,exports){
 /**
  * Requires member expressions to use dot notation when possible
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values:
  *  - `true`
@@ -7156,12 +7483,12 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireDotNotation) {
+    configure: function(options) {
         assert(
-            requireDotNotation === true || requireDotNotation === 'except_snake_case',
-            'requireDotNotation option requires true value or "except_snake_case" string'
+            options === true || options === 'except_snake_case',
+            this.getOptionName() + ' option requires a true value or "except_snake_case"'
         );
-        this._exceptSnakeCase = requireDotNotation === 'except_snake_case';
+        this._exceptSnakeCase = options === 'except_snake_case';
     },
 
     getOptionName: function() {
@@ -7207,7 +7534,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],66:[function(require,module,exports){
+},{"../utils":121,"assert":122}],69:[function(require,module,exports){
 /**
  * Requires function declarations by disallowing assignment of functions
  * expressions to variables. Function expressions are allowed in all other
@@ -7218,7 +7545,7 @@ module.exports.prototype = {
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -7266,10 +7593,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireFunctionDeclarations) {
+    configure: function(options) {
         assert(
-            requireFunctionDeclarations === true,
-            'requireFunctionDeclarations option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -7299,7 +7626,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],67:[function(require,module,exports){
+},{"assert":122}],70:[function(require,module,exports){
 /**
  * Requires placing keywords on a new line.
  *
@@ -7342,11 +7669,8 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(keywords) {
-        assert(Array.isArray(keywords), 'requireKeywordsOnNewLine option requires array value');
-        this._keywordIndex = {};
-        for (var i = 0, l = keywords.length; i < l; i++) {
-            this._keywordIndex[keywords[i]] = true;
-        }
+        assert(Array.isArray(keywords), this.getOptionName() + ' option requires array value');
+        this._keywords = keywords;
     },
 
     getOptionName: function() {
@@ -7354,21 +7678,17 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var keywordIndex = this._keywordIndex;
-
-        file.iterateTokensByType('Keyword', function(token) {
-            if (keywordIndex[token.value]) {
-                errors.assert.differentLine({
-                    token: file.getPrevToken(token),
-                    nextToken: token
-                });
-            }
+        file.iterateTokensByTypeAndValue('Keyword', this._keywords, function(token) {
+            errors.assert.differentLine({
+                token: file.getPrevToken(token),
+                nextToken: token
+            });
         });
     }
 
 };
 
-},{"assert":117}],68:[function(require,module,exports){
+},{"assert":122}],71:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -7394,13 +7714,13 @@ module.exports.prototype = {
 
 };
 
-},{}],69:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /**
  * Requires placing line feed after assigning a variable.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -7440,14 +7760,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireLineBreakAfterVariableAssignment) {
+    configure: function(options) {
         assert(
-            typeof requireLineBreakAfterVariableAssignment === 'boolean',
-            'requireLineFeedAtFileEnd option requires boolean value'
-        );
-        assert(
-            requireLineBreakAfterVariableAssignment === true,
-            'requireLineFeedAtFileEnd option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -7458,6 +7774,12 @@ module.exports.prototype = {
     check: function(file, errors) {
         var lastDeclaration;
         file.iterateNodesByType('VariableDeclaration', function(node) {
+            if (node.parentNode.type === 'ForStatement' ||
+                node.parentNode.type === 'ForInStatement' ||
+                node.parentNode.type === 'ForOfStatement') {
+                return;
+            }
+
             for (var i = 0; i < node.declarations.length; i++) {
                 var thisDeclaration = node.declarations[i];
                 if (thisDeclaration.parentNode.kind === 'var') {
@@ -7476,13 +7798,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],70:[function(require,module,exports){
+},{"assert":122}],73:[function(require,module,exports){
 /**
  * Requires placing line feed at file end.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -7497,10 +7819,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireLineFeedAtFileEnd) {
+    configure: function(options) {
         assert(
-            requireLineFeedAtFileEnd === true,
-            'requireLineFeedAtFileEnd option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -7520,11 +7842,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],71:[function(require,module,exports){
+},{"assert":122}],74:[function(require,module,exports){
 /**
  * Requires multiple `var` declaration.
  *
- * Type: `Boolean` or `String`
+ * Types: `Boolean` or `String`
  *
  * Values: `true` or `"onevar"`
  *
@@ -7620,18 +7942,13 @@ function onevar(file, errors) {
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireMultipleVarDecl) {
+    configure: function(options) {
         assert(
-            typeof requireMultipleVarDecl === 'boolean' ||
-            typeof requireMultipleVarDecl === 'string',
-            'requireMultipleVarDecl option requires boolean or string'
-        );
-        assert(
-            requireMultipleVarDecl === true || requireMultipleVarDecl === 'onevar',
-            'requireMultipleVarDecl option requires true value or `onevar` string'
+            options === true || options === 'onevar',
+            this.getOptionName() + ' option requires a true value or `onevar`'
         );
 
-        this._check = typeof requireMultipleVarDecl === 'string' ? onevar : consecutive;
+        this._check = typeof options === 'string' ? onevar : consecutive;
     },
 
     getOptionName: function() {
@@ -7643,13 +7960,13 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],72:[function(require,module,exports){
+},{"assert":122}],75:[function(require,module,exports){
 /**
  * Requires newline before opening curly brace of all block statements.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -7720,14 +8037,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireNewlineBeforeBlockStatements) {
+    configure: function(options) {
         assert(
-            typeof requireNewlineBeforeBlockStatements === 'boolean',
-            'requireNewlineBeforeBlockStatements option requires boolean value'
-        );
-        assert(
-            requireNewlineBeforeBlockStatements === true,
-            'requireNewlineBeforeBlockStatements option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -7749,11 +8062,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],73:[function(require,module,exports){
+},{"assert":122}],76:[function(require,module,exports){
 /**
  * Requires operators to appear before line breaks and not after.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to require all possible binary operators to appear before line breaks
  *
@@ -7810,7 +8123,7 @@ module.exports.prototype = {
 
         assert(
             Array.isArray(operators) || isTrue,
-            'requireOperatorBeforeLineBreak option requires array value or true value'
+            this.getOptionName() + ' option requires array value or true value'
         );
 
         if (isTrue) {
@@ -7873,13 +8186,88 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],74:[function(require,module,exports){
+},{"../utils":121,"assert":122}],77:[function(require,module,exports){
+/**
+ * Requires an extra blank newline after var declarations, as long
+ * as it is not the last expression in the current block.
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "requirePaddingNewLineAfterVariableDeclaration": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var x = {
+ *     a: 1
+ * };
+ *
+ * foo({
+ *     a: {
+ *         b: 1
+ *     }
+ * });
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var x = { a: 1 };
+ * foo({a:{b:1}});
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(requirePaddingNewLineAfterVariableDeclaration) {
+        assert(
+            requirePaddingNewLineAfterVariableDeclaration === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requirePaddingNewLineAfterVariableDeclaration';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('VariableDeclaration', function(node) {
+            var endOfDeclaration = file.findNextToken(file.getFirstNodeToken(node), 'Punctuator', ';');
+            var nextToken = file.getNextToken(endOfDeclaration);
+
+            if ((nextToken.type === 'Keyword' && nextToken.value === 'var') ||
+                (nextToken.type === 'Punctuator' && nextToken.value === '}') ||
+                nextToken.type === 'EOF') {
+                return;
+            }
+
+            errors.assert.linesBetween({
+                atLeast: 2,
+                token: endOfDeclaration,
+                nextToken: nextToken
+            });
+        });
+    }
+
+};
+
+},{"assert":122}],78:[function(require,module,exports){
 /**
  * Requires newline after blocks
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -7949,12 +8337,8 @@ module.exports.prototype = {
 
     configure: function(value) {
         assert(
-            typeof value === 'boolean',
-            'requirePaddingNewLinesAfterBlocks option requires boolean value'
-        );
-        assert(
             value === true,
-            'requirePaddingNewLinesAfterBlocks option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -7970,7 +8354,7 @@ module.exports.prototype = {
 
             var nextToken = file.getNextToken(closingBracket);
 
-            while (nextToken !== undefined) {
+            while (nextToken.type !== 'EOF') {
                 var excludeValues = excludes[parentNode.type];
                 if (excludeValues && excludeValues.indexOf(nextToken.value) !== -1) {
                     return;
@@ -7998,11 +8382,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],75:[function(require,module,exports){
+},{"assert":122}],79:[function(require,module,exports){
 /**
  * Requires an empty line above the specified keywords unless the keyword is the first expression in a block.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted types or `true` to require padding new lines before all of the keywords below.
  *
@@ -8071,7 +8455,7 @@ module.exports.prototype = {
 
     configure: function(keywords) {
         assert(Array.isArray(keywords) || keywords === true,
-            'requirePaddingNewlinesBeforeKeywords option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (keywords === true) {
             keywords = defaultKeywords;
@@ -8116,27 +8500,48 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],76:[function(require,module,exports){
+},{"../utils":121,"assert":122}],80:[function(require,module,exports){
 /**
  * Requires newline before line comments
  *
- * Type: `Boolean`
+ * Types: `Boolean` or `Object`
  *
- * Values: `true`
+ * Values:
+ * - `true`: always require a newline before line comments
+ * - `Object`:
+ *      - `"allExcept"`: `"firstAfterCurly"` Comments may be first line of block without extra padding
  *
- * #### Example
- *
+ * #### Examples
  * ```js
  * "requirePaddingNewLinesBeforeLineComments": true
+ * "requirePaddingNewLinesBeforeLineComments": { "allExcept": "firstAfterCurly" }
  * ```
  *
- * ##### Valid
+ * ##### Valid for `true`
  *
  * ```js
  * var a = 2;
  *
  * // comment
  * return a;
+ *
+ * function() {
+ *
+ *   // comment
+ * }
+ * ```
+ *
+ * ##### Valid for `{ "allExcept": "firstAfterCurly" }`
+ *
+ * ```js
+ * var a = 2;
+ *
+ * // comment
+ * return a;
+ *
+ * function() {
+ *   // comment
+ * }
  * ```
  *
  * ##### Invalid
@@ -8145,6 +8550,10 @@ module.exports.prototype = {
  * var a = 2;
  * //comment
  * return a;
+ *
+ * function() {
+ *   // comment
+ * }
  * ```
  */
 
@@ -8155,10 +8564,18 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(value) {
-        assert(
-            value === true,
-            'requirePaddingNewLinesBeforeLineComments option requires true value or should be removed'
-        );
+        this._allowFirstAfterCurly = false;
+
+        if (typeof value === 'object') {
+            assert(typeof value.allExcept === 'string' && value.allExcept === 'firstAfterCurly',
+                this.getOptionName() + ' option requires the "allExcept" ' +
+                 'property to equal "firstAfterCurly"');
+            this._allowFirstAfterCurly = true;
+        } else {
+            assert(value === true,
+                this.getOptionName() + ' option requires true value or object'
+            );
+        }
     },
 
     getOptionName: function() {
@@ -8166,13 +8583,25 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
+        var allowFirstAfterCurly = this._allowFirstAfterCurly;
+
         file.iterateTokensByType('Line', function(comment) {
             if (comment.loc.start.line === 1) {
                 return;
             }
 
+            var prevToken = file.getPrevToken(comment, {includeComments: true});
+
+            if (prevToken.type === 'Line') {
+                return;
+            }
+
+            if (allowFirstAfterCurly && prevToken.type === 'Punctuator' && prevToken.value === '{') {
+                return;
+            }
+
             errors.assert.linesBetween({
-                token: file.getPrevToken(comment, {includeComments: true}),
+                token: prevToken,
                 nextToken: comment,
                 atLeast: 2,
                 message: 'Line comments must be preceded with a blank line'
@@ -8181,11 +8610,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],77:[function(require,module,exports){
+},{"assert":122}],81:[function(require,module,exports){
 /**
  * Requires blocks to begin and end with 2 newlines
  *
- * Type: `Boolean` or `Integer`
+ * Types: `Boolean` or `Integer`
  *
  * Values: `true` validates all non-empty blocks,
  * `Integer` specifies a minimum number of statements in the block before validating.
@@ -8249,13 +8678,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requirePaddingNewlinesInBlocks) {
+    configure: function(options) {
         assert(
-            requirePaddingNewlinesInBlocks === true || typeof requirePaddingNewlinesInBlocks === 'number',
-            'requirePaddingNewlinesInBlocks option requires the value true or an Integer'
+            options === true || typeof options === 'number',
+            this.getOptionName() + ' option requires the value true or an Integer'
         );
 
-        this._minStatements = requirePaddingNewlinesInBlocks === true ? 0 : requirePaddingNewlinesInBlocks;
+        this._minStatements = options === true ? 0 : options;
     },
 
     getOptionName: function() {
@@ -8292,13 +8721,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],78:[function(require,module,exports){
+},{"assert":122}],82:[function(require,module,exports){
 /**
  * Requires newline inside curly braces of all objects.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -8335,12 +8764,8 @@ module.exports.prototype = {
 
     configure: function(value) {
         assert(
-            typeof value === 'boolean',
-            'requirePaddingNewLinesInObjects option requires boolean value'
-        );
-        assert(
             value === true,
-            'requirePaddingNewLinesInObjects option requires true value or should be removed'
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -8375,13 +8800,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],79:[function(require,module,exports){
+},{"assert":122}],83:[function(require,module,exports){
 /**
  * Requires parentheses around immediately invoked function expressions.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * JSHint: [`immed`](http://www.jshint.com/docs/options/#immed)
  *
@@ -8418,14 +8843,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireParenthesesAroundIIFE) {
+    configure: function(options) {
         assert(
-            typeof requireParenthesesAroundIIFE === 'boolean',
-            'requireParenthesesAroundIIFE option requires boolean value'
-        );
-        assert(
-            requireParenthesesAroundIIFE === true,
-            'requireParenthesesAroundIIFE option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -8460,18 +8881,18 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],80:[function(require,module,exports){
+},{"../utils":121,"assert":122}],84:[function(require,module,exports){
 /**
  * Requires quoted keys in objects.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
  * ```js
- * "requiresQuotedKeysInObjects": true
+ * "requireQuotedKeysInObjects": true
  * ```
  *
  * ##### Valid
@@ -8493,10 +8914,10 @@ module.exports = function() { };
 
 module.exports.prototype = {
 
-    configure: function(requireQuotedKeysInObjects) {
+    configure: function(options) {
         assert(
-            requireQuotedKeysInObjects === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -8520,7 +8941,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],81:[function(require,module,exports){
+},{"assert":122}],85:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -8546,11 +8967,103 @@ module.exports.prototype = {
 
 };
 
-},{}],82:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
+/**
+ * Requires semicolon after:
+ *
+ * * var declaration
+ * * expression statement
+ * * return
+ * * throw
+ * * break
+ * * continue
+ * * do-while
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "requireSemicolons": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var a = 1;
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var a = 1
+ * ```
+*/
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(options) {
+        assert(
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requireSemicolons';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType([
+            'VariableDeclaration',
+            'ExpressionStatement',
+            'DoWhileStatement',
+            'ReturnStatement',
+            'ThrowStatement',
+            'BreakStatement',
+            'ContinueStatement',
+            'DebuggerStatement'
+        ], function(node) {
+            // ignore variable declaration inside for and for-in
+            if (node.type === 'VariableDeclaration') {
+                if ((node.parentNode.type === 'ForInStatement' && node.parentNode.left === node) ||
+                    (node.parentNode.type === 'ForOfStatement' && node.parentNode.left === node) ||
+                    (node.parentNode.type === 'ForStatement' && node.parentNode.init === node)) {
+                    return;
+                }
+            }
+
+            // get last token inside node
+            var token = file.getLastNodeToken(node);
+
+            // if last token is not a semicolon punctuator, try to get next token in file
+            if (token && (token.type !== 'Punctuator' || token.value !== ';')) {
+                token = file.getNextToken(token);
+            }
+
+            // check token is semicolon
+            if (!token || token.type !== 'Punctuator' || token.value !== ';') {
+                errors.add(
+                    'Missing semicolon after statement',
+                    (token || node).loc.end
+                );
+            }
+        });
+    }
+
+};
+
+},{"assert":122}],87:[function(require,module,exports){
 /**
  * Disallows sticking binary operators to the right.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to require space after all possible binary operators
  *
@@ -8597,7 +9110,7 @@ module.exports.prototype = {
 
         assert(
             Array.isArray(operators) || isTrue,
-            'requireSpaceAfterBinaryOperators option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (isTrue) {
@@ -8667,11 +9180,11 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],83:[function(require,module,exports){
+},{"../utils":121,"assert":122}],88:[function(require,module,exports){
 /**
  * Requires space after keyword.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to require all of the keywords below to have a space afterward.
  *
@@ -8722,7 +9235,7 @@ module.exports.prototype = {
     configure: function(keywords) {
         assert(
             Array.isArray(keywords) || keywords === true,
-            'requireSpaceAfterKeywords option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (keywords === true) {
             keywords = defaultKeywords;
@@ -8743,10 +9256,10 @@ module.exports.prototype = {
                 return;
             }
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: token,
                 nextToken: nextToken,
-                spaces: 1,
+                exactly: 1,
                 message: 'One space required after "' + token.value + '" keyword'
             });
         });
@@ -8754,15 +9267,15 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],84:[function(require,module,exports){
+},{"../utils":121,"assert":122}],89:[function(require,module,exports){
 /**
  * Requires that a line comment (`//`) be followed by a space.
  *
- * Type: `Boolean` or `Object` or `String`
+ * Types: `Boolean`, `Object` or `String`
  *
  * Values:
  *  - `true`
- *  - `"allowSlash"` (*deprecated* use `"except": ["/"]`) allows `/// ` format
+ *  - `"allowSlash"` (*deprecated* use `"allExcept": ["/"]`) allows `/// ` format
  *  - `Object`:
  *     - `allExcept`: array of allowed strings before space `//(here) `
  *
@@ -8794,28 +9307,28 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireSpaceAfterLineComment) {
+    configure: function(options) {
         assert(
-            requireSpaceAfterLineComment === true ||
-            requireSpaceAfterLineComment === 'allowSlash' ||
-            typeof requireSpaceAfterLineComment === 'object',
-            'requireSpaceAfterLineComment option requires the value `true` ' +
+            options === true ||
+            options === 'allowSlash' ||
+            typeof options === 'object',
+            this.getOptionName() + ' option requires a true value ' +
             'or an object with String[] `allExcept` property'
         );
 
         // verify first item in `allExcept` property in object (if it's an object)
         assert(
-            typeof requireSpaceAfterLineComment !== 'object' ||
-            Array.isArray(requireSpaceAfterLineComment.allExcept) &&
-            typeof requireSpaceAfterLineComment.allExcept[0] === 'string',
-            'Property `allExcept` in requireSpaceAfterLineComment should be an array of strings'
+            typeof options !== 'object' ||
+            Array.isArray(options.allExcept) &&
+            typeof options.allExcept[0] === 'string',
+            'Property `allExcept` in ' + this.getOptionName() + ' should be an array of strings'
         );
 
         // don't check triple slashed comments, microsoft js doc convention. see #593
         // exceptions. see #592
         // need to drop allowSlash support in 2.0. Fixes #697
-        this._allExcept = requireSpaceAfterLineComment === 'allowSlash' ? ['/'] :
-            requireSpaceAfterLineComment.allExcept || [];
+        this._allExcept = options === 'allowSlash' ? ['/'] :
+            options.allExcept || [];
     },
 
     getOptionName: function() {
@@ -8846,13 +9359,13 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],85:[function(require,module,exports){
+},{"assert":122}],90:[function(require,module,exports){
 /**
  * Requires space after object keys.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -8876,10 +9389,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireSpaceAfterObjectKeys) {
+    configure: function(options) {
         assert(
-            requireSpaceAfterObjectKeys === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -8906,11 +9419,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],86:[function(require,module,exports){
+},{"assert":122}],91:[function(require,module,exports){
 /**
  * Disallows sticking unary operators to the right.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to require space after prefix for all unary operators
  *
@@ -8990,11 +9503,11 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],87:[function(require,module,exports){
+},{"../utils":121,"assert":122}],92:[function(require,module,exports){
 /**
  * Disallows sticking binary operators to the left.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to require space before all possible binary operators
  * without comma operator, since it's rarely used with this rule
@@ -9045,7 +9558,7 @@ module.exports.prototype = {
 
         assert(
             Array.isArray(operators) || isTrue,
-            'requireSpaceBeforeBinaryOperators option requires array or true value'
+            this.getOptionName() + ' option requires array or true value'
         );
 
         if (isTrue) {
@@ -9115,13 +9628,13 @@ module.exports.prototype = {
 
 };
 
-},{"../../lib/utils":116,"assert":117}],88:[function(require,module,exports){
+},{"../../lib/utils":121,"assert":122}],93:[function(require,module,exports){
 /**
  * Requires space before block statements (for loops, control structures).
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -9171,14 +9684,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireSpaceBeforeBlockStatements) {
+    configure: function(options) {
         assert(
-            typeof requireSpaceBeforeBlockStatements === 'boolean',
-            'requireSpaceBeforeBlockStatements option requires boolean value'
-        );
-        assert(
-            requireSpaceBeforeBlockStatements === true,
-            'requireSpaceBeforeBlockStatements option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -9190,10 +9699,10 @@ module.exports.prototype = {
         file.iterateNodesByType('BlockStatement', function(node) {
             var first = file.getFirstNodeToken(node);
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: file.getPrevToken(first),
                 nextToken: first,
-                spaces: 1,
+                exactly: 1,
                 disallowNewLine: true,
                 message: 'One space required before opening brace for block expressions'
             });
@@ -9202,11 +9711,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],89:[function(require,module,exports){
+},{"assert":122}],94:[function(require,module,exports){
 /**
  * Requires space before keyword.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted keywords or `true` to require all possible keywords to have a preceding space.
  *
@@ -9248,7 +9757,7 @@ module.exports.prototype = {
     configure: function(keywords) {
         assert(
             Array.isArray(keywords) || keywords === true,
-            'requireSpaceAfterKeywords option requires array or true value');
+            this.getOptionName() + ' option requires array or true value');
 
         if (keywords === true) {
             keywords = defaultKeywords;
@@ -9280,13 +9789,13 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],90:[function(require,module,exports){
+},{"../utils":121,"assert":122}],95:[function(require,module,exports){
 /**
  * Requires space after object keys.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -9310,10 +9819,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(disallow) {
+    configure: function(options) {
         assert(
-            disallow === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -9342,11 +9851,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],91:[function(require,module,exports){
+},{"assert":122}],96:[function(require,module,exports){
 /**
  * Disallows sticking unary operators to the left.
  *
- * Type: `Array` or `Boolean`
+ * Types: `Array` or `Boolean`
  *
  * Values: Array of quoted operators or `true` to require space before postfix for all unary operators
  * (i.e. increment/decrement operators).
@@ -9418,7 +9927,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":116,"assert":117}],92:[function(require,module,exports){
+},{"../utils":121,"assert":122}],97:[function(require,module,exports){
 /**
  * Ensure there are spaces after argument separators in call expressions.
  *
@@ -9451,14 +9960,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireSpaceBetweenArguments) {
+    configure: function(options) {
         assert(
-            typeof requireSpaceBetweenArguments === 'boolean',
-            this.getOptionName() + ' option requires boolean value'
-        );
-        assert(
-            requireSpaceBetweenArguments === true,
-            this.getOptionName() + ' option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -9481,7 +9986,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],93:[function(require,module,exports){
+},{"assert":122}],98:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in anonymous function expressions.
  *
@@ -9528,13 +10033,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'requireSpacesInAnonymousFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'requireSpacesInAnonymousFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -9542,14 +10047,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'requireSpacesInAnonymousFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'requireSpacesInAnonymousFunctionExpression must have beforeOpeningCurlyBrace ' +
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace ' +
             ' or beforeOpeningRoundBrace property'
         );
 
@@ -9598,13 +10103,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],94:[function(require,module,exports){
+},{"assert":122}],99:[function(require,module,exports){
 /**
  * Requires space before `()` in call expressions.
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -9630,10 +10135,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireSpacesInCallExpression) {
+    configure: function(options) {
         assert(
-            requireSpacesInCallExpression === true,
-            'requireSpacesInCallExpression option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -9655,11 +10160,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],95:[function(require,module,exports){
+},{"assert":122}],100:[function(require,module,exports){
 /**
  * Requires space before and/or after `?` or `:` in conditional expressions.
  *
- * Type: `Object` or `Boolean`
+ * Types: `Object` or `Boolean`
  *
  * Values: `"afterTest"`, `"beforeConsequent"`, `"afterConsequent"`, `"beforeAlternate"` as child properties,
  * or `true` to set all properties to `true`. Child properties must be set to `true`.
@@ -9717,7 +10222,7 @@ module.exports.prototype = {
 
         assert(
             typeof options === 'object',
-            optionName + ' option must be an object or boolean true'
+            optionName + ' option requires a true value or an object'
         );
 
         var isProperlyConfigured = validProperties.some(function(key) {
@@ -9797,13 +10302,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],96:[function(require,module,exports){
+},{"assert":122}],101:[function(require,module,exports){
 /**
  * Requires spaces inbetween for statement.
  *
  * Type: `Boolean`
  *
- * Values: `true` to requires spaces inbetween for statement.
+ * Value: `true` to requires spaces inbetween for statement.
  *
  * #### Example
  *
@@ -9845,10 +10350,10 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireSpacesInForStatement) {
+    configure: function(options) {
         assert(
-            requireSpacesInForStatement === true,
-            'requireSpacesInForStatement option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
     },
 
@@ -9860,19 +10365,19 @@ module.exports.prototype = {
         file.iterateNodesByType('ForStatement', function(node) {
             if (node.test) {
                 var testToken = file.getFirstNodeToken(node.test);
-                errors.assert.whitespaceBetween({
+                errors.assert.spacesBetween({
                     token: file.getPrevToken(testToken),
                     nextToken: testToken,
-                    spaces: 1,
+                    exactly: 1,
                     message: 'One space required after semicolon'
                 });
             }
             if (node.update) {
                 var updateToken = file.getFirstNodeToken(node.update);
-                errors.assert.whitespaceBetween({
+                errors.assert.spacesBetween({
                     token: file.getPrevToken(updateToken),
                     nextToken: updateToken,
-                    spaces: 1,
+                    exactly: 1,
                     message: 'One space required after semicolon'
                 });
             }
@@ -9880,7 +10385,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],97:[function(require,module,exports){
+},{"assert":122}],102:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in function declarations.
  *
@@ -9921,13 +10426,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'requireSpacesInFunctionDeclaration option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'requireSpacesInFunctionDeclaration.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -9935,14 +10440,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'requireSpacesInFunctionDeclaration.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'requireSpacesInFunctionDeclaration must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -9982,7 +10487,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],98:[function(require,module,exports){
+},{"assert":122}],103:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in function expressions (both [named](#requirespacesinnamedfunctionexpression)
  * and [anonymous](#requirespacesinanonymousfunctionexpression)).
@@ -10028,13 +10533,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'requireSpacesInFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'requireSpacesInFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -10042,14 +10547,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'requireSpacesInFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'requireSpacesInFunctionExpression must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -10095,7 +10600,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],99:[function(require,module,exports){
+},{"assert":122}],104:[function(require,module,exports){
 /**
  * Expression
  *
@@ -10147,13 +10652,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'requireSpacesInFunction option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'requireSpacesInFunction.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -10161,14 +10666,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'requireSpacesInFunction.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'requireSpacesInFunction must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace or beforeOpeningRoundBrace property'
         );
 
         this._beforeOpeningRoundBrace = Boolean(options.beforeOpeningRoundBrace);
@@ -10214,7 +10719,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],100:[function(require,module,exports){
+},{"assert":122}],105:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in named function expressions.
  *
@@ -10255,13 +10760,13 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'object',
-            'requireSpacesInNamedFunctionExpression option must be the object'
+            this.getOptionName() + ' option must be the object'
         );
 
         if ('beforeOpeningRoundBrace' in options) {
             assert(
                 options.beforeOpeningRoundBrace === true,
-                'requireSpacesInNamedFunctionExpression.beforeOpeningRoundBrace ' +
+                this.getOptionName() + '.beforeOpeningRoundBrace ' +
                 'property requires true value or should be removed'
             );
         }
@@ -10269,14 +10774,14 @@ module.exports.prototype = {
         if ('beforeOpeningCurlyBrace' in options) {
             assert(
                 options.beforeOpeningCurlyBrace === true,
-                'requireSpacesInNamedFunctionExpression.beforeOpeningCurlyBrace ' +
+                this.getOptionName() + '.beforeOpeningCurlyBrace ' +
                 'property requires true value or should be removed'
             );
         }
 
         assert(
             options.beforeOpeningCurlyBrace || options.beforeOpeningRoundBrace,
-            'requireSpacesInNamedFunctionExpression must have beforeOpeningCurlyBrace ' +
+            this.getOptionName() + ' must have beforeOpeningCurlyBrace ' +
             'or beforeOpeningRoundBrace property'
         );
 
@@ -10319,11 +10824,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],101:[function(require,module,exports){
+},{"assert":122}],106:[function(require,module,exports){
 /**
  * Requires space after opening array square bracket and before closing.
  *
- * Type: `String` or `Object`
+ * Types: `String` or `Object`
  *
  * Values: `"all"` for strict mode, `"allButNested"` (*deprecated* use `"allExcept": [ "[", "]"]`)
  * ignores closing brackets in a row.
@@ -10380,7 +10885,7 @@ module.exports.prototype = {
         };
         var isObject = typeof value === 'object';
 
-        var error = 'requireSpacesInsideArrayBrackets rule' +
+        var error = this.getOptionName() + ' rule' +
         ' requires string value "all" or "allButNested" or object';
 
         if (typeof value === 'string') {
@@ -10417,9 +10922,9 @@ module.exports.prototype = {
 
         file.iterateNodesByType('ArrayExpression', function(node) {
             var openBracket = file.getFirstNodeToken(node);
-            var afterOpen = file.getNextToken(openBracket);
+            var afterOpen = file.getNextToken(openBracket, {includeComments: true});
             var closeBracket = file.getLastNodeToken(node);
-            var beforeClose = file.getPrevToken(closeBracket);
+            var beforeClose = file.getPrevToken(closeBracket, {includeComments: true});
 
             // Skip for empty array brackets
             if (afterOpen.value === ']') {
@@ -10427,19 +10932,19 @@ module.exports.prototype = {
             }
 
             if (!(afterOpen.value in exceptions)) {
-                errors.assert.whitespaceBetween({
+                errors.assert.spacesBetween({
                     token: openBracket,
                     nextToken: afterOpen,
-                    spaces: 1,
+                    exactly: 1,
                     message: 'One space required after opening bracket'
                 });
             }
 
             if (!(beforeClose.value in exceptions)) {
-                errors.assert.whitespaceBetween({
+                errors.assert.spacesBetween({
                     token: beforeClose,
                     nextToken: closeBracket,
-                    spaces: 1,
+                    exactly: 1,
                     message: 'One space required before closing bracket'
                 });
             }
@@ -10447,11 +10952,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],102:[function(require,module,exports){
+},{"assert":122}],107:[function(require,module,exports){
 /**
  * Requires space after opening square bracket and before closing.
  *
- * Type: `Boolean` or `Object`
+ * Types: `Boolean` or `Object`
  *
  * Values: `true` for strict mode, or `"allExcept": [ "[", "]"]`
  * ignores closing brackets in a row.
@@ -10497,7 +11002,7 @@ module.exports.prototype = {
     configure: function(value) {
         var isObject = typeof value === 'object';
 
-        var error = 'requireSpacesInsideBrackets rule requires string value true or object';
+        var error = this.getOptionName() + ' rule requires string value true or object';
 
         if (isObject) {
             assert('allExcept' in value, error);
@@ -10534,10 +11039,10 @@ module.exports.prototype = {
                 return;
             }
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: token,
                 nextToken: nextToken,
-                spaces: 1,
+                exactly: 1,
                 message: 'One space required after opening bracket'
             });
         });
@@ -10555,21 +11060,21 @@ module.exports.prototype = {
                 return;
             }
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: prevToken,
                 nextToken: token,
-                spaces: 1,
+                exactly: 1,
                 message: 'One space required before closing bracket'
             });
         });
     }
 };
 
-},{"assert":117}],103:[function(require,module,exports){
+},{"assert":122}],108:[function(require,module,exports){
 /**
  * Requires space after opening object curly brace and before closing.
  *
- * Type: `Object` or `String`
+ * Types: `Object` or `String`
  *
  * Values: `"all"` for strict mode, `"allButNested"` (*deprecated* use `"allExcept": ['}']`)
  * ignores closing brackets in a row.
@@ -10625,7 +11130,7 @@ module.exports.prototype = {
         };
         var isObject = typeof value === 'object';
 
-        var error = 'requireSpacesInsideObjectBrackets rule' +
+        var error = this.getOptionName() + ' rule' +
         ' requires string value \'all\' or \'allButNested\' or object';
 
         if (typeof value === 'string') {
@@ -10669,10 +11174,10 @@ module.exports.prototype = {
                 return;
             }
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: openingBracket,
                 nextToken: nextToken,
-                spaces: 1,
+                exactly: 1,
                 message: 'One space required after opening curly brace'
             });
 
@@ -10683,21 +11188,21 @@ module.exports.prototype = {
                 return;
             }
 
-            errors.assert.whitespaceBetween({
+            errors.assert.spacesBetween({
                 token: prevToken,
                 nextToken: closingBracket,
-                spaces: 1,
+                exactly: 1,
                 message: 'One space required before closing curly brace'
             });
         });
     }
 };
 
-},{"assert":117}],104:[function(require,module,exports){
+},{"assert":122}],109:[function(require,module,exports){
 /**
  * Requires space after opening round bracket and before closing.
  *
- * Type: `Object` or `String`
+ * Types: `Object` or `String`
  *
  * Values: `"all"` for strict mode, `"allButNested"`
  * (*deprecated* use `"except": ['(', ')']`) ignores nested brackets in a row, you could also specify token exceptions.
@@ -10750,7 +11255,7 @@ module.exports.prototype = {
         };
         var isObject = typeof value === 'object';
 
-        var error = 'requireSpacesInsideParentheses rule' +
+        var error = this.getOptionName() + ' rule' +
         ' requires string value \'all\' or \'allButNested\' or object';
 
         if (typeof value === 'string') {
@@ -10839,11 +11344,11 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":117}],105:[function(require,module,exports){
+},{"assert":122}],110:[function(require,module,exports){
 /**
  * Requires an extra comma following the final element of an array or object literal.
  *
- * Type: `Boolean` or `Object`
+ * Types: `Boolean` or `Object`
  *
  * Values:
  *
@@ -10892,27 +11397,27 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(requireTrailingComma) {
+    configure: function(options) {
 
-        if (typeof requireTrailingComma === 'object') {
-            if ('ignoreSingleValue' in requireTrailingComma) {
+        if (typeof options === 'object') {
+            if ('ignoreSingleValue' in options) {
                 assert(
-                    requireTrailingComma.ignoreSingleValue === true,
-                    'requireTrailingComma option ignoreSingleValue requires true value or should be removed'
+                    options.ignoreSingleValue === true,
+                    this.getOptionName() + ' option ignoreSingleValue requires true value or should be removed'
                 );
                 this._ignoreSingleValue = true;
             }
-            if ('ignoreSingleLine' in requireTrailingComma) {
+            if ('ignoreSingleLine' in options) {
                 assert(
-                    requireTrailingComma.ignoreSingleLine === true,
-                    'requireTrailingComma option ignoreSingleLine requires true value or should be removed'
+                    options.ignoreSingleLine === true,
+                    this.getOptionName() + ' option ignoreSingleLine requires true value or should be removed'
                 );
                 this._ignoreSingleLine = true;
             }
         } else {
             assert(
-                requireTrailingComma === true,
-                'requireTrailingComma option requires true value or should be removed'
+                options === true,
+                this.getOptionName() + ' option requires a true value or should be removed'
             );
         }
     },
@@ -10952,13 +11457,13 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],106:[function(require,module,exports){
+},{"assert":122}],111:[function(require,module,exports){
 /**
  * Requires the variable to be the right hand operator when doing a boolean comparison
  *
  * Type: `Boolean`
  *
- * Values: `true`
+ * Value: `true`
  *
  * #### Example
  *
@@ -10988,14 +11493,10 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireYodaConditions) {
+    configure: function(options) {
         assert(
-            typeof requireYodaConditions === 'boolean',
-            'requireYodaConditions option requires boolean value'
-        );
-        assert(
-            requireYodaConditions === true,
-            'requireYodaConditions option requires true value or should be removed'
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
         );
         this._operatorIndex = {
             '==': true,
@@ -11028,11 +11529,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],107:[function(require,module,exports){
+},{"assert":122}],112:[function(require,module,exports){
 /**
  * Option to check `var that = this` expressions
  *
- * Type: `Array` or `String`
+ * Types: `Array` or `String`
  *
  * Values: String value used for context local declaration
  *
@@ -11064,7 +11565,7 @@ module.exports.prototype = {
     configure: function(keywords) {
         assert(
             Array.isArray(keywords) || typeof keywords === 'string',
-            'safeContextKeyword option requires string or array value'
+            this.getOptionName() + ' option requires string or array value'
         );
 
         this._keywords = keywords;
@@ -11127,11 +11628,11 @@ function checkKeywords(name, keywords) {
     return true;
 }
 
-},{"assert":117}],108:[function(require,module,exports){
+},{"assert":122}],113:[function(require,module,exports){
 /**
  * Validates indentation for switch statements and block statements
  *
- * Type: `Integer` or `String` or `Object`
+ * Types: `Integer`, `String` or `Object`
  *
  * Values:
  *  - `Integer`: A positive number of spaces
@@ -11244,24 +11745,24 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(validateIndentation) {
+    configure: function(options) {
         this._includeEmptyLines = false;
 
-        if (typeof validateIndentation === 'object') {
-            this._includeEmptyLines = (validateIndentation.includeEmptyLines === true);
-            validateIndentation = validateIndentation.value;
+        if (typeof options === 'object') {
+            this._includeEmptyLines = (options.includeEmptyLines === true);
+            options = options.value;
         }
 
         assert(
-            validateIndentation === '\t' ||
-                (typeof validateIndentation === 'number' && validateIndentation > 0),
-            'validateIndentation option requires a positive number of spaces or "\\t"' +
+            options === '\t' ||
+                (typeof options === 'number' && options > 0),
+            this.getOptionName() + ' option requires a positive number of spaces or "\\t"' +
             ' or options object with "value" property'
         );
 
-        if (typeof validateIndentation === 'number') {
+        if (typeof options === 'number') {
             this._indentChar = ' ';
-            this._indentSize = validateIndentation;
+            this._indentSize = options;
         } else {
             this._indentChar = '\t';
             this._indentSize = 1;
@@ -11323,10 +11824,9 @@ module.exports.prototype = {
             });
         }
 
-        function markAlternateBlockStatement(node, property) {
-            var child =  node[property];
-            if (child && child.type === 'BlockStatement') {
-                markCheck(child);
+        function markKeyword(node) {
+            if (node) {
+                markCheck(file.getPrevToken(file.getFirstNodeToken(node)));
             }
         }
 
@@ -11376,31 +11876,54 @@ module.exports.prototype = {
             return node[childrenProperty];
         }
 
-        function getIndentationFromLine(i) {
+        function getIndentationFromLine(line) {
             var rNotIndentChar = new RegExp('[^' + indentChar + ']');
-            var firstContent = lines[i].search(rNotIndentChar);
+            var firstContent = line.search(rNotIndentChar);
             if (firstContent === -1) {
-                firstContent = lines[i].length;
+                firstContent = line.length;
             }
             return firstContent;
         }
 
         function checkIndentations() {
+            var lineAugment = 0;
+
             linesToCheck.forEach(function(line, i) {
-                var actualIndentation = getIndentationFromLine(i);
+                var lineNumber = i + 1;
+                var actualIndentation = line.indentation;
                 var expectedIndentation = getExpectedIndentation(line, actualIndentation);
 
+                // do not augment this line considering this line changes indentation
+                if (line.pop.length || line.push.length) {
+                    lineAugment = 0;
+                }
+
                 if (line.check) {
-                    if (actualIndentation !== expectedIndentation) {
-                        errors.add(
-                            'Expected indentation of ' + expectedIndentation + ' characters',
-                            i + 1,
-                            expectedIndentation
-                        );
-                        // correct the indentation so that future lines
-                        // can be validated appropriately
-                        actualIndentation = expectedIndentation;
-                    }
+                    errors.assert.indentation({
+                        lineNumber: lineNumber,
+                        actual: actualIndentation,
+                        expected: expectedIndentation,
+                        indentChar: indentChar
+                    });
+
+                    // for multiline statements, we need move subsequent lines over the correct
+                    // number of spaces to match the change made to the first line of the statement.
+                    lineAugment = expectedIndentation - actualIndentation;
+
+                    // correct the indentation so that future lines can be validated appropriately
+                    actualIndentation = expectedIndentation;
+                } else if (!line.empty) {
+                    // in the case that we moved a previous line over a certain number spaces,
+                    // we need to move this line over as well, but technically, it's not an error
+                    errors.assert.indentation({
+                        lineNumber: lineNumber,
+                        actual: actualIndentation,
+                        // Avoid going negative in the case that a previous line was overindented,
+                        // and now outdenting a line that is already at column zero.
+                        expected: Math.max(actualIndentation + lineAugment, 0),
+                        indentChar: indentChar,
+                        silent: true
+                    });
                 }
 
                 if (line.push.length) {
@@ -11450,7 +11973,7 @@ module.exports.prototype = {
             if (line.pushAltLine.length) {
                 expected = [expected];
                 line.pushAltLine.forEach(function(altLine) {
-                    expected.push(getIndentationFromLine(altLine) + (indentSize * indents));
+                    expected.push(linesToCheck[altLine].indentation + (indentSize * indents));
                 });
             }
 
@@ -11523,13 +12046,41 @@ module.exports.prototype = {
                 markEndCheck(node);
             });
 
+            file.iterateNodesByType('ObjectExpression', function(node) {
+                if (!isMultiline(node)) {
+                    return;
+                }
+
+                var children = getChildren(node);
+
+                // only check objects that have children and that look like they are trying to adhere
+                // to an indentation strategy, i.e. objects that have curly braces on their own lines.
+                if (!children.length || node.loc.start.line === children[0].loc.start.line ||
+                    node.loc.end.line === children[children.length - 1].loc.end.line) {
+                    return;
+                }
+
+                markChildren(node);
+                markPop(node, 1);
+                markPush(node, 1);
+                markEndCheck(node);
+                markPushAlt(node);
+            });
+
             file.iterateNodesByType('IfStatement', function(node) {
-                markAlternateBlockStatement(node, 'alternate');
+                markKeyword(node.alternate);
             });
 
             file.iterateNodesByType('TryStatement', function(node) {
-                markAlternateBlockStatement(node, 'handler');
-                markAlternateBlockStatement(node, 'finalizer');
+                if (!isMultiline(node)) {
+                    return;
+                }
+
+                var handler = node.handlers && node.handlers.length ? node.handlers[0] : node.handler;
+                if (handler) {
+                    markCheck(handler);
+                }
+                markKeyword(node.finalizer);
             });
 
             file.iterateNodesByType('SwitchStatement', function(node) {
@@ -11576,12 +12127,43 @@ module.exports.prototype = {
             });
 
             if (_this._includeEmptyLines) {
-                file.getLines().forEach(function(line, i) {
-                    if (line.match(/^\s*$/)) {
-                        linesToCheck[i].check = true;
+                linesToCheck.forEach(function(line) {
+                    if (line.empty) {
+                        line.check = true;
                     }
                 });
             }
+
+            // starting from the bottom, which allows back to back comments to be checked, mark comments
+            file.getComments().concat().reverse().forEach(function(node) {
+                var startLine = node.loc.start.line;
+                var firstToken = file.getFirstTokenOnLine(startLine, {includeComments: true});
+
+                var nextToken = file.getNextToken(firstToken, {includeComments: true});
+                var nextStartLine = nextToken.loc.start.line;
+
+                var nextLine = linesToCheck[nextStartLine - 1];
+
+                // ignore if not the only token on the line, or not right above another checked line
+                if (firstToken !== node || startLine === nextStartLine || !nextLine.check) {
+                    return;
+                }
+
+                // ignore if next line is a case statement, which is kind of hacky, but avoids
+                // additional complexity for what qualifies as an outdent
+                if (nextToken && nextToken.type === 'Keyword' &&
+                    (nextToken.value === 'case' || nextToken.value === 'default')) {
+                    return;
+                }
+
+                // ignore if above a line that both introduces and ends an ident,
+                // which catches cases like a comment above an `else if`, but not nested ifs.
+                if (nextLine.push.length && nextLine.pop.length) {
+                    return;
+                }
+
+                markCheck(node);
+            });
         }
 
         var _this = this;
@@ -11591,14 +12173,15 @@ module.exports.prototype = {
         var indentChar = this._indentChar;
         var indentSize = this._indentSize;
 
-        var lines = file.getLinesWithCommentsRemoved(errors);
         var indentStack = [0];
-        var linesToCheck = lines.map(function() {
+        var linesToCheck = file.getLines().map(function(line) {
             return {
                 push: [],
                 pushAltLine: [],
                 pop: [],
-                check: false
+                check: false,
+                indentation: getIndentationFromLine(line),
+                empty: line.match(/^\s*$/)
             };
         });
 
@@ -11608,7 +12191,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":116,"assert":117}],109:[function(require,module,exports){
+},{"../utils":121,"assert":122}],114:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -11616,7 +12199,7 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(options) {
-        assert(typeof options === 'object', 'validateJSDoc option requires object value');
+        assert(typeof options === 'object', this.getOptionName() + ' option requires object value');
         this._options = options;
     },
 
@@ -11701,7 +12284,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],110:[function(require,module,exports){
+},{"assert":122}],115:[function(require,module,exports){
 /**
  * Option to check line break characters
  *
@@ -11737,7 +12320,7 @@ module.exports.prototype = {
     configure: function(options) {
         assert(
             typeof options === 'string' || typeof options === 'object',
-            'validateLineBreaks option requires string or object value'
+            this.getOptionName() + ' option requires string or object value'
         );
 
         if (typeof options === 'string') {
@@ -11764,20 +12347,17 @@ module.exports.prototype = {
             return;
         }
 
-        var lineBreaks = file.getSource().match(/\r\n|\r|\n/g);
-        for (var i = 0, len = lineBreaks.length; i < len; i++) {
-            if (lineBreaks[i] !== this._allowedLineBreak) {
+        file.getLineBreaks().some(function(lineBreak, i) {
+            if (lineBreak !== this._allowedLineBreak) {
                 errors.add('Invalid line break', i + 1, lines[i].length);
-                if (this._reportOncePerFile) {
-                    break;
-                }
+                return this._reportOncePerFile;
             }
-        }
+        }, this);
     }
 
 };
 
-},{"assert":117}],111:[function(require,module,exports){
+},{"assert":122}],116:[function(require,module,exports){
 /**
  * Enable validation of separators between function parameters. Will ignore newlines.
  *
@@ -11815,13 +12395,13 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(validateParameterSeparator) {
+    configure: function(options) {
         assert(
-            typeof validateParameterSeparator === 'string' && /^[ ]?,[ ]?$/.test(validateParameterSeparator),
-            'validateParameterSpacing option requires string value containing only a comma and optional spaces'
+            typeof options === 'string' && /^[ ]?,[ ]?$/.test(options),
+            this.getOptionName() + ' option requires string value containing only a comma and optional spaces'
         );
 
-        this._separator = validateParameterSeparator;
+        this._separator = options;
     },
 
     getOptionName: function() {
@@ -11844,10 +12424,10 @@ module.exports.prototype = {
                 if (punctuatorToken.value === ',') {
 
                     if (whitespaceBeforeComma) {
-                        errors.assert.whitespaceBetween({
+                        errors.assert.spacesBetween({
                             token: prevParamToken,
                             nextToken: punctuatorToken,
-                            spaces: 1,
+                            exactly: 1,
                             message: 'One space required after function parameter \'' + prevParamToken.value + '\''
                         });
                     } else {
@@ -11861,10 +12441,10 @@ module.exports.prototype = {
                     var nextParamToken = file.getNextToken(punctuatorToken);
 
                     if (whitespaceAfterComma) {
-                        errors.assert.whitespaceBetween({
+                        errors.assert.spacesBetween({
                             token: punctuatorToken,
                             nextToken: nextParamToken,
-                            spaces: 1,
+                            exactly: 1,
                             message: 'One space required before function parameter \'' + nextParamToken.value + '\''
                         });
                     } else {
@@ -11881,11 +12461,11 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],112:[function(require,module,exports){
+},{"assert":122}],117:[function(require,module,exports){
 /**
  * Requires all quote marks to be either the supplied value, or consistent if `true`
  *
- * Type: `String` or `Object`
+ * Types: `Boolean`, `String` or `Object`
  *
  * Values:
  *  - `"\""`: all strings require double quotes
@@ -11950,7 +12530,7 @@ module.exports.prototype = {
         if (typeof quoteMark === 'object') {
             assert(
                 typeof quoteMark.escape === 'boolean' && quoteMark.mark !== undefined,
-                'validateQuoteMarks option requires the "escape" and "mark" property to be defined'
+                this.getOptionName() + ' option requires the "escape" and "mark" property to be defined'
             );
             this._allowEscape = quoteMark.escape;
             quoteMark = quoteMark.mark;
@@ -11958,7 +12538,7 @@ module.exports.prototype = {
 
         assert(
             quoteMark === '"' || quoteMark === '\'' || quoteMark === true,
-            'validateQuoteMarks option requires \'"\', "\'", or boolean true'
+            this.getOptionName() + ' option requires \'"\', "\'", or boolean true'
         );
 
         this._quoteMark = quoteMark;
@@ -12001,7 +12581,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":117}],113:[function(require,module,exports){
+},{"assert":122}],118:[function(require,module,exports){
 var defaultEsprima = require('esprima');
 var harmonyEsprima = require('esprima-harmony-jscs');
 var Errors = require('./errors');
@@ -12290,7 +12870,7 @@ StringChecker.prototype = {
 
 module.exports = StringChecker;
 
-},{"./config/configuration":1,"./errors":2,"./js-file":3,"esprima":136,"esprima-harmony-jscs":135}],114:[function(require,module,exports){
+},{"./config/configuration":1,"./errors":2,"./js-file":3,"esprima":136,"esprima-harmony-jscs":135}],119:[function(require,module,exports){
 var utils = require('util');
 var EventEmitter = require('events').EventEmitter;
 
@@ -12317,33 +12897,8 @@ utils.inherits(TokenAssert, EventEmitter);
  * @param {Number} [options.spaces] Amount of spaces between tokens.
  */
 TokenAssert.prototype.whitespaceBetween = function(options) {
-    var token = options.token;
-    var nextToken = options.nextToken;
-    if (options.hasOwnProperty('spaces')) {
-        var spaces = options.spaces;
-        if (nextToken.loc.start.line === token.loc.end.line &&
-            (nextToken.loc.start.column - token.loc.end.column) !== spaces
-        ) {
-            nextToken.whitespaceBefore = new Array(spaces + 1).join(' ');
-            this.emit('error', {
-                message: options.message ||
-                    spaces + ' spaces required between ' + token.value + ' and ' + nextToken.value,
-                line: token.loc.end.line,
-                column: token.loc.end.column,
-                fixed: true
-            });
-        }
-    } else {
-        if (nextToken.range[0] === token.range[1]) {
-            nextToken.whitespaceBefore = ' ';
-            this.emit('error', {
-                message: options.message || 'Missing space between ' + token.value + ' and ' + nextToken.value,
-                line: token.loc.end.line,
-                column: token.loc.end.column,
-                fixed: true
-            });
-        }
-    }
+    options.atLeast = 1;
+    this.spacesBetween(options);
 };
 
 /**
@@ -12355,19 +12910,192 @@ TokenAssert.prototype.whitespaceBetween = function(options) {
  * @param {Boolean} [options.disallowNewLine=false]
  */
 TokenAssert.prototype.noWhitespaceBetween = function(options) {
+    options.exactly = 0;
+    this.spacesBetween(options);
+};
+
+/**
+ * Requires to have the whitespace between specified tokens with the provided options.
+ *
+ * @param {Object} options.token
+ * @param {Object} options.nextToken
+ * @param {String} [options.message]
+ * @param {Object} [options.atLeast] At least how many spaces the tokens are apart
+ * @param {Object} [options.atMost] At most how many spaces the tokens are apart
+ * @param {Object} [options.exactly] Exactly how many spaces the tokens are apart
+ * @param {Boolean} [options.disallowNewLine=false]
+ */
+TokenAssert.prototype.spacesBetween = function(options) {
     var token = options.token;
     var nextToken = options.nextToken;
-    if (nextToken.range[0] !== token.range[1] &&
-        (options.disallowNewLine || token.loc.end.line === nextToken.loc.start.line)
-    ) {
-        nextToken.whitespaceBefore = '';
+    var atLeast = options.atLeast;
+    var atMost = options.atMost;
+    var exactly = options.exactly;
+
+    if (!token || !nextToken) {
+        return;
+    }
+
+    this._validateOptions(options);
+
+    if (!options.disallowNewLine && token.loc.end.line !== nextToken.loc.start.line) {
+        return;
+    }
+
+    // Only attempt to remove or add lines if there are no comments between the two nodes
+    // as this prevents accidentally moving a valid token onto a line comment ed line
+    var fixed = this._file.getNextToken(options.token, {includeComments: true}) === nextToken;
+
+    var emitError = function(countPrefix, spaceCount) {
+        if (fixed) {
+            nextToken.whitespaceBefore = new Array(spaceCount + 1).join(' ');
+        }
+
+        var msgPostfix = token.value + ' and ' + nextToken.value;
+
+        if (!options.message) {
+            if (exactly === 0) {
+                // support noWhitespaceBetween
+                options.message = 'Unexpected whitespace between ' + msgPostfix;
+            } else if (exactly !== undefined) {
+                // support whitespaceBetween (spaces option)
+                options.message = spaceCount + ' spaces required between ' + msgPostfix;
+            } else if (atLeast === 1 && atMost === undefined) {
+                // support whitespaceBetween (no spaces option)
+                options.message = 'Missing space between ' + msgPostfix;
+            } else {
+                options.message = countPrefix + ' ' + spaceCount + ' spaces required between ' + msgPostfix;
+            }
+        }
+
         this.emit('error', {
-            message: options.message || 'Unexpected whitespace between ' + token.value + ' and ' + nextToken.value,
+            message: options.message,
             line: token.loc.end.line,
             column: token.loc.end.column,
+            fixed: fixed
+        });
+    }.bind(this);
+
+    var spacesBetween = Math.abs(nextToken.range[0] - token.range[1]);
+    if (atLeast !== undefined && spacesBetween < atLeast) {
+        emitError('at least', atLeast);
+    } else if (atMost !== undefined && spacesBetween > atMost) {
+        emitError('at most', atMost);
+    } else if (exactly !== undefined && spacesBetween !== exactly) {
+        emitError('exactly', exactly);
+    }
+};
+
+/**
+ * Requires the specified line to have the expected indentation.
+ *
+ * @param {Number} options.lineNumber
+ * @param {Number} options.actual
+ * @param {Number} options.expected
+ * @param {String} options.indentChar
+ * @param {Boolean} [options.silent] if true, will suppress error emission but still fix whitespace
+ */
+TokenAssert.prototype.indentation = function(options) {
+    var lineNumber = options.lineNumber;
+    var actual = options.actual;
+    var expected = options.expected;
+    var indentChar = options.indentChar;
+
+    if (actual === expected) {
+        return;
+    }
+
+    if (!options.silent) {
+        this.emit('error', {
+            message: 'Expected indentation of ' + expected + ' characters',
+            line: lineNumber,
+            column: expected,
             fixed: true
         });
     }
+
+    var token = this._file.getFirstTokenOnLine(lineNumber, {includeComments: true});
+    var newWhitespace = (new Array(expected + 1)).join(indentChar);
+
+    if (!token) {
+        this._setEmptyLineIndentation(lineNumber, newWhitespace);
+        return;
+    }
+
+    this._updateWhitespaceByLine(token, function(lines) {
+        lines[lines.length - 1] = newWhitespace;
+
+        return lines;
+    });
+
+    if (token.isComment) {
+        this._updateCommentWhitespace(token, indentChar, actual, expected);
+    }
+};
+
+/**
+ * Updates the whitespace of a line by passing split lines to a callback function
+ * for editing.
+ *
+ * @param  {Number} lineNumber
+ * @param  {Function} callback
+ */
+TokenAssert.prototype._updateWhitespaceByLine = function(token, callback) {
+    var lineBreak = this._file.getLineBreakStyle();
+    var lines = token.whitespaceBefore.split(/\r\n|\r|\n/);
+
+    lines = callback(lines);
+    token.whitespaceBefore = lines.join(lineBreak);
+};
+
+/**
+ * Updates the whitespace of a line by passing split lines to a callback function
+ * for editing.
+ *
+ * @param  {Number} lineNumber
+ * @param  {Function} callback
+ */
+TokenAssert.prototype._updateCommentWhitespace = function(token, indentChar, actual, expected) {
+    var difference = expected - actual;
+    var tokenLines = token.value.split(/\r\n|\r|\n/);
+    var i = 1;
+    if (difference >= 0) {
+        var lineWhitespace = (new Array(difference + 1)).join(indentChar);
+        for (; i < tokenLines.length; i++) {
+            tokenLines[i] = tokenLines[i] === '' ? '' : lineWhitespace + tokenLines[i];
+        }
+    } else {
+        for (; i < tokenLines.length; i++) {
+            tokenLines[i] = tokenLines[i].substring(-difference);
+        }
+    }
+
+    token.value = tokenLines.join(this._file.getLineBreakStyle());
+};
+
+/**
+ * Fixes the indentation of a line that has no tokens on it
+ *
+ * @param  {Number} lineNumber
+ * @param  {String} newWhitespace
+ */
+TokenAssert.prototype._setEmptyLineIndentation = function(lineNumber, newWhitespace) {
+    var token;
+    do {
+        token = this._file.getFirstTokenOnLine(++lineNumber, {includeComments: true});
+    } while (!token);
+
+    this._updateWhitespaceByLine(token, function(lines) {
+        if (lines[0] !== '') {
+            lines[0] = newWhitespace;
+        }
+
+        for (var i = 1; i < lines.length; i++) {
+            lines[i] = newWhitespace;
+        }
+
+        return lines;
+    });
 };
 
 /**
@@ -12405,45 +13133,28 @@ TokenAssert.prototype.differentLine = function(options) {
  * @param {Object} [options.message]
  * @param {Object} [options.atLeast] At least how many lines the tokens are apart
  * @param {Object} [options.atMost] At most how many lines the tokens are apart
- * @param {object} [options.exactly] Exactly how many lines the tokens are apart
+ * @param {Object} [options.exactly] Exactly how many lines the tokens are apart
  */
 TokenAssert.prototype.linesBetween = function(options) {
     var token = options.token;
     var nextToken = options.nextToken;
+    var atLeast = options.atLeast;
+    var atMost = options.atMost;
+    var exactly = options.exactly;
 
     if (!token || !nextToken) {
         return;
     }
 
-    if (token === nextToken) {
-        throw new Error('You cannot specify the same token as both token and nextToken');
-    }
-
-    var atLeast = options.atLeast;
-    var atMost = options.atMost;
-    var exactly = options.exactly;
+    this._validateOptions(options);
 
     // Only attempt to remove or add lines if there are no comments between the two nodes
     // as this prevents accidentally moving a valid token onto a line comment ed line
     var fixed = this._file.getNextToken(options.token, {includeComments: true}) === nextToken;
 
-    if (atLeast === undefined &&
-        atMost === undefined &&
-        exactly === undefined) {
-        throw new Error('You must specify at least one option');
-    }
-
-    if (exactly !== undefined && (atLeast !== undefined || atMost !== undefined)) {
-        throw new Error('You cannot specify atLeast or atMost with exactly');
-    }
-
-    if (atLeast !== undefined && atMost !== undefined && atMost < atLeast) {
-        throw new Error('atLeast and atMost are in conflict');
-    }
-
     var linesBetween = Math.abs(token.loc.end.line - nextToken.loc.start.line);
 
-    var emitError = (function(countPrefix, lineCount) {
+    var emitError = function(countPrefix, lineCount) {
         var msgPrefix = token.value + ' and ' + nextToken.value;
 
         if (!options.message) {
@@ -12460,7 +13171,7 @@ TokenAssert.prototype.linesBetween = function(options) {
         }
 
         if (fixed) {
-            nextToken.whitespaceBefore = lineCount ? new Array(lineCount + 1).join('\n') : ' ';
+            this._augmentLineCount(nextToken, lineCount);
         }
 
         this.emit('error', {
@@ -12469,7 +13180,7 @@ TokenAssert.prototype.linesBetween = function(options) {
             column: token.loc.end.column,
             fixed: fixed
         });
-    }).bind(this);
+    }.bind(this);
 
     if (atLeast !== undefined && linesBetween < atLeast) {
         emitError('at least', atLeast);
@@ -12478,6 +13189,74 @@ TokenAssert.prototype.linesBetween = function(options) {
     } else if (exactly !== undefined && linesBetween !== exactly) {
         emitError('exactly', exactly);
     }
+};
+
+/**
+ * Throws errors if atLeast, atMost, and exactly options don't mix together properly or
+ * if the tokens provided are equivalent.
+ *
+ * @param {Object} options.token
+ * @param {Object} options.nextToken
+ * @param {Object} [options.atLeast] At least how many spaces the tokens are apart
+ * @param {Object} [options.atMost] At most how many spaces the tokens are apart
+ * @param {Object} [options.exactly] Exactly how many spaces the tokens are apart
+ * @throws {Error} If the options are non-sensical
+ */
+TokenAssert.prototype._validateOptions = function(options) {
+    var token = options.token;
+    var nextToken = options.nextToken;
+    var atLeast = options.atLeast;
+    var atMost = options.atMost;
+    var exactly = options.exactly;
+
+    if (token === nextToken) {
+        throw new Error('You cannot specify the same token as both token and nextToken');
+    }
+
+    if (atLeast === undefined &&
+        atMost === undefined &&
+        exactly === undefined) {
+        throw new Error('You must specify at least one option');
+    }
+
+    if (exactly !== undefined && (atLeast !== undefined || atMost !== undefined)) {
+        throw new Error('You cannot specify atLeast or atMost with exactly');
+    }
+
+    if (atLeast !== undefined && atMost !== undefined && atMost < atLeast) {
+        throw new Error('atLeast and atMost are in conflict');
+    }
+};
+
+/**
+ * Augments token whitespace to contain the correct number of newlines while preserving indentation
+ *
+ * @param {Object} token
+ * @param {Number} lineCount
+ */
+TokenAssert.prototype._augmentLineCount = function(token, lineCount) {
+    if (lineCount === 0) {
+        token.whitespaceBefore = ' ';
+        return;
+    }
+
+    this._updateWhitespaceByLine(token, function(lines) {
+        var currentLineCount = lines.length;
+        var lastLine = lines[lines.length - 1];
+
+        if (currentLineCount <= lineCount) {
+            // add additional lines that maintain the same indentation as the former last line
+            for (; currentLineCount <= lineCount; currentLineCount++) {
+                lines[lines.length - 1] = '';
+                lines.push(lastLine);
+            }
+        } else {
+            // remove lines and then ensure that the new last line maintains the previous indentation
+            lines = lines.slice(0, lineCount + 1);
+            lines[lines.length - 1] = lastLine;
+        }
+        return lines;
+    });
 };
 
 /**
@@ -12546,7 +13325,7 @@ TokenAssert.prototype.noTokenBefore = function(options) {
 
 module.exports = TokenAssert;
 
-},{"events":118,"util":123}],115:[function(require,module,exports){
+},{"events":123,"util":128}],120:[function(require,module,exports){
 var estraverse = require('estraverse');
 
 module.exports = {
@@ -12581,6 +13360,17 @@ function iterate(node, cb) {
                 }
             },
             keys: {
+                JSXIdentifier: [],
+                JSXNamespacedName: ['namespace', 'name'],
+                JSXMemberExpression: ['object', 'property'],
+                JSXEmptyExpression: [],
+                JSXExpressionContainer: ['expression'],
+                JSXElement: ['openingElement', 'closingElement', 'children'],
+                JSXClosingElement: ['name'],
+                JSXOpeningElement: ['name', 'attributes'],
+                JSXAttribute: ['name', 'value'],
+                JSXSpreadAttribute: ['argument'],
+                JSXText: null,
                 XJSIdentifier: [],
                 XJSNamespacedName: ['namespace', 'name'],
                 XJSMemberExpression: ['object', 'property'],
@@ -12597,7 +13387,7 @@ function iterate(node, cb) {
     }
 }
 
-},{"estraverse":137}],116:[function(require,module,exports){
+},{"estraverse":137}],121:[function(require,module,exports){
 var path = require('path');
 var Vow = require('vow');
 
@@ -12878,7 +13668,7 @@ exports.unaryOperators = ['-', '+', '!', '~'].concat(exports.incrementAndDecreme
  */
 exports.operators = exports.binaryOperators.concat(exports.unaryOperators);
 
-},{"path":120,"vow":142}],117:[function(require,module,exports){
+},{"path":125,"vow":144}],122:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -13239,7 +14029,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":123}],118:[function(require,module,exports){
+},{"util/":128}],123:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13542,7 +14332,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],119:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -13567,7 +14357,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],120:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13795,7 +14585,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":121}],121:[function(require,module,exports){
+},{"_process":126}],126:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -13832,6 +14622,7 @@ process.browser = true;
 process.env = {};
 process.argv = [];
 process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
 
 function noop() {}
 
@@ -13854,14 +14645,14 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],122:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],123:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -14451,654 +15242,243 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":122,"_process":121,"inherits":119}],124:[function(require,module,exports){
-/*
-
-The MIT License (MIT)
-
-Original Library 
-  - Copyright (c) Marak Squires
-
-Additional functionality
- - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-*/
-
-var colors = {};
-module['exports'] = colors;
-
-colors.themes = {};
-
-var ansiStyles = colors.styles = require('./styles');
+},{"./support/isBuffer":127,"_process":126,"inherits":124}],129:[function(require,module,exports){
+(function (process){
+'use strict';
+var escapeStringRegexp = require('escape-string-regexp');
+var ansiStyles = require('ansi-styles');
+var stripAnsi = require('strip-ansi');
+var hasAnsi = require('has-ansi');
+var supportsColor = require('supports-color');
 var defineProps = Object.defineProperties;
 
-colors.supportsColor = require('./system/supports-colors');
-
-if (typeof colors.enabled === "undefined") {
-  colors.enabled = colors.supportsColor;
+function Chalk(options) {
+	// detect mode if not set manually
+	this.enabled = !options || options.enabled === undefined ? supportsColor : options.enabled;
 }
 
-colors.stripColors = colors.strip = function(str){
-  return ("" + str).replace(/\x1B\[\d+m/g, '');
-};
-
-
-var stylize = colors.stylize = function stylize (str, style) {
-  return ansiStyles[style].open + str + ansiStyles[style].close;
-}
-
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-var escapeStringRegexp = function (str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('Expected a string');
-  }
-  return str.replace(matchOperatorsRe,  '\\$&');
+// use bright blue on Windows as the normal blue color is illegible
+if (process.platform === 'win32') {
+	ansiStyles.blue.open = '\u001b[94m';
 }
 
 function build(_styles) {
-  var builder = function builder() {
-    return applyStyle.apply(builder, arguments);
-  };
-  builder._styles = _styles;
-  // __proto__ is used because we must return a function, but there is
-  // no way to create a function with a different prototype.
-  builder.__proto__ = proto;
-  return builder;
+	var builder = function builder() {
+		return applyStyle.apply(builder, arguments);
+	};
+	builder._styles = _styles;
+	builder.enabled = this.enabled;
+	// __proto__ is used because we must return a function, but there is
+	// no way to create a function with a different prototype.
+	builder.__proto__ = proto;
+	return builder;
 }
 
 var styles = (function () {
-  var ret = {};
-  ansiStyles.grey = ansiStyles.gray;
-  Object.keys(ansiStyles).forEach(function (key) {
-    ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
-    ret[key] = {
-      get: function () {
-        return build(this._styles.concat(key));
-      }
-    };
-  });
-  return ret;
+	var ret = {};
+
+	Object.keys(ansiStyles).forEach(function (key) {
+		ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
+
+		ret[key] = {
+			get: function () {
+				return build.call(this, this._styles.concat(key));
+			}
+		};
+	});
+
+	return ret;
 })();
 
-var proto = defineProps(function colors() {}, styles);
+var proto = defineProps(function chalk() {}, styles);
 
 function applyStyle() {
-  var args = arguments;
-  var argsLen = args.length;
-  var str = argsLen !== 0 && String(arguments[0]);
-  if (argsLen > 1) {
-    for (var a = 1; a < argsLen; a++) {
-      str += ' ' + args[a];
-    }
-  }
+	// support varags, but simply cast to string in case there's only one arg
+	var args = arguments;
+	var argsLen = args.length;
+	var str = argsLen !== 0 && String(arguments[0]);
+	if (argsLen > 1) {
+		// don't slice `arguments`, it prevents v8 optimizations
+		for (var a = 1; a < argsLen; a++) {
+			str += ' ' + args[a];
+		}
+	}
 
-  if (!colors.enabled || !str) {
-    return str;
-  }
+	if (!this.enabled || !str) {
+		return str;
+	}
 
-  var nestedStyles = this._styles;
+	/*jshint validthis: true */
+	var nestedStyles = this._styles;
 
-  var i = nestedStyles.length;
-  while (i--) {
-    var code = ansiStyles[nestedStyles[i]];
-    str = code.open + str.replace(code.closeRe, code.open) + code.close;
-  }
+	var i = nestedStyles.length;
+	while (i--) {
+		var code = ansiStyles[nestedStyles[i]];
+		// Replace any instances already present with a re-opening code
+		// otherwise only the part of the string until said closing code
+		// will be colored, and the rest will simply be 'plain'.
+		str = code.open + str.replace(code.closeRe, code.open) + code.close;
+	}
 
-  return str;
+	return str;
 }
-
-function applyTheme (theme) {
-  for (var style in theme) {
-    (function(style){
-      colors[style] = function(str){
-        return colors[theme[style]](str);
-      };
-    })(style)
-  }
-}
-
-colors.setTheme = function (theme) {
-  if (typeof theme === 'string') {
-    try {
-      colors.themes[theme] = require(theme);
-      applyTheme(colors.themes[theme]);
-      return colors.themes[theme];
-    } catch (err) {
-      console.log(err);
-      return err;
-    }
-  } else {
-    applyTheme(theme);
-  }
-};
 
 function init() {
-  var ret = {};
-  Object.keys(styles).forEach(function (name) {
-    ret[name] = {
-      get: function () {
-        return build([name]);
-      }
-    };
-  });
-  return ret;
+	var ret = {};
+
+	Object.keys(styles).forEach(function (name) {
+		ret[name] = {
+			get: function () {
+				return build.call(this, [name]);
+			}
+		};
+	});
+
+	return ret;
 }
 
-var sequencer = function sequencer (map, str) {
-  var exploded = str.split(""), i = 0;
-  exploded = exploded.map(map);
-  return exploded.join("");
+defineProps(Chalk.prototype, init());
+
+module.exports = new Chalk();
+module.exports.styles = ansiStyles;
+module.exports.hasColor = hasAnsi;
+module.exports.stripColor = stripAnsi;
+module.exports.supportsColor = supportsColor;
+
+}).call(this,require('_process'))
+},{"_process":126,"ansi-styles":130,"escape-string-regexp":131,"has-ansi":138,"strip-ansi":132,"supports-color":134}],130:[function(require,module,exports){
+'use strict';
+
+var styles = module.exports = {
+	modifiers: {
+		reset: [0, 0],
+		bold: [1, 22], // 21 isn't widely supported and 22 does the same thing
+		dim: [2, 22],
+		italic: [3, 23],
+		underline: [4, 24],
+		inverse: [7, 27],
+		hidden: [8, 28],
+		strikethrough: [9, 29]
+	},
+	colors: {
+		black: [30, 39],
+		red: [31, 39],
+		green: [32, 39],
+		yellow: [33, 39],
+		blue: [34, 39],
+		magenta: [35, 39],
+		cyan: [36, 39],
+		white: [37, 39],
+		gray: [90, 39]
+	},
+	bgColors: {
+		bgBlack: [40, 49],
+		bgRed: [41, 49],
+		bgGreen: [42, 49],
+		bgYellow: [43, 49],
+		bgBlue: [44, 49],
+		bgMagenta: [45, 49],
+		bgCyan: [46, 49],
+		bgWhite: [47, 49]
+	}
 };
 
-// custom formatter methods
-colors.trap = require('./custom/trap');
-colors.zalgo = require('./custom/zalgo');
+// fix humans
+styles.colors.grey = styles.colors.gray;
 
-// maps
-colors.maps = {};
-colors.maps.america = require('./maps/america');
-colors.maps.zebra = require('./maps/zebra');
-colors.maps.rainbow = require('./maps/rainbow');
-colors.maps.random = require('./maps/random')
+Object.keys(styles).forEach(function (groupName) {
+	var group = styles[groupName];
 
-for (var map in colors.maps) {
-  (function(map){
-    colors[map] = function (str) {
-      return sequencer(colors.maps[map], str);
-    }
-  })(map)
-}
+	Object.keys(group).forEach(function (styleName) {
+		var style = group[styleName];
 
-defineProps(colors, init());
-},{"./custom/trap":125,"./custom/zalgo":126,"./maps/america":129,"./maps/rainbow":130,"./maps/random":131,"./maps/zebra":132,"./styles":133,"./system/supports-colors":134}],125:[function(require,module,exports){
-module['exports'] = function runTheTrap (text, options) {
-  var result = "";
-  text = text || "Run the trap, drop the bass";
-  text = text.split('');
-  var trap = {
-    a: ["\u0040", "\u0104", "\u023a", "\u0245", "\u0394", "\u039b", "\u0414"],
-    b: ["\u00df", "\u0181", "\u0243", "\u026e", "\u03b2", "\u0e3f"],
-    c: ["\u00a9", "\u023b", "\u03fe"],
-    d: ["\u00d0", "\u018a", "\u0500" , "\u0501" ,"\u0502", "\u0503"],
-    e: ["\u00cb", "\u0115", "\u018e", "\u0258", "\u03a3", "\u03be", "\u04bc", "\u0a6c"],
-    f: ["\u04fa"],
-    g: ["\u0262"],
-    h: ["\u0126", "\u0195", "\u04a2", "\u04ba", "\u04c7", "\u050a"],
-    i: ["\u0f0f"],
-    j: ["\u0134"],
-    k: ["\u0138", "\u04a0", "\u04c3", "\u051e"],
-    l: ["\u0139"],
-    m: ["\u028d", "\u04cd", "\u04ce", "\u0520", "\u0521", "\u0d69"],
-    n: ["\u00d1", "\u014b", "\u019d", "\u0376", "\u03a0", "\u048a"],
-    o: ["\u00d8", "\u00f5", "\u00f8", "\u01fe", "\u0298", "\u047a", "\u05dd", "\u06dd", "\u0e4f"],
-    p: ["\u01f7", "\u048e"],
-    q: ["\u09cd"],
-    r: ["\u00ae", "\u01a6", "\u0210", "\u024c", "\u0280", "\u042f"],
-    s: ["\u00a7", "\u03de", "\u03df", "\u03e8"],
-    t: ["\u0141", "\u0166", "\u0373"],
-    u: ["\u01b1", "\u054d"],
-    v: ["\u05d8"],
-    w: ["\u0428", "\u0460", "\u047c", "\u0d70"],
-    x: ["\u04b2", "\u04fe", "\u04fc", "\u04fd"],
-    y: ["\u00a5", "\u04b0", "\u04cb"],
-    z: ["\u01b5", "\u0240"]
-  }
-  text.forEach(function(c){
-    c = c.toLowerCase();
-    var chars = trap[c] || [" "];
-    var rand = Math.floor(Math.random() * chars.length);
-    if (typeof trap[c] !== "undefined") {
-      result += trap[c][rand];
-    } else {
-      result += c;
-    }
-  });
-  return result;
+		styles[styleName] = group[styleName] = {
+			open: '\u001b[' + style[0] + 'm',
+			close: '\u001b[' + style[1] + 'm'
+		};
+	});
 
-}
-
-},{}],126:[function(require,module,exports){
-// please no
-module['exports'] = function zalgo(text, options) {
-  text = text || "   he is here   ";
-  var soul = {
-    "up" : [
-      '̍', '̎', '̄', '̅',
-      '̿', '̑', '̆', '̐',
-      '͒', '͗', '͑', '̇',
-      '̈', '̊', '͂', '̓',
-      '̈', '͊', '͋', '͌',
-      '̃', '̂', '̌', '͐',
-      '̀', '́', '̋', '̏',
-      '̒', '̓', '̔', '̽',
-      '̉', 'ͣ', 'ͤ', 'ͥ',
-      'ͦ', 'ͧ', 'ͨ', 'ͩ',
-      'ͪ', 'ͫ', 'ͬ', 'ͭ',
-      'ͮ', 'ͯ', '̾', '͛',
-      '͆', '̚'
-    ],
-    "down" : [
-      '̖', '̗', '̘', '̙',
-      '̜', '̝', '̞', '̟',
-      '̠', '̤', '̥', '̦',
-      '̩', '̪', '̫', '̬',
-      '̭', '̮', '̯', '̰',
-      '̱', '̲', '̳', '̹',
-      '̺', '̻', '̼', 'ͅ',
-      '͇', '͈', '͉', '͍',
-      '͎', '͓', '͔', '͕',
-      '͖', '͙', '͚', '̣'
-    ],
-    "mid" : [
-      '̕', '̛', '̀', '́',
-      '͘', '̡', '̢', '̧',
-      '̨', '̴', '̵', '̶',
-      '͜', '͝', '͞',
-      '͟', '͠', '͢', '̸',
-      '̷', '͡', ' ҉'
-    ]
-  },
-  all = [].concat(soul.up, soul.down, soul.mid),
-  zalgo = {};
-
-  function randomNumber(range) {
-    var r = Math.floor(Math.random() * range);
-    return r;
-  }
-
-  function is_char(character) {
-    var bool = false;
-    all.filter(function (i) {
-      bool = (i === character);
-    });
-    return bool;
-  }
-  
-
-  function heComes(text, options) {
-    var result = '', counts, l;
-    options = options || {};
-    options["up"] = options["up"] || true;
-    options["mid"] = options["mid"] || true;
-    options["down"] = options["down"] || true;
-    options["size"] = options["size"] || "maxi";
-    text = text.split('');
-    for (l in text) {
-      if (is_char(l)) {
-        continue;
-      }
-      result = result + text[l];
-      counts = {"up" : 0, "down" : 0, "mid" : 0};
-      switch (options.size) {
-      case 'mini':
-        counts.up = randomNumber(8);
-        counts.min = randomNumber(2);
-        counts.down = randomNumber(8);
-        break;
-      case 'maxi':
-        counts.up = randomNumber(16) + 3;
-        counts.min = randomNumber(4) + 1;
-        counts.down = randomNumber(64) + 3;
-        break;
-      default:
-        counts.up = randomNumber(8) + 1;
-        counts.mid = randomNumber(6) / 2;
-        counts.down = randomNumber(8) + 1;
-        break;
-      }
-
-      var arr = ["up", "mid", "down"];
-      for (var d in arr) {
-        var index = arr[d];
-        for (var i = 0 ; i <= counts[index]; i++) {
-          if (options[index]) {
-            result = result + soul[index][randomNumber(soul[index].length)];
-          }
-        }
-      }
-    }
-    return result;
-  }
-  // don't summon him
-  return heComes(text);
-}
-
-},{}],127:[function(require,module,exports){
-var colors = require('./colors'),
-    styles = require('./styles');
-
-module['exports'] = function () {
-
-  //
-  // Extends prototype of native string object to allow for "foo".red syntax
-  //
-  var addProperty = function (color, func) {
-    String.prototype.__defineGetter__(color, func);
-  };
-
-  var sequencer = function sequencer (map, str) {
-      return function () {
-        var exploded = this.split(""), i = 0;
-        exploded = exploded.map(map);
-        return exploded.join("");
-      }
-  };
-
-  var stylize = function stylize (str, style) {
-    return styles[style].open + str + styles[style].close;
-  }
-
-  addProperty('strip', function () {
-    return colors.strip(this);
-  });
-
-  addProperty('stripColors', function () {
-    return colors.strip(this);
-  });
-
-  addProperty("trap", function(){
-    return colors.trap(this);
-  });
-
-  addProperty("zalgo", function(){
-    return colors.zalgo(this);
-  });
-
-  addProperty("zebra", function(){
-    return colors.zebra(this);
-  });
-
-  addProperty("rainbow", function(){
-    return colors.rainbow(this);
-  });
-
-  addProperty("random", function(){
-    return colors.random(this);
-  });
-
-  addProperty("america", function(){
-    return colors.america(this);
-  });
-
-  //
-  // Iterate through all default styles and colors
-  //
-  var x = Object.keys(colors.styles);
-  x.forEach(function (style) {
-    addProperty(style, function () {
-      return stylize(this, style);
-    });
-  });
-
-  function applyTheme(theme) {
-    //
-    // Remark: This is a list of methods that exist
-    // on String that you should not overwrite.
-    //
-    var stringPrototypeBlacklist = [
-      '__defineGetter__', '__defineSetter__', '__lookupGetter__', '__lookupSetter__', 'charAt', 'constructor',
-      'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf', 'charCodeAt',
-      'indexOf', 'lastIndexof', 'length', 'localeCompare', 'match', 'replace', 'search', 'slice', 'split', 'substring',
-      'toLocaleLowerCase', 'toLocaleUpperCase', 'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight'
-    ];
-
-    Object.keys(theme).forEach(function (prop) {
-      if (stringPrototypeBlacklist.indexOf(prop) !== -1) {
-        console.log('warn: '.red + ('String.prototype' + prop).magenta + ' is probably something you don\'t want to override. Ignoring style name');
-      }
-      else {
-        if (typeof(theme[prop]) === 'string') {
-          colors[prop] = colors[theme[prop]];
-          addProperty(prop, function () {
-            return colors[theme[prop]](this);
-          });
-        }
-        else {
-          addProperty(prop, function () {
-            var ret = this;
-            for (var t = 0; t < theme[prop].length; t++) {
-              ret = exports[theme[prop][t]](ret);
-            }
-            return ret;
-          });
-        }
-      }
-    });
-  }
-
-  colors.setTheme = function (theme) {
-    if (typeof theme === 'string') {
-      try {
-        colors.themes[theme] = require(theme);
-        applyTheme(colors.themes[theme]);
-        return colors.themes[theme];
-      } catch (err) {
-        console.log(err);
-        return err;
-      }
-    } else {
-      applyTheme(theme);
-    }
-  };
-
-};
-},{"./colors":124,"./styles":133}],128:[function(require,module,exports){
-var colors = require('./colors');
-module['exports'] = colors;
-
-// Remark: By default, colors will add style properties to String.prototype
-//
-// If you don't wish to extend String.prototype you can do this instead and native String will not be touched
-//
-//   var colors = require('colors/safe);
-//   colors.red("foo")
-//
-//
-var extendStringPrototype = require('./extendStringPrototype')();
-},{"./colors":124,"./extendStringPrototype":127}],129:[function(require,module,exports){
-var colors = require('../colors');
-
-module['exports'] = (function() {
-  return function (letter, i, exploded) {
-    if(letter === " ") return letter;
-    switch(i%3) {
-      case 0: return colors.red(letter);
-      case 1: return colors.white(letter)
-      case 2: return colors.blue(letter)
-    }
-  }
-})();
-},{"../colors":124}],130:[function(require,module,exports){
-var colors = require('../colors');
-
-module['exports'] = (function () {
-  var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta']; //RoY G BiV
-  return function (letter, i, exploded) {
-    if (letter === " ") {
-      return letter;
-    } else {
-      return colors[rainbowColors[i++ % rainbowColors.length]](letter);
-    }
-  };
-})();
-
-
-},{"../colors":124}],131:[function(require,module,exports){
-var colors = require('../colors');
-
-module['exports'] = (function () {
-  var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green', 'blue', 'white', 'cyan', 'magenta'];
-  return function(letter, i, exploded) {
-    return letter === " " ? letter : colors[available[Math.round(Math.random() * (available.length - 1))]](letter);
-  };
-})();
-},{"../colors":124}],132:[function(require,module,exports){
-var colors = require('../colors');
-
-module['exports'] = function (letter, i, exploded) {
-  return i % 2 === 0 ? letter : colors.inverse(letter);
-};
-},{"../colors":124}],133:[function(require,module,exports){
-/*
-The MIT License (MIT)
-
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-*/
-
-var styles = {};
-module['exports'] = styles;
-
-var codes = {
-  reset: [0, 0],
-
-  bold: [1, 22],
-  dim: [2, 22],
-  italic: [3, 23],
-  underline: [4, 24],
-  inverse: [7, 27],
-  hidden: [8, 28],
-  strikethrough: [9, 29],
-
-  black: [30, 39],
-  red: [31, 39],
-  green: [32, 39],
-  yellow: [33, 39],
-  blue: [34, 39],
-  magenta: [35, 39],
-  cyan: [36, 39],
-  white: [37, 39],
-  gray: [90, 39],
-  grey: [90, 39],
-
-  bgBlack: [40, 49],
-  bgRed: [41, 49],
-  bgGreen: [42, 49],
-  bgYellow: [43, 49],
-  bgBlue: [44, 49],
-  bgMagenta: [45, 49],
-  bgCyan: [46, 49],
-  bgWhite: [47, 49],
-
-  // legacy styles for colors pre v1.0.0
-  blackBG: [40, 49],
-  redBG: [41, 49],
-  greenBG: [42, 49],
-  yellowBG: [43, 49],
-  blueBG: [44, 49],
-  magentaBG: [45, 49],
-  cyanBG: [46, 49],
-  whiteBG: [47, 49]
-
-};
-
-Object.keys(codes).forEach(function (key) {
-  var val = codes[key];
-  var style = styles[key] = [];
-  style.open = '\u001b[' + val[0] + 'm';
-  style.close = '\u001b[' + val[1] + 'm';
+	Object.defineProperty(styles, groupName, {
+		value: group,
+		enumerable: false
+	});
 });
+
+},{}],131:[function(require,module,exports){
+'use strict';
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(matchOperatorsRe,  '\\$&');
+};
+
+},{}],132:[function(require,module,exports){
+'use strict';
+var ansiRegex = require('ansi-regex')();
+
+module.exports = function (str) {
+	return typeof str === 'string' ? str.replace(ansiRegex, '') : str;
+};
+
+},{"ansi-regex":133}],133:[function(require,module,exports){
+'use strict';
+module.exports = function () {
+	return /(?:(?:\u001b\[)|\u009b)(?:(?:[0-9]{1,3})?(?:(?:;[0-9]{0,3})*)?[A-M|f-m])|\u001b[A-M]/g;
+};
+
 },{}],134:[function(require,module,exports){
 (function (process){
-/*
-The MIT License (MIT)
-
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-*/
-
+'use strict';
 var argv = process.argv;
 
 module.exports = (function () {
-  if (argv.indexOf('--no-color') !== -1 ||
-    argv.indexOf('--color=false') !== -1) {
-    return false;
-  }
+	if ('FORCE_COLOR' in process.env) {
+		return true;
+	}
 
-  if (argv.indexOf('--color') !== -1 ||
-    argv.indexOf('--color=true') !== -1 ||
-    argv.indexOf('--color=always') !== -1) {
-    return true;
-  }
+	if (argv.indexOf('--no-color') !== -1 ||
+		argv.indexOf('--no-colors') !== -1 ||
+		argv.indexOf('--color=false') !== -1) {
+		return false;
+	}
 
-  if (process.stdout && !process.stdout.isTTY) {
-    return false;
-  }
+	if (argv.indexOf('--color') !== -1 ||
+		argv.indexOf('--colors') !== -1 ||
+		argv.indexOf('--color=true') !== -1 ||
+		argv.indexOf('--color=always') !== -1) {
+		return true;
+	}
 
-  if (process.platform === 'win32') {
-    return true;
-  }
+	if (process.stdout && !process.stdout.isTTY) {
+		return false;
+	}
 
-  if ('COLORTERM' in process.env) {
-    return true;
-  }
+	if (process.platform === 'win32') {
+		return true;
+	}
 
-  if (process.env.TERM === 'dumb') {
-    return false;
-  }
+	if ('COLORTERM' in process.env) {
+		return true;
+	}
 
-  if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(process.env.TERM)) {
-    return true;
-  }
+	if (process.env.TERM === 'dumb') {
+		return false;
+	}
 
-  return false;
+	if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(process.env.TERM)) {
+		return true;
+	}
+
+	return false;
 })();
+
 }).call(this,require('_process'))
-},{"_process":121}],135:[function(require,module,exports){
+},{"_process":126}],135:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -15191,6 +15571,7 @@ module.exports = (function () {
     TokenName[Token.Punctuator] = 'Punctuator';
     TokenName[Token.StringLiteral] = 'String';
     TokenName[Token.RegularExpression] = 'RegularExpression';
+    TokenName[Token.Template] = 'Template';
 
     // A function following one of those tokens is an expression.
     FnExprTokens = ['(', '{', '[', 'in', 'typeof', 'instanceof', 'new',
@@ -15243,7 +15624,6 @@ module.exports = (function () {
         LogicalExpression: 'LogicalExpression',
         MemberExpression: 'MemberExpression',
         MethodDefinition: 'MethodDefinition',
-        ModuleSpecifier: 'ModuleSpecifier',
         NewExpression: 'NewExpression',
         ObjectExpression: 'ObjectExpression',
         ObjectPattern: 'ObjectPattern',
@@ -15331,7 +15711,7 @@ module.exports = (function () {
         InvalidModuleSpecifier: 'Invalid module specifier',
         IllegalImportDeclaration: 'Illegal import declaration',
         IllegalExportDeclaration: 'Illegal export declaration',
-        NoUnintializedConst: 'Const must be initialized',
+        NoUninitializedConst: 'Const must be initialized',
         ComprehensionRequiresBlock: 'Comprehension must have at least one block',
         ComprehensionError: 'Comprehension Error',
         EachNotAllowed: 'Each is not supported'
@@ -15824,21 +16204,43 @@ module.exports = (function () {
         case 41:   // ) close bracket
         case 59:   // ; semicolon
         case 44:   // , comma
-        case 123:  // { open curly brace
-        case 125:  // } close curly brace
         case 91:   // [
         case 93:   // ]
         case 58:   // :
         case 63:   // ?
         case 126:  // ~
             ++index;
-            if (extra.tokenize) {
-                if (code === 40) {
-                    extra.openParenToken = extra.tokens.length;
-                } else if (code === 123) {
-                    extra.openCurlyToken = extra.tokens.length;
+            if (extra.tokenize && code === 40) {
+                extra.openParenToken = extra.tokens.length;
+            }
+
+            return {
+                type: Token.Punctuator,
+                value: String.fromCharCode(code),
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+
+        case 123:  // { open curly brace
+        case 125:  // } close curly brace
+            ++index;
+            if (extra.tokenize && code === 123) {
+                extra.openCurlyToken = extra.tokens.length;
+            }
+
+            // lookahead2 function can cause tokens to be scanned twice and in doing so
+            // would wreck the curly stack by pushing the same token onto the stack twice.
+            // curlyLastIndex ensures each token is pushed or popped exactly once
+            if (index > state.curlyLastIndex) {
+                state.curlyLastIndex = index;
+                if (code === 123) {
+                    state.curlyStack.push('{');
+                } else {
+                    state.curlyStack.pop();
                 }
             }
+
             return {
                 type: Token.Punctuator,
                 value: String.fromCharCode(code),
@@ -16304,11 +16706,12 @@ module.exports = (function () {
     }
 
     function scanTemplate() {
-        var cooked = '', ch, start, terminated, tail, restore, unescaped, code, octal;
+        var cooked = '', ch, start, terminated, head, tail, restore, unescaped, code, octal;
 
         terminated = false;
         tail = false;
         start = index;
+        head = (source[index] === '`');
 
         ++index;
 
@@ -16415,37 +16818,30 @@ module.exports = (function () {
             throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
         }
 
+        if (index > state.curlyLastIndex) {
+            state.curlyLastIndex = index;
+            if (!tail) {
+                state.curlyStack.push('template');
+            }
+
+            if (!head) {
+                state.curlyStack.pop();
+            }
+        }
+
         return {
             type: Token.Template,
             value: {
                 cooked: cooked,
                 raw: source.slice(start + 1, index - ((tail) ? 1 : 2))
             },
+            head: head,
             tail: tail,
             octal: octal,
             lineNumber: lineNumber,
             lineStart: lineStart,
             range: [start, index]
         };
-    }
-
-    function scanTemplateElement(option) {
-        var startsWith, template;
-
-        lookahead = null;
-        skipComment();
-
-        startsWith = (option.head) ? '`' : '}';
-
-        if (source[index] !== startsWith) {
-            throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
-        }
-
-        template = scanTemplate();
-
-        peek();
-
-        return template;
     }
 
     function testRegExp(pattern, flags) {
@@ -16709,7 +17105,9 @@ module.exports = (function () {
             return scanStringLiteral();
         }
 
-        if (ch === 96) {
+        // Template literals start with backtick (#96) for template head
+        // or close curly (#125) for template middle or template tail.
+        if (ch === 96 || (ch === 125 && state.curlyStack[state.curlyStack.length - 1] === 'template')) {
             return scanTemplate();
         }
         if (isIdentifierStart(ch)) {
@@ -17311,14 +17709,6 @@ module.exports = (function () {
             };
         },
 
-        createModuleSpecifier: function (token) {
-            return {
-                type: Syntax.ModuleSpecifier,
-                value: token.value,
-                raw: source.slice(token.range[0], token.range[1])
-            };
-        },
-
         createExportSpecifier: function (id, name) {
             return {
                 type: Syntax.ExportSpecifier,
@@ -17864,8 +18254,15 @@ module.exports = (function () {
     }
 
     function parseTemplateElement(option) {
-        var marker = markerCreate(),
-            token = scanTemplateElement(option);
+        var marker, token;
+
+        if (lookahead.type !== Token.Template || (option.head && !lookahead.head)) {
+            throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+        }
+
+        marker = markerCreate();
+        token = lex();
+
         if (strict && token.octal) {
             throwError(token, Messages.StrictOctalLiteral);
         }
@@ -18067,7 +18464,7 @@ module.exports = (function () {
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
-        while (match('.') || match('[') || match('(') || lookahead.type === Token.Template) {
+        while (match('.') || match('[') || match('(') || (lookahead.type === Token.Template && lookahead.head)) {
             if (match('(')) {
                 args = parseArguments();
                 expr = markerApply(marker, delegate.createCallExpression(expr, args));
@@ -18088,7 +18485,7 @@ module.exports = (function () {
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
-        while (match('.') || match('[') || lookahead.type === Token.Template) {
+        while (match('.') || match('[') || (lookahead.type === Token.Template && lookahead.head)) {
             if (match('[')) {
                 expr = markerApply(marker, delegate.createMemberExpression('[', expr, parseComputedMember()));
             } else if (match('.')) {
@@ -18677,7 +19074,7 @@ module.exports = (function () {
 
         if (kind === 'const') {
             if (!match('=')) {
-                throwError({}, Messages.NoUnintializedConst);
+                throwError({}, Messages.NoUninitializedConst);
             }
             expect('=');
             init = parseAssignmentExpression();
@@ -18740,8 +19137,7 @@ module.exports = (function () {
         if (lookahead.type !== Token.StringLiteral) {
             throwError({}, Messages.InvalidModuleSpecifier);
         }
-        specifier = delegate.createModuleSpecifier(lookahead);
-        lex();
+        specifier = delegate.createLiteral(lex());
         return markerApply(marker, specifier);
     }
 
@@ -18752,7 +19148,7 @@ module.exports = (function () {
     }
 
     function parseExportSpecifier() {
-        var id, name = null, marker = markerCreate(), from;
+        var id, name = null, marker = markerCreate();
         if (matchKeyword('default')) {
             lex();
             id = markerApply(marker, delegate.createIdentifier('default'));
@@ -18769,17 +19165,11 @@ module.exports = (function () {
     }
 
     function parseExportDeclaration() {
-        var backtrackToken, id, declaration = null,
+        var declaration = null,
+            possibleIdentifierToken, sourceElement,
             isExportFromIdentifier,
             src = null, specifiers = [],
             marker = markerCreate();
-
-        function rewind(token) {
-            index = token.range[0];
-            lineNumber = token.lineNumber;
-            lineStart = token.lineStart;
-            lookahead = token;
-        }
 
         expectKeyword('export');
 
@@ -18788,20 +19178,17 @@ module.exports = (function () {
             // export default ...
             lex();
             if (matchKeyword('function') || matchKeyword('class')) {
-                backtrackToken = lookahead;
-                lex();
-                if (isIdentifierName(lookahead)) {
+                possibleIdentifierToken = lookahead2();
+                if (isIdentifierName(possibleIdentifierToken)) {
                     // covers:
                     // export default function foo () {}
                     // export default class foo {}
-                    id = parseNonComputedProperty();
-                    rewind(backtrackToken);
-                    return markerApply(marker, delegate.createExportDeclaration(true, parseSourceElement(), [id], null));
+                    sourceElement = parseSourceElement();
+                    return markerApply(marker, delegate.createExportDeclaration(true, sourceElement, [sourceElement.id], null));
                 }
                 // covers:
                 // export default function () {}
                 // export default class {}
-                rewind(backtrackToken);
                 switch (lookahead.value) {
                 case 'class':
                     return markerApply(marker, delegate.createExportDeclaration(true, parseClassExpression(), [], null));
@@ -20286,7 +20673,9 @@ module.exports = (function () {
             inFunctionBody: false,
             inIteration: false,
             inSwitch: false,
-            lastCommentStart: -1
+            lastCommentStart: -1,
+            curlyStack: [],
+            curlyLastIndex: 0
         };
 
         extra = {};
@@ -20378,7 +20767,10 @@ module.exports = (function () {
             inIteration: false,
             inSwitch: false,
             lastCommentStart: -1,
-            yieldAllowed: false
+            yieldAllowed: false,
+            curlyPosition: 0,
+            curlyStack: [],
+            curlyLastIndex: 0
         };
 
         extra = {};
@@ -21311,6 +21703,24 @@ parseStatement: true, parseSourceElement: true */
         };
     }
 
+    function isImplicitOctalLiteral() {
+        var i, ch;
+
+        // Implicit octal, unless there is a non-octal digit.
+        // (Annex B.1.1 on Numeric Literals)
+        for (i = index + 1; i < length; ++i) {
+            ch = source[i];
+            if (ch === '8' || ch === '9') {
+                return false;
+            }
+            if (!isOctalDigit(ch)) {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
     function scanNumericLiteral() {
         var number, start, ch;
 
@@ -21332,12 +21742,9 @@ parseStatement: true, parseSourceElement: true */
                     return scanHexLiteral(start);
                 }
                 if (isOctalDigit(ch)) {
-                    return scanOctalLiteral(start);
-                }
-
-                // decimal number starts with '0' such as '09' is illegal.
-                if (ch && isDecimalDigit(ch.charCodeAt(0))) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    if (isImplicitOctalLiteral()) {
+                        return scanOctalLiteral(start);
+                    }
                 }
             }
 
@@ -24200,7 +24607,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     // Sync with *.json manifests.
-    exports.version = '1.2.4';
+    exports.version = '1.2.5';
 
     exports.tokenize = tokenize;
 
@@ -24379,9 +24786,11 @@ parseStatement: true, parseSourceElement: true */
     };
 
     function extend(to, from) {
-        objectKeys(from).forEach(function (key) {
+        var keys = objectKeys(from), key, i, len;
+        for (i = 0, len = keys.length; i < len; i += 1) {
+            key = keys[i];
             to[key] = from[key];
-        });
+        }
         return to;
     }
 
@@ -25077,6 +25486,14 @@ parseStatement: true, parseSourceElement: true */
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 },{}],138:[function(require,module,exports){
+'use strict';
+var ansiRegex = require('ansi-regex');
+var re = new RegExp(ansiRegex().source); // remove the `g` flag
+module.exports = re.test.bind(re);
+
+},{"ansi-regex":139}],139:[function(require,module,exports){
+arguments[4][133][0].apply(exports,arguments)
+},{"dup":133}],140:[function(require,module,exports){
 (function (process){
 module.exports = minimatch
 minimatch.Minimatch = Minimatch
@@ -25925,7 +26342,7 @@ function regExpEscape (s) {
 }
 
 }).call(this,require('_process'))
-},{"_process":121,"brace-expansion":139}],139:[function(require,module,exports){
+},{"_process":126,"brace-expansion":141}],141:[function(require,module,exports){
 var concatMap = require('concat-map');
 var balanced = require('balanced-match');
 
@@ -26118,7 +26535,7 @@ function expand(str, isTop) {
 }
 
 
-},{"balanced-match":140,"concat-map":141}],140:[function(require,module,exports){
+},{"balanced-match":142,"concat-map":143}],142:[function(require,module,exports){
 module.exports = balanced;
 function balanced(a, b, str) {
   var bal = 0;
@@ -26158,7 +26575,7 @@ function balanced(a, b, str) {
   }
 }
 
-},{}],141:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 module.exports = function (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
@@ -26173,7 +26590,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],142:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 (function (process){
 /**
  * @module vow
@@ -27493,16 +27910,16 @@ defineAsGlobal && (global.vow = vow);
 })(this);
 
 }).call(this,require('_process'))
-},{"_process":121}],143:[function(require,module,exports){
+},{"_process":126}],145:[function(require,module,exports){
 module.exports = /[A-Za-z\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0-\u08B2\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16F1-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]|\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF30-\uDF40\uDF42-\uDF49\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF]|\uD801[\uDC00-\uDC9D\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE33\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48]|\uD804[\uDC03-\uDC37\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDE00-\uDE11\uDE13-\uDE2B\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF5D-\uDF61]|\uD805[\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDE00-\uDE2F\uDE44\uDE80-\uDEAA]|\uD806[\uDCA0-\uDCDF\uDCFF\uDEC0-\uDEF8]|\uD808[\uDC00-\uDF98]|[\uD80C\uD840-\uD868\uD86A-\uD86C][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDF00-\uDF44\uDF50\uDF93-\uDF9F]|\uD82C[\uDC00\uDC01]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD83A[\uDC00-\uDCC4]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D]|\uD87E[\uDC00-\uDE1D]/;
 
-},{}],144:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 module.exports = /[a-z\xB5\xDF-\xF6\xF8-\xFF\u0101\u0103\u0105\u0107\u0109\u010B\u010D\u010F\u0111\u0113\u0115\u0117\u0119\u011B\u011D\u011F\u0121\u0123\u0125\u0127\u0129\u012B\u012D\u012F\u0131\u0133\u0135\u0137\u0138\u013A\u013C\u013E\u0140\u0142\u0144\u0146\u0148\u0149\u014B\u014D\u014F\u0151\u0153\u0155\u0157\u0159\u015B\u015D\u015F\u0161\u0163\u0165\u0167\u0169\u016B\u016D\u016F\u0171\u0173\u0175\u0177\u017A\u017C\u017E-\u0180\u0183\u0185\u0188\u018C\u018D\u0192\u0195\u0199-\u019B\u019E\u01A1\u01A3\u01A5\u01A8\u01AA\u01AB\u01AD\u01B0\u01B4\u01B6\u01B9\u01BA\u01BD-\u01BF\u01C6\u01C9\u01CC\u01CE\u01D0\u01D2\u01D4\u01D6\u01D8\u01DA\u01DC\u01DD\u01DF\u01E1\u01E3\u01E5\u01E7\u01E9\u01EB\u01ED\u01EF\u01F0\u01F3\u01F5\u01F9\u01FB\u01FD\u01FF\u0201\u0203\u0205\u0207\u0209\u020B\u020D\u020F\u0211\u0213\u0215\u0217\u0219\u021B\u021D\u021F\u0221\u0223\u0225\u0227\u0229\u022B\u022D\u022F\u0231\u0233-\u0239\u023C\u023F\u0240\u0242\u0247\u0249\u024B\u024D\u024F-\u0293\u0295-\u02AF\u0371\u0373\u0377\u037B-\u037D\u0390\u03AC-\u03CE\u03D0\u03D1\u03D5-\u03D7\u03D9\u03DB\u03DD\u03DF\u03E1\u03E3\u03E5\u03E7\u03E9\u03EB\u03ED\u03EF-\u03F3\u03F5\u03F8\u03FB\u03FC\u0430-\u045F\u0461\u0463\u0465\u0467\u0469\u046B\u046D\u046F\u0471\u0473\u0475\u0477\u0479\u047B\u047D\u047F\u0481\u048B\u048D\u048F\u0491\u0493\u0495\u0497\u0499\u049B\u049D\u049F\u04A1\u04A3\u04A5\u04A7\u04A9\u04AB\u04AD\u04AF\u04B1\u04B3\u04B5\u04B7\u04B9\u04BB\u04BD\u04BF\u04C2\u04C4\u04C6\u04C8\u04CA\u04CC\u04CE\u04CF\u04D1\u04D3\u04D5\u04D7\u04D9\u04DB\u04DD\u04DF\u04E1\u04E3\u04E5\u04E7\u04E9\u04EB\u04ED\u04EF\u04F1\u04F3\u04F5\u04F7\u04F9\u04FB\u04FD\u04FF\u0501\u0503\u0505\u0507\u0509\u050B\u050D\u050F\u0511\u0513\u0515\u0517\u0519\u051B\u051D\u051F\u0521\u0523\u0525\u0527\u0529\u052B\u052D\u052F\u0561-\u0587\u1D00-\u1D2B\u1D6B-\u1D77\u1D79-\u1D9A\u1E01\u1E03\u1E05\u1E07\u1E09\u1E0B\u1E0D\u1E0F\u1E11\u1E13\u1E15\u1E17\u1E19\u1E1B\u1E1D\u1E1F\u1E21\u1E23\u1E25\u1E27\u1E29\u1E2B\u1E2D\u1E2F\u1E31\u1E33\u1E35\u1E37\u1E39\u1E3B\u1E3D\u1E3F\u1E41\u1E43\u1E45\u1E47\u1E49\u1E4B\u1E4D\u1E4F\u1E51\u1E53\u1E55\u1E57\u1E59\u1E5B\u1E5D\u1E5F\u1E61\u1E63\u1E65\u1E67\u1E69\u1E6B\u1E6D\u1E6F\u1E71\u1E73\u1E75\u1E77\u1E79\u1E7B\u1E7D\u1E7F\u1E81\u1E83\u1E85\u1E87\u1E89\u1E8B\u1E8D\u1E8F\u1E91\u1E93\u1E95-\u1E9D\u1E9F\u1EA1\u1EA3\u1EA5\u1EA7\u1EA9\u1EAB\u1EAD\u1EAF\u1EB1\u1EB3\u1EB5\u1EB7\u1EB9\u1EBB\u1EBD\u1EBF\u1EC1\u1EC3\u1EC5\u1EC7\u1EC9\u1ECB\u1ECD\u1ECF\u1ED1\u1ED3\u1ED5\u1ED7\u1ED9\u1EDB\u1EDD\u1EDF\u1EE1\u1EE3\u1EE5\u1EE7\u1EE9\u1EEB\u1EED\u1EEF\u1EF1\u1EF3\u1EF5\u1EF7\u1EF9\u1EFB\u1EFD\u1EFF-\u1F07\u1F10-\u1F15\u1F20-\u1F27\u1F30-\u1F37\u1F40-\u1F45\u1F50-\u1F57\u1F60-\u1F67\u1F70-\u1F7D\u1F80-\u1F87\u1F90-\u1F97\u1FA0-\u1FA7\u1FB0-\u1FB4\u1FB6\u1FB7\u1FBE\u1FC2-\u1FC4\u1FC6\u1FC7\u1FD0-\u1FD3\u1FD6\u1FD7\u1FE0-\u1FE7\u1FF2-\u1FF4\u1FF6\u1FF7\u210A\u210E\u210F\u2113\u212F\u2134\u2139\u213C\u213D\u2146-\u2149\u214E\u2184\u2C30-\u2C5E\u2C61\u2C65\u2C66\u2C68\u2C6A\u2C6C\u2C71\u2C73\u2C74\u2C76-\u2C7B\u2C81\u2C83\u2C85\u2C87\u2C89\u2C8B\u2C8D\u2C8F\u2C91\u2C93\u2C95\u2C97\u2C99\u2C9B\u2C9D\u2C9F\u2CA1\u2CA3\u2CA5\u2CA7\u2CA9\u2CAB\u2CAD\u2CAF\u2CB1\u2CB3\u2CB5\u2CB7\u2CB9\u2CBB\u2CBD\u2CBF\u2CC1\u2CC3\u2CC5\u2CC7\u2CC9\u2CCB\u2CCD\u2CCF\u2CD1\u2CD3\u2CD5\u2CD7\u2CD9\u2CDB\u2CDD\u2CDF\u2CE1\u2CE3\u2CE4\u2CEC\u2CEE\u2CF3\u2D00-\u2D25\u2D27\u2D2D\uA641\uA643\uA645\uA647\uA649\uA64B\uA64D\uA64F\uA651\uA653\uA655\uA657\uA659\uA65B\uA65D\uA65F\uA661\uA663\uA665\uA667\uA669\uA66B\uA66D\uA681\uA683\uA685\uA687\uA689\uA68B\uA68D\uA68F\uA691\uA693\uA695\uA697\uA699\uA69B\uA723\uA725\uA727\uA729\uA72B\uA72D\uA72F-\uA731\uA733\uA735\uA737\uA739\uA73B\uA73D\uA73F\uA741\uA743\uA745\uA747\uA749\uA74B\uA74D\uA74F\uA751\uA753\uA755\uA757\uA759\uA75B\uA75D\uA75F\uA761\uA763\uA765\uA767\uA769\uA76B\uA76D\uA76F\uA771-\uA778\uA77A\uA77C\uA77F\uA781\uA783\uA785\uA787\uA78C\uA78E\uA791\uA793-\uA795\uA797\uA799\uA79B\uA79D\uA79F\uA7A1\uA7A3\uA7A5\uA7A7\uA7A9\uA7FA\uAB30-\uAB5A\uAB64\uAB65\uFB00-\uFB06\uFB13-\uFB17\uFF41-\uFF5A]|\uD801[\uDC28-\uDC4F]|\uD806[\uDCC0-\uDCDF]|\uD835[\uDC1A-\uDC33\uDC4E-\uDC54\uDC56-\uDC67\uDC82-\uDC9B\uDCB6-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDCCF\uDCEA-\uDD03\uDD1E-\uDD37\uDD52-\uDD6B\uDD86-\uDD9F\uDDBA-\uDDD3\uDDEE-\uDE07\uDE22-\uDE3B\uDE56-\uDE6F\uDE8A-\uDEA5\uDEC2-\uDEDA\uDEDC-\uDEE1\uDEFC-\uDF14\uDF16-\uDF1B\uDF36-\uDF4E\uDF50-\uDF55\uDF70-\uDF88\uDF8A-\uDF8F\uDFAA-\uDFC2\uDFC4-\uDFC9\uDFCB]/;
 
-},{}],145:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 module.exports = /[A-Z\xC0-\xD6\xD8-\xDE\u0100\u0102\u0104\u0106\u0108\u010A\u010C\u010E\u0110\u0112\u0114\u0116\u0118\u011A\u011C\u011E\u0120\u0122\u0124\u0126\u0128\u012A\u012C\u012E\u0130\u0132\u0134\u0136\u0139\u013B\u013D\u013F\u0141\u0143\u0145\u0147\u014A\u014C\u014E\u0150\u0152\u0154\u0156\u0158\u015A\u015C\u015E\u0160\u0162\u0164\u0166\u0168\u016A\u016C\u016E\u0170\u0172\u0174\u0176\u0178\u0179\u017B\u017D\u0181\u0182\u0184\u0186\u0187\u0189-\u018B\u018E-\u0191\u0193\u0194\u0196-\u0198\u019C\u019D\u019F\u01A0\u01A2\u01A4\u01A6\u01A7\u01A9\u01AC\u01AE\u01AF\u01B1-\u01B3\u01B5\u01B7\u01B8\u01BC\u01C4\u01C7\u01CA\u01CD\u01CF\u01D1\u01D3\u01D5\u01D7\u01D9\u01DB\u01DE\u01E0\u01E2\u01E4\u01E6\u01E8\u01EA\u01EC\u01EE\u01F1\u01F4\u01F6-\u01F8\u01FA\u01FC\u01FE\u0200\u0202\u0204\u0206\u0208\u020A\u020C\u020E\u0210\u0212\u0214\u0216\u0218\u021A\u021C\u021E\u0220\u0222\u0224\u0226\u0228\u022A\u022C\u022E\u0230\u0232\u023A\u023B\u023D\u023E\u0241\u0243-\u0246\u0248\u024A\u024C\u024E\u0370\u0372\u0376\u037F\u0386\u0388-\u038A\u038C\u038E\u038F\u0391-\u03A1\u03A3-\u03AB\u03CF\u03D2-\u03D4\u03D8\u03DA\u03DC\u03DE\u03E0\u03E2\u03E4\u03E6\u03E8\u03EA\u03EC\u03EE\u03F4\u03F7\u03F9\u03FA\u03FD-\u042F\u0460\u0462\u0464\u0466\u0468\u046A\u046C\u046E\u0470\u0472\u0474\u0476\u0478\u047A\u047C\u047E\u0480\u048A\u048C\u048E\u0490\u0492\u0494\u0496\u0498\u049A\u049C\u049E\u04A0\u04A2\u04A4\u04A6\u04A8\u04AA\u04AC\u04AE\u04B0\u04B2\u04B4\u04B6\u04B8\u04BA\u04BC\u04BE\u04C0\u04C1\u04C3\u04C5\u04C7\u04C9\u04CB\u04CD\u04D0\u04D2\u04D4\u04D6\u04D8\u04DA\u04DC\u04DE\u04E0\u04E2\u04E4\u04E6\u04E8\u04EA\u04EC\u04EE\u04F0\u04F2\u04F4\u04F6\u04F8\u04FA\u04FC\u04FE\u0500\u0502\u0504\u0506\u0508\u050A\u050C\u050E\u0510\u0512\u0514\u0516\u0518\u051A\u051C\u051E\u0520\u0522\u0524\u0526\u0528\u052A\u052C\u052E\u0531-\u0556\u10A0-\u10C5\u10C7\u10CD\u1E00\u1E02\u1E04\u1E06\u1E08\u1E0A\u1E0C\u1E0E\u1E10\u1E12\u1E14\u1E16\u1E18\u1E1A\u1E1C\u1E1E\u1E20\u1E22\u1E24\u1E26\u1E28\u1E2A\u1E2C\u1E2E\u1E30\u1E32\u1E34\u1E36\u1E38\u1E3A\u1E3C\u1E3E\u1E40\u1E42\u1E44\u1E46\u1E48\u1E4A\u1E4C\u1E4E\u1E50\u1E52\u1E54\u1E56\u1E58\u1E5A\u1E5C\u1E5E\u1E60\u1E62\u1E64\u1E66\u1E68\u1E6A\u1E6C\u1E6E\u1E70\u1E72\u1E74\u1E76\u1E78\u1E7A\u1E7C\u1E7E\u1E80\u1E82\u1E84\u1E86\u1E88\u1E8A\u1E8C\u1E8E\u1E90\u1E92\u1E94\u1E9E\u1EA0\u1EA2\u1EA4\u1EA6\u1EA8\u1EAA\u1EAC\u1EAE\u1EB0\u1EB2\u1EB4\u1EB6\u1EB8\u1EBA\u1EBC\u1EBE\u1EC0\u1EC2\u1EC4\u1EC6\u1EC8\u1ECA\u1ECC\u1ECE\u1ED0\u1ED2\u1ED4\u1ED6\u1ED8\u1EDA\u1EDC\u1EDE\u1EE0\u1EE2\u1EE4\u1EE6\u1EE8\u1EEA\u1EEC\u1EEE\u1EF0\u1EF2\u1EF4\u1EF6\u1EF8\u1EFA\u1EFC\u1EFE\u1F08-\u1F0F\u1F18-\u1F1D\u1F28-\u1F2F\u1F38-\u1F3F\u1F48-\u1F4D\u1F59\u1F5B\u1F5D\u1F5F\u1F68-\u1F6F\u1FB8-\u1FBB\u1FC8-\u1FCB\u1FD8-\u1FDB\u1FE8-\u1FEC\u1FF8-\u1FFB\u2102\u2107\u210B-\u210D\u2110-\u2112\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u2130-\u2133\u213E\u213F\u2145\u2183\u2C00-\u2C2E\u2C60\u2C62-\u2C64\u2C67\u2C69\u2C6B\u2C6D-\u2C70\u2C72\u2C75\u2C7E-\u2C80\u2C82\u2C84\u2C86\u2C88\u2C8A\u2C8C\u2C8E\u2C90\u2C92\u2C94\u2C96\u2C98\u2C9A\u2C9C\u2C9E\u2CA0\u2CA2\u2CA4\u2CA6\u2CA8\u2CAA\u2CAC\u2CAE\u2CB0\u2CB2\u2CB4\u2CB6\u2CB8\u2CBA\u2CBC\u2CBE\u2CC0\u2CC2\u2CC4\u2CC6\u2CC8\u2CCA\u2CCC\u2CCE\u2CD0\u2CD2\u2CD4\u2CD6\u2CD8\u2CDA\u2CDC\u2CDE\u2CE0\u2CE2\u2CEB\u2CED\u2CF2\uA640\uA642\uA644\uA646\uA648\uA64A\uA64C\uA64E\uA650\uA652\uA654\uA656\uA658\uA65A\uA65C\uA65E\uA660\uA662\uA664\uA666\uA668\uA66A\uA66C\uA680\uA682\uA684\uA686\uA688\uA68A\uA68C\uA68E\uA690\uA692\uA694\uA696\uA698\uA69A\uA722\uA724\uA726\uA728\uA72A\uA72C\uA72E\uA732\uA734\uA736\uA738\uA73A\uA73C\uA73E\uA740\uA742\uA744\uA746\uA748\uA74A\uA74C\uA74E\uA750\uA752\uA754\uA756\uA758\uA75A\uA75C\uA75E\uA760\uA762\uA764\uA766\uA768\uA76A\uA76C\uA76E\uA779\uA77B\uA77D\uA77E\uA780\uA782\uA784\uA786\uA78B\uA78D\uA790\uA792\uA796\uA798\uA79A\uA79C\uA79E\uA7A0\uA7A2\uA7A4\uA7A6\uA7A8\uA7AA-\uA7AD\uA7B0\uA7B1\uFF21-\uFF3A]|\uD801[\uDC00-\uDC27]|\uD806[\uDCA0-\uDCBF]|\uD835[\uDC00-\uDC19\uDC34-\uDC4D\uDC68-\uDC81\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB5\uDCD0-\uDCE9\uDD04\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD38\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD6C-\uDD85\uDDA0-\uDDB9\uDDD4-\uDDED\uDE08-\uDE21\uDE3C-\uDE55\uDE70-\uDE89\uDEA8-\uDEC0\uDEE2-\uDEFA\uDF1C-\uDF34\uDF56-\uDF6E\uDF90-\uDFA8\uDFCA]/;
 
-},{}],146:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 module.exports={
     "disallowSpacesInNamedFunctionExpression": {
         "beforeOpeningRoundBrace": true
@@ -27562,13 +27979,17 @@ module.exports={
         "catch",
         "typeof"
     ],
+    "requirePaddingNewLinesBeforeLineComments": {
+        "allExcept": "firstAfterCurly"
+    },
+    "requirePaddingNewLinesAfterBlocks": true,
     "safeContextKeyword": "_this",
     "validateLineBreaks": "LF",
     "validateQuoteMarks": "'",
     "validateIndentation": 2
 }
 
-},{}],147:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -27637,7 +28058,7 @@ module.exports={
     "requireSpaceBeforeObjectValues": true
 }
 
-},{}],148:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -27703,7 +28124,7 @@ module.exports={
     "disallowNewlineBeforeBlockStatements": true
 }
 
-},{}],149:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 module.exports={
   "preset": "google",
   "maximumLineLength": 120,
@@ -27712,7 +28133,7 @@ module.exports={
   "disallowMultipleVarDecl": "exceptUndefined"
 }
 
-},{}],150:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -27725,7 +28146,6 @@ module.exports={
     ],
     "requireOperatorBeforeLineBreak": true,
     "requireParenthesesAroundIIFE": true,
-    "requireMultipleVarDecl": "onevar",
     "requireCommaBeforeLineBreak": true,
     "requireCamelCaseOrUpperCaseIdentifiers": true,
     "requireDotNotation": "except_snake_case",
@@ -27779,6 +28199,7 @@ module.exports={
     "requireSpacesInNamedFunctionExpression": {
         "beforeOpeningCurlyBrace": true
     },
+    "requirePaddingNewLinesBeforeLineComments": true,
     "validateLineBreaks": "LF",
 
     "disallowKeywords": [ "with" ],
@@ -27799,7 +28220,7 @@ module.exports={
     "disallowMultipleLineBreaks": true
 }
 
-},{}],151:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": ["while", "do", "try", "catch"],
     "requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "try", "catch"],
@@ -27830,7 +28251,56 @@ module.exports={
     }
 }
 
-},{}],152:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
+module.exports={
+    "disallowKeywords": ["with"],
+    "disallowKeywordsOnNewLine": ["else"],
+    "disallowMixedSpacesAndTabs": true,
+    "disallowMultipleVarDecl": "exceptUndefined",
+    "disallowNewlineBeforeBlockStatements": true,
+    "disallowQuotedKeysInObjects": true,
+    "disallowSpaceAfterObjectKeys": true,
+    "disallowSpaceAfterPrefixUnaryOperators": true,
+    "disallowSpacesInFunction": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInsideParentheses": true,
+    "disallowTrailingWhitespace": true,
+    "maximumLineLength": 80,
+    "requireCamelCaseOrUpperCaseIdentifiers": true,
+    "requireCapitalizedComments": true,
+    "requireCapitalizedConstructors": true,
+    "requireCurlyBraces": true,
+    "requireSpaceAfterKeywords": [
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "case",
+        "return",
+        "try",
+        "catch",
+        "typeof"
+    ],
+    "requireSpaceAfterLineComment": true,
+    "requireSpaceAfterBinaryOperators": true,
+    "requireSpaceBeforeBinaryOperators": true,
+    "requireSpaceBeforeBlockStatements": true,
+    "requireSpaceBeforeObjectValues": true,
+    "requireSpacesInFunction": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "requireTrailingComma": {
+        "ignoreSingleLine": true
+    },
+    "validateIndentation": 2,
+    "validateLineBreaks": "LF",
+    "validateQuoteMarks": "'"
+}
+
+},{}],155:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -27904,7 +28374,22 @@ module.exports={
     "validateIndentation": "\t"
 }
 
-},{}],153:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
+module.exports={
+    "preset": "jquery",
+    "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~"],
+    "disallowSpaceBeforePostfixUnaryOperators": true,
+    "maximumLineLength": null,
+    "requireSpaceAfterPrefixUnaryOperators": ["!"],
+    "requireSpacesInsideParentheses": {
+        "all": true,
+        "except": [ "{", "}", "[", "]", "function" ]
+    },
+    "requireYodaConditions": true,
+    "validateQuoteMarks": "'"
+}
+
+},{}],157:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28002,8 +28487,11 @@ module.exports={
     "disallowMultipleLineBreaks": true,
     "disallowMixedSpacesAndTabs": true,
     "disallowTrailingWhitespace": true,
-    "validateLineBreaks": "LF"
+    "validateIndentation": 4,
+    "validateLineBreaks": "LF",
+
+    "requireSemicolons": true
 }
 
-},{}]},{},[113])(113)
+},{}]},{},[118])(118)
 });

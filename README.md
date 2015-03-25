@@ -27,7 +27,7 @@ If you have disabled the default Brackets JSLinting service, you will need to ma
 "language": {
 	"javascript": {
 		"linting.prefer": [
-			"JSXHint",
+			"JSHint",
 			"JSCS"
 		]
 	}
@@ -36,6 +36,11 @@ If you have disabled the default Brackets JSLinting service, you will need to ma
 
 Release Notes
 =====
+
+**v0.3.0** (2015-03-25)
+
+- Upgrade to latest node-jscs
+- Remove support for JSX Transformation. It was causing too many issues. The behaviour of this extension will now work the same as running JSCS on the command line. We're looking into whether or not Babel (https://babeljs.io/) may be a good alternative for handling JSX processing through JSCS. This should fix issues #16, #17 and #19.
 
 **v0.2.2** (2015-03-12)
 

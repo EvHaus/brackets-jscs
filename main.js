@@ -11,7 +11,6 @@ define(function (require, exports, module) {
 		PreferencesManager	= brackets.getModule("preferences/PreferencesManager"),
 		ProjectManager		= brackets.getModule("project/ProjectManager"),
 		globmatch			= brackets.getModule("thirdparty/globmatch"),
-		JSXTransformer		= require('bower_components/react/JSXTransformer'),
 
 		// node-jscs Library
 		JscsStringChecker = require("jscs/jscs-browser"),
@@ -151,45 +150,6 @@ define(function (require, exports, module) {
 	}
 
 
-	/**
-	 * Synchronous linting entry point for .jsx files
-	 * @method handleJSXJSCS
-	 *
-	 * @param	{string}	text		- The string of code to validate
-	 * @param	{string}	fullPath	- File path to the file
-	 * @param	{object}	config		- Configuration object
-	 *
-	 * @return	{object}	Results of code inspection.
-	 */
-	function handleJSXJSCS(text, fullPath, config) {
-		var JSXCode,
-			result = {
-				errors: []
-			};
-
-		try {
-			JSXCode = JSXTransformer.transform(text, {harmony: true}).code;
-
-			// Trim trailing whitespace
-			JSXCode = JSXCode.replace(/( +)\n/g, '\n');
-		} catch (e) {
-			// Try to find a line number
-			var line = null,
-				linematch = e.message.match(/Line (\d+)/g);
-			if (linematch) line = parseInt(linematch[0].replace('Line ', ''), 10) - 1;
-
-			result.errors.push({
-				pos: {line: line},
-				message: e.message,
-				type: CodeInspection.Type.ERROR
-			});
-			return result;
-		}
-
-		return handleJSCS(JSXCode, fullPath, config);
-	}
-
-
 	// ==========================================================================================
 
 
@@ -206,25 +166,6 @@ define(function (require, exports, module) {
 		_loadConfig(fullPath)
 			.done(function (cfg) {
 				deferred.resolve(handleJSCS(text, fullPath, cfg));
-			});
-
-		return deferred.promise();
-	}
-
-
-	/**
-	* Asynchronous linting entry point for .jsx files
-	*
-	* @param	{string}	text		- File contents
-	* @param	{string}	fullPath	- Absolute path to the file
-	*
-	* @return {$.Promise} Promise to return results of code inspection
-	*/
-	function handleJSXJSCSAsync(text, fullPath) {
-		var deferred = new $.Deferred();
-		_loadConfig(fullPath)
-			.done(function (cfg) {
-				deferred.resolve(handleJSXJSCS(text, fullPath, cfg));
 			});
 
 		return deferred.promise();
@@ -414,13 +355,7 @@ define(function (require, exports, module) {
 
 	CodeInspection.register("javascript", {
 		name: JSCS_NAME,
-		scanFile: handleJSXJSCS,
-		scanFileAsync: handleJSXJSCSAsync
-	});
-
-	CodeInspection.register("jsx", {
-		name: JSCS_NAME,
-		scanFile: handleJSXJSCS,
-		scanFileAsync: handleJSXJSCSAsync
+		scanFile: handleJSCS,
+		scanFileAsync: handleJSCSAsync
 	});
 });
