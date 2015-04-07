@@ -6,8 +6,10 @@ define(function (require, exports, module) {
 
 	// Brackets Modules
 	var CodeInspection		= brackets.getModule("language/CodeInspection"),
+		ExtensionUtils		= brackets.getModule("utils/ExtensionUtils"),
 		FileSystem			= brackets.getModule("filesystem/FileSystem"),
 		FileUtils			= brackets.getModule("file/FileUtils"),
+		NodeDomain			= brackets.getModule("utils/NodeDomain"),
 		PreferencesManager	= brackets.getModule("preferences/PreferencesManager"),
 		ProjectManager		= brackets.getModule("project/ProjectManager"),
 		globmatch			= brackets.getModule("thirdparty/globmatch"),
@@ -162,10 +164,16 @@ define(function (require, exports, module) {
 	* @return {$.Promise} Promise to return results of code inspection
 	*/
 	function handleJSCSAsync(text, fullPath) {
-		var deferred = new $.Deferred();
+		var deferred = new $.Deferred(),
+			config;
+
 		_loadConfig(fullPath)
-			.done(function (cfg) {
-				deferred.resolve(handleJSCS(text, fullPath, cfg));
+			.then(function (cfg) {
+				config = cfg;
+				return _loadEsprima(config);
+			})
+			.done(function () {
+				deferred.resolve(handleJSCS(text, fullPath, config));
 			});
 
 		return deferred.promise();
@@ -346,6 +354,46 @@ define(function (require, exports, module) {
 			.done(function (cfg) {
 				result.resolve(cfg);
 			});
+		return result.promise();
+	}
+
+
+	// ==========================================================================================
+
+
+	/**
+	 * Loads a custom esprima module
+	 *
+	 * @param {object}		config	- The JSCS configuration file
+	 *
+	 * @returns {$.Promise} Promise to return a modified configuration object.
+	 */
+	function _loadEsprima(config) {
+		var result = new $.Deferred();
+
+		// Add support for esprima files overrides
+		if (config.esprima && typeof(config.esprima) === 'string') {
+			var projectRootEntry = ProjectManager.getProjectRoot(),
+				esprima_path = config.esprima.replace(/^\.\//, projectRootEntry.fullPath) + '/esprima.js',
+				esprima_file = FileSystem.getFileForPath(esprima_path);
+
+			esprima_file.read(function (err, content) {
+				if (err) {
+					console.error("JSCS failed to load custom esprima file: " + esprima_path);
+					result.reject(err);
+				}
+
+				require([config.esprima + '/esprima'], function (esp) {
+					// Replace config's esprima value with the contents of the file
+					config.esprima = esp;
+
+					result.resolve(config);
+				});
+			});
+		} else {
+			result.resolve(config);
+		}
+
 		return result.promise();
 	}
 

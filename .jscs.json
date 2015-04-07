@@ -1,4 +1,6 @@
 {
+	"esprima": "./node_modules/esprima-fb",
+
 	"requireOperatorBeforeLineBreak": true,
 	"maximumLineLength": {
 	  "value": 80,

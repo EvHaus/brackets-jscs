@@ -34,8 +34,29 @@ If you have disabled the default Brackets JSLinting service, you will need to ma
 },
 ```
 
+Using with JSX
+=====
+
+JSCS (and brackets-jscs) can be used to validate JSX files. First you'll need to install `esprima-fb' via:
+
+```
+npm install esprima-fb
+```
+
+Then in your .jscs.json file, add the following line:
+
+```
+"esprima": "./node_modules/esprima-fb"
+```
+
+Now your JSX syntax should be properly parsed by JSCS via this extension and the commandline JSCS parser.
+
 Release Notes
 =====
+
+**v0.4.0** (2015-04-07)
+
+- Add support for custom `esprima` paths in the .jscs file. This allows us to use this extension for JSX files
 
 **v0.3.0** (2015-03-25)
 
