@@ -15,7 +15,8 @@ var BUILTIN_OPTIONS = {
     es3: true,
     esprima: true,
     esprimaOptions: true,
-    errorFilter: true
+    errorFilter: true,
+    verbose: true
 };
 
 /**
@@ -42,6 +43,7 @@ function Configuration() {
     this._esprima = null;
     this._esprimaOptions = {};
     this._errorFilter = null;
+    this._verbose = null;
 }
 
 /**
@@ -192,6 +194,15 @@ Configuration.prototype.hasCustomEsprima = function() {
  */
 Configuration.prototype.getCustomEsprima = function() {
     return this._esprima;
+};
+
+/**
+ * Returns verbose option.
+ *
+ * @returns {Object|null}
+ */
+Configuration.prototype.getVerbose = function() {
+    return this._verbose || false;
 };
 
 /**
@@ -353,6 +364,10 @@ Configuration.prototype._processConfig = function(config) {
         this._loadErrorFilter(options.errorFilter);
     }
 
+    if (options.hasOwnProperty('verbose')) {
+        this._loadVerbose(options.verbose);
+    }
+
     // NOTE: rule setting must come last in order to
     // override any rules that are loaded from a preset
     Object.keys(config).forEach(function(key) {
@@ -388,6 +403,20 @@ Configuration.prototype._loadErrorFilter = function(errorFilter) {
         '`errorFilter` option requires a function or null value'
     );
     this._errorFilter = errorFilter;
+};
+
+/**
+ * Loads verbose option.
+ *
+ * @param {Boolean|null} verbose
+ * @protected
+ */
+Configuration.prototype._loadVerbose = function(verbose) {
+    assert(
+        typeof verbose === 'boolean' || verbose === null,
+        '`verbose` option requires a boolean or null value'
+    );
+    this._verbose = verbose;
 };
 
 /**
@@ -475,7 +504,7 @@ Configuration.prototype._throwNonCamelCaseErrorIfNeeded = function(ruleSettings)
 /**
  * Adds rule to the collection.
  *
- * @param {Rule|function} rule Rule instance or rule class.
+ * @param {Rule|Function} rule Rule instance or rule class.
  */
 Configuration.prototype.registerRule = function(rule) {
     if (typeof rule === 'function') {
@@ -594,6 +623,7 @@ Configuration.prototype.registerDefaultRules = function() {
     this.registerRule(require('../rules/require-quoted-keys-in-objects'));
     this.registerRule(require('../rules/disallow-dangling-underscores'));
     this.registerRule(require('../rules/require-aligned-object-values'));
+    this.registerRule(require('../rules/validate-aligned-function-parameters'));
 
     this.registerRule(require('../rules/disallow-padding-newlines-after-blocks'));
     this.registerRule(require('../rules/require-padding-newlines-after-blocks'));
@@ -666,6 +696,8 @@ Configuration.prototype.registerDefaultRules = function() {
 
     this.registerRule(require('../rules/require-anonymous-functions'));
     this.registerRule(require('../rules/disallow-anonymous-functions'));
+    this.registerRule(require('../rules/require-named-unassigned-functions'));
+    this.registerRule(require('../rules/disallow-named-unassigned-functions'));
 
     this.registerRule(require('../rules/require-function-declarations'));
     this.registerRule(require('../rules/disallow-function-declarations'));
@@ -676,6 +708,12 @@ Configuration.prototype.registerDefaultRules = function() {
     this.registerRule(require('../rules/require-line-break-after-variable-assignment'));
     this.registerRule(require('../rules/require-padding-newline-after-variable-declaration'));
 
+    this.registerRule(require('../rules/disallow-padding-newlines-after-use-strict'));
+    this.registerRule(require('../rules/require-padding-newlines-after-use-strict'));
+
+    this.registerRule(require('../rules/disallow-padding-newlines-before-export'));
+    this.registerRule(require('../rules/require-padding-newlines-before-export'));
+
     this.registerRule(require('../rules/require-semicolons'));
     this.registerRule(require('../rules/disallow-semicolons'));
 
@@ -685,6 +723,12 @@ Configuration.prototype.registerDefaultRules = function() {
     this.registerRule(require('../rules/disallow-keywords-in-comments'));
 
     this.registerRule(require('../rules/disallow-identifier-names'));
+
+    this.registerRule(require('../rules/maximum-number-of-lines'));
+
+    this.registerRule(require('../rules/validate-newline-after-array-elements'));
+
+    this.registerRule(require('../rules/disallow-not-operators-in-conditionals'));
 };
 
 /**
@@ -733,7 +777,7 @@ function copyConfiguration(source, dest) {
     }
 }
 
-},{"../../presets/airbnb.json":148,"../../presets/crockford.json":149,"../../presets/google.json":150,"../../presets/grunt.json":151,"../../presets/jquery.json":152,"../../presets/mdcs.json":153,"../../presets/node-style-guide.json":154,"../../presets/wikimedia.json":155,"../../presets/wordpress.json":156,"../../presets/yandex.json":157,"../rules/disallow-anonymous-functions":4,"../rules/disallow-capitalized-comments":5,"../rules/disallow-comma-before-line-break":6,"../rules/disallow-curly-braces":7,"../rules/disallow-dangling-underscores":8,"../rules/disallow-empty-blocks":9,"../rules/disallow-function-declarations":10,"../rules/disallow-identifier-names":11,"../rules/disallow-implicit-type-conversion":12,"../rules/disallow-keywords":15,"../rules/disallow-keywords-in-comments":13,"../rules/disallow-keywords-on-new-line":14,"../rules/disallow-left-sticked-operators":16,"../rules/disallow-mixed-spaces-and-tabs":17,"../rules/disallow-multiple-line-breaks":18,"../rules/disallow-multiple-line-strings":19,"../rules/disallow-multiple-spaces":20,"../rules/disallow-multiple-var-decl":21,"../rules/disallow-newline-before-block-statements":22,"../rules/disallow-operator-before-line-break":23,"../rules/disallow-padding-newlines-after-blocks":24,"../rules/disallow-padding-newlines-before-keywords":25,"../rules/disallow-padding-newlines-before-line-comments":26,"../rules/disallow-padding-newlines-in-blocks":27,"../rules/disallow-padding-newlines-in-objects":28,"../rules/disallow-quoted-keys-in-objects":29,"../rules/disallow-right-sticked-operators":30,"../rules/disallow-semicolons":31,"../rules/disallow-space-after-binary-operators":32,"../rules/disallow-space-after-keywords":33,"../rules/disallow-space-after-line-comment":34,"../rules/disallow-space-after-object-keys":35,"../rules/disallow-space-after-prefix-unary-operators.js":36,"../rules/disallow-space-before-binary-operators":37,"../rules/disallow-space-before-block-statements.js":38,"../rules/disallow-space-before-keywords":39,"../rules/disallow-space-before-object-values":40,"../rules/disallow-space-before-postfix-unary-operators.js":41,"../rules/disallow-space-between-arguments":42,"../rules/disallow-spaces-in-anonymous-function-expression":43,"../rules/disallow-spaces-in-call-expression":44,"../rules/disallow-spaces-in-conditional-expression":45,"../rules/disallow-spaces-in-for-statement":46,"../rules/disallow-spaces-in-function":49,"../rules/disallow-spaces-in-function-declaration":47,"../rules/disallow-spaces-in-function-expression":48,"../rules/disallow-spaces-in-named-function-expression":50,"../rules/disallow-spaces-inside-array-brackets":51,"../rules/disallow-spaces-inside-brackets":52,"../rules/disallow-spaces-inside-object-brackets":53,"../rules/disallow-spaces-inside-parentheses":54,"../rules/disallow-trailing-comma":55,"../rules/disallow-trailing-whitespace":56,"../rules/disallow-yoda-conditions":57,"../rules/maximum-line-length":58,"../rules/require-aligned-object-values":59,"../rules/require-anonymous-functions":60,"../rules/require-blocks-on-newline":61,"../rules/require-camelcase-or-uppercase-identifiers":62,"../rules/require-capitalized-comments":63,"../rules/require-capitalized-constructors":64,"../rules/require-comma-before-line-break":65,"../rules/require-curly-braces":66,"../rules/require-dollar-before-jquery-assignment":67,"../rules/require-dot-notation":68,"../rules/require-function-declarations":69,"../rules/require-keywords-on-new-line":70,"../rules/require-left-sticked-operators":71,"../rules/require-line-break-after-variable-assignment":72,"../rules/require-line-feed-at-file-end":73,"../rules/require-multiple-var-decl":74,"../rules/require-newline-before-block-statements":75,"../rules/require-operator-before-line-break":76,"../rules/require-padding-newline-after-variable-declaration":77,"../rules/require-padding-newlines-after-blocks":78,"../rules/require-padding-newlines-before-keywords":79,"../rules/require-padding-newlines-before-line-comments":80,"../rules/require-padding-newlines-in-blocks":81,"../rules/require-padding-newlines-in-objects":82,"../rules/require-parentheses-around-iife":83,"../rules/require-quoted-keys-in-objects":84,"../rules/require-right-sticked-operators":85,"../rules/require-semicolons":86,"../rules/require-space-after-binary-operators":87,"../rules/require-space-after-keywords":88,"../rules/require-space-after-line-comment":89,"../rules/require-space-after-object-keys":90,"../rules/require-space-after-prefix-unary-operators.js":91,"../rules/require-space-before-binary-operators":92,"../rules/require-space-before-block-statements.js":93,"../rules/require-space-before-keywords":94,"../rules/require-space-before-object-values":95,"../rules/require-space-before-postfix-unary-operators.js":96,"../rules/require-space-between-arguments":97,"../rules/require-spaces-in-anonymous-function-expression":98,"../rules/require-spaces-in-call-expression":99,"../rules/require-spaces-in-conditional-expression":100,"../rules/require-spaces-in-for-statement":101,"../rules/require-spaces-in-function":104,"../rules/require-spaces-in-function-declaration":102,"../rules/require-spaces-in-function-expression":103,"../rules/require-spaces-in-named-function-expression":105,"../rules/require-spaces-inside-array-brackets":106,"../rules/require-spaces-inside-brackets":107,"../rules/require-spaces-inside-object-brackets":108,"../rules/require-spaces-inside-parentheses":109,"../rules/require-trailing-comma":110,"../rules/require-yoda-conditions":111,"../rules/safe-context-keyword":112,"../rules/validate-indentation":113,"../rules/validate-jsdoc":114,"../rules/validate-line-breaks":115,"../rules/validate-parameter-separator":116,"../rules/validate-quote-marks":117,"assert":122,"minimatch":140,"path":125}],2:[function(require,module,exports){
+},{"../../presets/airbnb.json":159,"../../presets/crockford.json":160,"../../presets/google.json":161,"../../presets/grunt.json":162,"../../presets/jquery.json":163,"../../presets/mdcs.json":164,"../../presets/node-style-guide.json":165,"../../presets/wikimedia.json":166,"../../presets/wordpress.json":167,"../../presets/yandex.json":168,"../rules/disallow-anonymous-functions":4,"../rules/disallow-capitalized-comments":5,"../rules/disallow-comma-before-line-break":6,"../rules/disallow-curly-braces":7,"../rules/disallow-dangling-underscores":8,"../rules/disallow-empty-blocks":9,"../rules/disallow-function-declarations":10,"../rules/disallow-identifier-names":11,"../rules/disallow-implicit-type-conversion":12,"../rules/disallow-keywords":15,"../rules/disallow-keywords-in-comments":13,"../rules/disallow-keywords-on-new-line":14,"../rules/disallow-left-sticked-operators":16,"../rules/disallow-mixed-spaces-and-tabs":17,"../rules/disallow-multiple-line-breaks":18,"../rules/disallow-multiple-line-strings":19,"../rules/disallow-multiple-spaces":20,"../rules/disallow-multiple-var-decl":21,"../rules/disallow-named-unassigned-functions":22,"../rules/disallow-newline-before-block-statements":23,"../rules/disallow-not-operators-in-conditionals":24,"../rules/disallow-operator-before-line-break":25,"../rules/disallow-padding-newlines-after-blocks":26,"../rules/disallow-padding-newlines-after-use-strict":27,"../rules/disallow-padding-newlines-before-export":28,"../rules/disallow-padding-newlines-before-keywords":29,"../rules/disallow-padding-newlines-before-line-comments":30,"../rules/disallow-padding-newlines-in-blocks":31,"../rules/disallow-padding-newlines-in-objects":32,"../rules/disallow-quoted-keys-in-objects":33,"../rules/disallow-right-sticked-operators":34,"../rules/disallow-semicolons":35,"../rules/disallow-space-after-binary-operators":36,"../rules/disallow-space-after-keywords":37,"../rules/disallow-space-after-line-comment":38,"../rules/disallow-space-after-object-keys":39,"../rules/disallow-space-after-prefix-unary-operators.js":40,"../rules/disallow-space-before-binary-operators":41,"../rules/disallow-space-before-block-statements.js":42,"../rules/disallow-space-before-keywords":43,"../rules/disallow-space-before-object-values":44,"../rules/disallow-space-before-postfix-unary-operators.js":45,"../rules/disallow-space-between-arguments":46,"../rules/disallow-spaces-in-anonymous-function-expression":47,"../rules/disallow-spaces-in-call-expression":48,"../rules/disallow-spaces-in-conditional-expression":49,"../rules/disallow-spaces-in-for-statement":50,"../rules/disallow-spaces-in-function":53,"../rules/disallow-spaces-in-function-declaration":51,"../rules/disallow-spaces-in-function-expression":52,"../rules/disallow-spaces-in-named-function-expression":54,"../rules/disallow-spaces-inside-array-brackets":55,"../rules/disallow-spaces-inside-brackets":56,"../rules/disallow-spaces-inside-object-brackets":57,"../rules/disallow-spaces-inside-parentheses":58,"../rules/disallow-trailing-comma":59,"../rules/disallow-trailing-whitespace":60,"../rules/disallow-yoda-conditions":61,"../rules/maximum-line-length":62,"../rules/maximum-number-of-lines":63,"../rules/require-aligned-object-values":64,"../rules/require-anonymous-functions":65,"../rules/require-blocks-on-newline":66,"../rules/require-camelcase-or-uppercase-identifiers":67,"../rules/require-capitalized-comments":68,"../rules/require-capitalized-constructors":69,"../rules/require-comma-before-line-break":70,"../rules/require-curly-braces":71,"../rules/require-dollar-before-jquery-assignment":72,"../rules/require-dot-notation":73,"../rules/require-function-declarations":74,"../rules/require-keywords-on-new-line":75,"../rules/require-left-sticked-operators":76,"../rules/require-line-break-after-variable-assignment":77,"../rules/require-line-feed-at-file-end":78,"../rules/require-multiple-var-decl":79,"../rules/require-named-unassigned-functions":80,"../rules/require-newline-before-block-statements":81,"../rules/require-operator-before-line-break":82,"../rules/require-padding-newline-after-variable-declaration":83,"../rules/require-padding-newlines-after-blocks":84,"../rules/require-padding-newlines-after-use-strict":85,"../rules/require-padding-newlines-before-export":86,"../rules/require-padding-newlines-before-keywords":87,"../rules/require-padding-newlines-before-line-comments":88,"../rules/require-padding-newlines-in-blocks":89,"../rules/require-padding-newlines-in-objects":90,"../rules/require-parentheses-around-iife":91,"../rules/require-quoted-keys-in-objects":92,"../rules/require-right-sticked-operators":93,"../rules/require-semicolons":94,"../rules/require-space-after-binary-operators":95,"../rules/require-space-after-keywords":96,"../rules/require-space-after-line-comment":97,"../rules/require-space-after-object-keys":98,"../rules/require-space-after-prefix-unary-operators.js":99,"../rules/require-space-before-binary-operators":100,"../rules/require-space-before-block-statements.js":101,"../rules/require-space-before-keywords":102,"../rules/require-space-before-object-values":103,"../rules/require-space-before-postfix-unary-operators.js":104,"../rules/require-space-between-arguments":105,"../rules/require-spaces-in-anonymous-function-expression":106,"../rules/require-spaces-in-call-expression":107,"../rules/require-spaces-in-conditional-expression":108,"../rules/require-spaces-in-for-statement":109,"../rules/require-spaces-in-function":112,"../rules/require-spaces-in-function-declaration":110,"../rules/require-spaces-in-function-expression":111,"../rules/require-spaces-in-named-function-expression":113,"../rules/require-spaces-inside-array-brackets":114,"../rules/require-spaces-inside-brackets":115,"../rules/require-spaces-inside-object-brackets":116,"../rules/require-spaces-inside-parentheses":117,"../rules/require-trailing-comma":118,"../rules/require-yoda-conditions":119,"../rules/safe-context-keyword":120,"../rules/validate-aligned-function-parameters":121,"../rules/validate-indentation":122,"../rules/validate-jsdoc":123,"../rules/validate-line-breaks":124,"../rules/validate-newline-after-array-elements":125,"../rules/validate-parameter-separator":126,"../rules/validate-quote-marks":127,"assert":132,"minimatch":150,"path":135}],2:[function(require,module,exports){
 var assert = require('assert');
 var chalk = require('chalk');
 var TokenAssert = require('./token-assert');
@@ -800,11 +844,25 @@ Errors.prototype = {
         this._errorList.push({
             filename: this._file.getFilename(),
             rule: this._currentRule,
-            message: this._verbose ? this._currentRule + ': ' + errorInfo.message : errorInfo.message,
+            message: this._prepareMessage(errorInfo),
             line: errorInfo.line,
             column: errorInfo.column,
             fixed: errorInfo.fixed
         });
+    },
+
+    /**
+     * Prepare error message.
+     *
+     * @param {Object} errorInfo
+     * @private
+     */
+    _prepareMessage: function(errorInfo) {
+        if (this._verbose && this._currentRule) {
+            return this._currentRule + ': ' + errorInfo.message;
+        }
+
+        return errorInfo.message;
     },
 
     /**
@@ -865,7 +923,7 @@ Errors.prototype = {
      * Formats error for further output.
      *
      * @param {Object} error
-     * @param {Boolean} colorize
+     * @param {Boolean} [colorize = false]
      * @returns {String}
      */
     explainError: function(error, colorize) {
@@ -935,7 +993,7 @@ function prependSpaces(s, len) {
  *
  * @param {Number} n line number
  * @param {String} line
- * @param {Boolean} colorize
+ * @param {Boolean} [colorize = false]
  * @returns {String}
  */
 function renderLine(n, line, colorize) {
@@ -953,7 +1011,7 @@ function renderLine(n, line, colorize) {
  * ---------------^
  *
  * @param {Number} column
- * @param {Boolean} colorize
+ * @param {Boolean} [colorize = false]
  * @returns {String}
  */
 function renderPointer(column, colorize) {
@@ -963,7 +1021,7 @@ function renderPointer(column, colorize) {
 
 module.exports = Errors;
 
-},{"./token-assert":119,"assert":122,"chalk":129}],3:[function(require,module,exports){
+},{"./token-assert":129,"assert":132,"chalk":139}],3:[function(require,module,exports){
 var treeIterator = require('./tree-iterator');
 
 /**
@@ -1002,7 +1060,10 @@ var JsFile = function(filename, source, tree, options) {
     this._tokenRangeEndIndex = tokenIndexes.tokenRangeEndIndex;
     this._tokensByLineIndex = tokenIndexes.tokensByLineIndex;
 
-    this._index = this._buildNodeIndex();
+    var nodeIndexes = this._buildNodeIndex();
+    this._index = nodeIndexes.nodesByType;
+    this._nodesByStartRange = nodeIndexes.nodesByStartRange;
+
     this._fixEsprimaIdentifiers();
 
     this._buildDisabledRuleIndex();
@@ -1341,6 +1402,23 @@ JsFile.prototype = {
     },
 
     /**
+     * Returns nodes by range start index from earlier built index.
+     *
+     * @param {Object} token
+     * @returns {Object[]}
+     */
+    getNodesByFirstToken: function(token) {
+        var result = [];
+        if (token && token.range && token.range[0] >= 0) {
+            var nodes = this._nodesByStartRange[token.range[0]];
+            if (nodes) {
+                result = result.concat(nodes);
+            }
+        }
+        return result;
+    },
+
+    /**
      * Returns nodes by type(s) from earlier built index.
      *
      * @param {String|String[]} type
@@ -1442,7 +1520,7 @@ JsFile.prototype = {
      *
      * @param {Number} lineNumber
      * @param {Object} [options]
-     * @param {Boolean} [options.includeComments]
+     * @param {Boolean} [options.includeComments = false]
      * @returns {Object|undefined}
      */
     getFirstTokenOnLine: function(lineNumber, options) {
@@ -1686,27 +1764,38 @@ JsFile.prototype = {
     },
 
     /**
-     * Builds node index using node type as the key.
+     * Builds node indexes using
+     *  i. node type as the key
+     *  ii. node start range as the key
      *
-     * @returns {Object}
+     * @returns {{nodesByType: {}, nodesByStartRange: {}}}
      * @private
      */
     _buildNodeIndex: function() {
-        var index = {};
+        var nodesByType = {};
+        var nodesByStartRange = {};
         this.iterate(function(node, parentNode, parentCollection) {
             var type = node.type;
 
             node.parentNode = parentNode;
             node.parentCollection = parentCollection;
-            (index[type] || (index[type] = [])).push(node);
+            (nodesByType[type] || (nodesByType[type] = [])).push(node);
+
+            // this part builds a node index that uses node start ranges as the key
+            var startRange = node.range[0];
+            (nodesByStartRange[startRange] || (nodesByStartRange[startRange] = [])).push(node);
         });
-        return index;
+        return {
+            nodesByType: nodesByType,
+            nodesByStartRange: nodesByStartRange
+        };
     },
 
     /**
      * Temporary fix (I hope) for esprima tokenizer
      * (https://code.google.com/p/esprima/issues/detail?id=481)
      * Fixes #83, #180
+     *
      * @private
      */
     _fixEsprimaIdentifiers: function() {
@@ -1798,7 +1887,7 @@ JsFile.parse = function(source, esprima, esprimaOptions) {
 
 module.exports = JsFile;
 
-},{"./tree-iterator":120}],4:[function(require,module,exports){
+},{"./tree-iterator":130}],4:[function(require,module,exports){
 /**
  * Requires that a function expression be named.
  *
@@ -1862,7 +1951,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],5:[function(require,module,exports){
+},{"assert":132}],5:[function(require,module,exports){
 /**
  * Requires the first alphabetical character of a comment to be lowercase.
  *
@@ -1936,7 +2025,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../../patterns/L":145,"../../patterns/Ll":146,"assert":122}],6:[function(require,module,exports){
+},{"../../patterns/L":156,"../../patterns/Ll":157,"assert":132}],6:[function(require,module,exports){
 /**
  * Disallows commas as last token on a line in lists.
  *
@@ -2001,7 +2090,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],7:[function(require,module,exports){
+},{"assert":132}],7:[function(require,module,exports){
 /**
  * Disallows curly braces after statements.
  *
@@ -2120,7 +2209,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],8:[function(require,module,exports){
+},{"../utils":131,"assert":132}],8:[function(require,module,exports){
 /**
  * Disallows identifiers that start or end in `_`. Some popular identifiers are automatically listed as exceptions:
  *
@@ -2233,7 +2322,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],9:[function(require,module,exports){
+},{"assert":132}],9:[function(require,module,exports){
 /**
  * Disallows empty blocks (except for catch blocks).
  *
@@ -2293,7 +2382,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],10:[function(require,module,exports){
+},{"assert":132}],10:[function(require,module,exports){
 /**
  * Disallows function declarations.
  *
@@ -2355,7 +2444,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],11:[function(require,module,exports){
+},{"assert":132}],11:[function(require,module,exports){
 /**
  * Disallows a specified set of identifier names.
  *
@@ -2412,14 +2501,14 @@ module.exports.prototype = {
         var disallowedIdentifiers = this._identifierIndex;
 
         file.iterateNodesByType('Identifier', function(node) {
-            if (disallowedIdentifiers[node.name]) {
+            if (Object.prototype.hasOwnProperty.call(disallowedIdentifiers, node.name)) {
                 errors.add('Illegal Identifier name: ' + node.name, node.loc.start);
             }
         });
 
         file.iterateNodesByType('MemberExpression', function(node) {
             if (node.property.type === 'Literal') {
-                if (disallowedIdentifiers[node.property.value]) {
+                if (Object.prototype.hasOwnProperty.call(disallowedIdentifiers, node.property.value)) {
                     errors.add('Illegal Identifier name: ' + node.property.value, node.property.loc.start);
                 }
             }
@@ -2429,7 +2518,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],12:[function(require,module,exports){
+},{"assert":132}],12:[function(require,module,exports){
 /**
  * Disallows implicit type conversion.
  *
@@ -2514,7 +2603,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],13:[function(require,module,exports){
+},{"assert":132}],13:[function(require,module,exports){
 /**
  * Disallows keywords in your comments, such as TODO or FIXME
  *
@@ -2615,7 +2704,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],14:[function(require,module,exports){
+},{"assert":132}],14:[function(require,module,exports){
 /**
  * Disallows placing keywords on a new line.
  *
@@ -2676,6 +2765,24 @@ module.exports.prototype = {
                 return;
             }
 
+            // Special cases for #885, using while as the keyword contradicts rule meaning
+            // but it is more efficient and reduces complexity of the code in this rule
+            if (token.value === 'while') {
+                var nodes = file.getNodesByFirstToken(token);
+
+                if (nodes.length === 0) {
+                    // "while" that is part of a do will not return nodes as it is not a start token
+                    if (prevToken.value !== '}') {
+                        // allow "while" that is part of a "do while" with no braces to succeed
+                        return;
+                    }
+                } else {
+                    // it is a "while" statement that is not part of a "do while"
+                    // , allow it to succeed even though it contradicts rule meaning
+                    return;
+                }
+            }
+
             errors.assert.sameLine({
                 token: prevToken,
                 nextToken: token
@@ -2685,7 +2792,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],15:[function(require,module,exports){
+},{"assert":132}],15:[function(require,module,exports){
 /**
  * Disallows usage of specified keywords.
  *
@@ -2734,7 +2841,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],16:[function(require,module,exports){
+},{"assert":132}],16:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -2845,7 +2952,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],18:[function(require,module,exports){
+},{"assert":132}],18:[function(require,module,exports){
 /**
  * Disallows multiple blank lines in a row.
  *
@@ -2911,7 +3018,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],19:[function(require,module,exports){
+},{"assert":132}],19:[function(require,module,exports){
 /**
  * Disallows strings that span multiple lines without using concatenation.
  *
@@ -2972,9 +3079,9 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],20:[function(require,module,exports){
+},{"assert":132}],20:[function(require,module,exports){
 /**
- * Disallows multiple spaces between identifiers, keywords, and any other token
+ * Disallows multiple indentation characters (tabs or spaces) between identifiers, keywords, and any other token
  *
  * Type: `Boolean`
  *
@@ -2995,7 +3102,7 @@ module.exports.prototype = {
  * ##### Invalid
  * ```js
  * var x  = "hello";
- * function y() {}
+ * function  y() {}
  * ```
  */
 
@@ -3010,7 +3117,7 @@ module.exports.prototype = {
             options === true ||
             typeof options === 'object' &&
             options.allowEOLComments === true,
-            'options option requires true value ' +
+            this.getOptionName() + ' option requires true value ' +
             'or an object with `allowEOLComments` property'
         );
 
@@ -3048,17 +3155,20 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],21:[function(require,module,exports){
+},{"assert":132}],21:[function(require,module,exports){
 /**
  * Disallows multiple `var` declaration (except for-loop).
  *
- * Types: `Boolean` or `String`
+ * Types: `Boolean` or `Object`
  *
  * Values:
  *
  * - `true` disallows multiple variable declarations except within a for loop
- * - `'strict'` disallows all multiple variable declarations
- * - `'exceptUndefined'` allows declarations where all variables are not defined
+ * - `Object`:
+ *    - `'strict'` disallows all multiple variable declarations
+ *    - `'allExcept'` array of exceptions:
+ *       - `'undefined'` allows declarations where all variables are not defined
+ *       - `'required'` allows declarations where all variables are importing external modules with require
  *
  * #### Example
  *
@@ -3075,17 +3185,28 @@ module.exports.prototype = {
  * for (var i = 0, j = arr.length; i < j; i++) {}
  * ```
  *
- * ##### Valid for `strict`
+ * ##### Valid for `{ strict: true }`
  *
  * ```js
  * var x = 1;
  * var y = 2;
  * ```
  *
- * ##### Valid for `exceptUndefined`
+ * ##### Valid for `{ allExcept: ['undefined'] }`
  *
  * ```js
  * var a, b;
+ * var x = 1;
+ * var y = 2;
+ *
+ * for (var i = 0, j = arr.length; i < j; i++) {}
+ * ```
+ * ##### Valid for `{ allExcept: ['require'] }`
+ *
+ * ```js
+ * var a = require('a'),
+ *     b = require('b');
+ *
  * var x = 1;
  * var y = 2;
  *
@@ -3109,15 +3230,34 @@ module.exports = function() {};
 module.exports.prototype = {
 
     configure: function(options) {
-        assert(
-            options === true ||
-            options === 'strict' ||
-            options === 'exceptUndefined',
-            this.getOptionName() + ' option requires a true value, "strict", or "exceptUndefined"'
-        );
+        // support for legacy options
+        if (typeof options !== 'object') {
+            assert(
+                options === true ||
+                options === 'strict' ||
+                options === 'exceptUndefined',
+                this.getOptionName() +
+                    ' option requires a true value, "strict", "exceptUndefined", or an object'
+            );
 
-        this.strictMode = options === 'strict';
-        this.exceptUndefined = options === 'exceptUndefined';
+            var _options = {
+                strict: options === 'strict',
+                allExcept: []
+            };
+
+            if (options === 'exceptUndefined') {
+                _options.allExcept.push('undefined');
+            }
+
+            return this.configure(_options);
+        }
+
+        if (Array.isArray(options.allExcept)) {
+            this._exceptUndefined = options.allExcept.indexOf('undefined') > -1;
+            this._exceptRequire = options.allExcept.indexOf('require') > -1;
+        }
+
+        this._strictMode = options.strict === true;
     },
 
     getOptionName: function() {
@@ -3125,24 +3265,53 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
-        var inStrictMode = this.strictMode;
-        var exceptUndefined = this.exceptUndefined;
+        var inStrictMode = this._strictMode;
+        var exceptUndefined = this._exceptUndefined;
+        var exceptRequire = this._exceptRequire;
 
         file.iterateNodesByType('VariableDeclaration', function(node) {
-            var hasDefinedVariables = node.declarations.some(function(declaration) {
+            var definedVariables = node.declarations.filter(function(declaration) {
                 return !!declaration.init;
             });
+            var hasDefinedVariables = definedVariables.length > 0;
+
+            var requireStatements = node.declarations.filter(function(declaration) {
+                var init = declaration.init;
+
+                return init &&
+                    init.callee &&
+                    init.callee.name === 'require';
+            });
+            var allRequireStatements = requireStatements.length === node.declarations.length;
 
             var isForStatement = node.parentNode.type === 'ForStatement';
 
             // allow single var declarations
-            if (node.declarations.length === 1 ||
-                // allow multiple var declarations in for statement unless we're in strict mode
-                // for (var i = 0, j = myArray.length; i < j; i++) {}
-                !inStrictMode && isForStatement ||
-                // allow multiple var declarations with all undefined variables in exceptUndefined mode
-                // var a, b, c
-                exceptUndefined && !hasDefinedVariables) {
+            if (node.declarations.length === 1) {
+                return;
+            }
+
+            // allow multiple var declarations in for statement unless we're in strict mode
+            // for (var i = 0, j = myArray.length; i < j; i++) {}
+            if (!inStrictMode && isForStatement) {
+                return;
+            }
+
+            // allow multiple var declarations with all undefined variables in exceptUndefined mode
+            // var a, b, c
+            if (exceptUndefined && !hasDefinedVariables) {
+                return;
+            }
+
+            // allow multiple var declaration with all require
+            // var a = require("a"), b = require("b")
+            if (exceptRequire && allRequireStatements) {
+                return;
+            }
+
+            // allow multiple var declarations only with require && undefined
+            // var a = require("a"), b = require("b"), x, y
+            if (exceptUndefined && exceptRequire && definedVariables.length === requireStatements.length) {
                 return;
             }
 
@@ -3152,7 +3321,70 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],22:[function(require,module,exports){
+},{"assert":132}],22:[function(require,module,exports){
+/**
+ * Disallows unassigned functions to be named inline
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowNamedUnassignedFunctions": true
+ * ```
+ *
+ * ##### Valid
+ * ```js
+ * [].forEach(function () {});
+ * var x = function() {};
+ * function y() {}
+ * ```
+ *
+ * ##### Invalid
+ * ```js
+ * [].forEach(function x() {});
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(options) {
+        assert(
+            options === true,
+            this.getOptionName() + ' option requires true value'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowNamedUnassignedFunctions';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('FunctionExpression', function(node) {
+            // If the function has been named via left hand assignment, skip it
+            //   e.g. `var hello = function() {`, `foo.bar = function() {`
+            if (node.parentNode.type.match(/VariableDeclarator|Property|AssignmentExpression/)) {
+                return;
+            }
+
+            // If the function has not been named, skip it
+            //   e.g. `[].forEach(function() {`
+            if (node.id === null) {
+                return;
+            }
+
+            // Otherwise, complain that it is being named
+            errors.add('Inline functions cannot be named', node.loc.start);
+        });
+    }
+};
+
+},{"assert":132}],23:[function(require,module,exports){
 /**
  * Disallows newline before opening curly brace of all block statements.
  *
@@ -3254,7 +3486,115 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],23:[function(require,module,exports){
+},{"assert":132}],24:[function(require,module,exports){
+/**
+ * Disallows the not, not equals, and strict not equals operators in conditionals.
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowNotOperatorsInConditionals": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * if (clause) {
+ *     // Do something really crazy
+ * } else {
+ *     // Do something crazy
+ * }
+ *
+ * if (a == 1) {
+ *     // Do something really crazy
+ * } else {
+ *     // Do something crazy
+ * }
+ *
+ * var a = (clause) ? 1 : 0
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * if (!clause) {
+ *     // Do something crazy
+ * } else {
+ *     // Do something really crazy
+ * }
+ *
+ * if (a != 1) {
+ *     // Do something crazy
+ * } else {
+ *     // Do something really crazy
+ * }
+ *
+ * if (a !== 1) {
+ *     // Do something crazy
+ * } else {
+ *     // Do something really crazy
+ * }
+ *
+ * var a = (!clause) ? 0 : 1
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(options) {
+        assert(
+            options === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowNotOperatorsInConditionals';
+    },
+
+    check: function(file, errors) {
+        function hasNotOperator(test) {
+            return test.type === 'UnaryExpression' && test.operator === '!';
+        }
+
+        function hasNotEqualOperator(test) {
+            return test.type === 'BinaryExpression' && test.operator === '!=';
+        }
+
+        function hasStrictNotEqualOperator(test) {
+            return test.type === 'BinaryExpression' && test.operator === '!==';
+        }
+
+        file.iterateNodesByType(['IfStatement', 'ConditionalExpression'], function(node) {
+            var alternate = node.alternate;
+
+            // check if the if statement has an else block
+            if (node.type === 'IfStatement' && (!alternate || alternate.type !== 'BlockStatement')) {
+                return;
+            }
+            var test = node.test;
+            if (hasNotOperator(test)) {
+                errors.add('Illegal use of not operator in if statement', test.loc.start);
+            }
+            if (hasNotEqualOperator(test)) {
+                errors.add('Illegal use of not equal operator in if statement', test.loc.end);
+            }
+            if (hasStrictNotEqualOperator(test)) {
+                errors.add('Illegal use of strict not equal operator in if statement', test.loc.end);
+            }
+        });
+    }
+};
+
+},{"assert":132}],25:[function(require,module,exports){
 /**
  * Requires putting certain operators on the next line rather than on the current line before a line break.
  *
@@ -3320,7 +3660,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],24:[function(require,module,exports){
+},{"../utils":131,"assert":132}],26:[function(require,module,exports){
 /**
  * Disallow a newline after blocks
  *
@@ -3421,7 +3761,146 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],25:[function(require,module,exports){
+},{"assert":132}],27:[function(require,module,exports){
+/**
+ * Disallow a blank line after `'use strict';` statements
+ *
+ * Values: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowPaddingNewLinesAfterUseStrict": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * 'use strict';
+ * // code
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * 'use strict';
+ *
+ * // code
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(disallowPaddingNewLinesAfterUseStrict) {
+        assert(
+            disallowPaddingNewLinesAfterUseStrict === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowPaddingNewLinesAfterUseStrict';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('ExpressionStatement', function(node) {
+            var expression = node.expression;
+
+            if (expression.type !== 'Literal' || expression.value !== 'use strict') {
+                return;
+            }
+
+            var endOfNode = file.getLastNodeToken(node);
+            var nextToken = file.getNextToken(endOfNode, {
+                includeComments: true
+            });
+
+            errors.assert.linesBetween({
+                atMost: 1,
+                token: endOfNode,
+                nextToken: nextToken
+            });
+        });
+    }
+};
+
+},{"assert":132}],28:[function(require,module,exports){
+/**
+ * Disallows newline before module.exports
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "disallowPaddingNewLinesBeforeExport": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var a = 2;
+ * module.exports = a;
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var a = 2;
+ *
+ * module.exports = a;
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(value) {
+        assert(
+            value === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'disallowPaddingNewLinesBeforeExport';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('AssignmentExpression', function(node) {
+            var left = node.left;
+            if (!(
+                left.object &&
+                left.object.name === 'module' &&
+                left.property &&
+                left.property.name === 'exports')) {
+                return;
+            }
+
+            var firstToken = file.getFirstNodeToken(node);
+            var prevToken = file.getPrevToken(firstToken, {includeComments: true});
+
+            errors.assert.linesBetween({
+                atMost: 1,
+                token: prevToken,
+                nextToken: firstToken,
+                message: 'Unexpected extra newline before export'
+            });
+        });
+    }
+
+};
+
+},{"assert":132}],29:[function(require,module,exports){
 /**
  * Disallow an empty line above the specified keywords.
  *
@@ -3521,7 +4000,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],26:[function(require,module,exports){
+},{"../utils":131,"assert":132}],30:[function(require,module,exports){
 /**
  * Disallows newline before line comments
  *
@@ -3586,9 +4065,9 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],27:[function(require,module,exports){
+},{"assert":132}],31:[function(require,module,exports){
 /**
- * Disallows blocks from beginning and ending with 2 newlines.
+ * Disallows blocks from beginning or ending with 2 newlines.
  *
  * Type: `Boolean`
  *
@@ -3662,7 +4141,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],28:[function(require,module,exports){
+},{"assert":132}],32:[function(require,module,exports){
 /**
  * Disallows newline inside curly braces of all objects.
  *
@@ -3741,7 +4220,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],29:[function(require,module,exports){
+},{"assert":132}],33:[function(require,module,exports){
 /**
  * Disallows quoted keys in object if possible.
  *
@@ -3822,7 +4301,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],30:[function(require,module,exports){
+},{"../utils":131,"assert":132}],34:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -3848,7 +4327,7 @@ module.exports.prototype = {
 
 };
 
-},{}],31:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /**
  * Disallows lines from ending in a semicolon.
  *
@@ -3904,7 +4383,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],32:[function(require,module,exports){
+},{"assert":132}],36:[function(require,module,exports){
 /**
  * Requires sticking binary operators to the right.
  *
@@ -4024,7 +4503,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],33:[function(require,module,exports){
+},{"../utils":131,"assert":132}],37:[function(require,module,exports){
 /**
  * Disallows space after keyword.
  *
@@ -4099,7 +4578,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],34:[function(require,module,exports){
+},{"../utils":131,"assert":132}],38:[function(require,module,exports){
 /**
  * Requires that a line comment (`//`) not be followed by a space.
  *
@@ -4154,7 +4633,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],35:[function(require,module,exports){
+},{"assert":132}],39:[function(require,module,exports){
 /**
  * Disallows space after object keys.
  *
@@ -4232,7 +4711,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],36:[function(require,module,exports){
+},{"assert":132}],40:[function(require,module,exports){
 /**
  * Requires sticking unary operators to the right.
  *
@@ -4305,7 +4784,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],37:[function(require,module,exports){
+},{"../utils":131,"assert":132}],41:[function(require,module,exports){
 /**
  * Requires sticking binary operators to the left.
  *
@@ -4426,7 +4905,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],38:[function(require,module,exports){
+},{"../utils":131,"assert":132}],42:[function(require,module,exports){
 /**
  * Disallows space before block statements (for loops, control structures).
  *
@@ -4447,7 +4926,7 @@ module.exports.prototype = {
  *     foo();
  * } else{
  *    bar();
- }
+ * }
  *
  * for (var e in elements){
  *     bar(e);
@@ -4465,7 +4944,7 @@ module.exports.prototype = {
  *     foo();
  * } else {
  *    bar();
- }
+ * }
  *
  * for (var e in elements) {
  *     bar(e);
@@ -4507,7 +4986,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],39:[function(require,module,exports){
+},{"assert":132}],43:[function(require,module,exports){
 /**
  * Disallows space before keyword.
  *
@@ -4584,7 +5063,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],40:[function(require,module,exports){
+},{"../utils":131,"assert":132}],44:[function(require,module,exports){
 /**
  * Disallows space after object keys.
  *
@@ -4646,7 +5125,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],41:[function(require,module,exports){
+},{"assert":132}],45:[function(require,module,exports){
 /**
  * Requires sticking unary operators to the left.
  *
@@ -4721,7 +5200,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],42:[function(require,module,exports){
+},{"../utils":131,"assert":132}],46:[function(require,module,exports){
 /**
  * Ensure there are no spaces after argument separators in call expressions.
  *
@@ -4783,7 +5262,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],43:[function(require,module,exports){
+},{"assert":132}],47:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in anonymous function expressions.
  *
@@ -4902,7 +5381,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],44:[function(require,module,exports){
+},{"assert":132}],48:[function(require,module,exports){
 /**
  * Disallows space before `()` in call expressions.
  *
@@ -4959,7 +5438,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],45:[function(require,module,exports){
+},{"assert":132}],49:[function(require,module,exports){
 /**
  * Disallows space before and/or after `?` or `:` in conditional expressions.
  *
@@ -5116,7 +5595,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],46:[function(require,module,exports){
+},{"assert":132}],50:[function(require,module,exports){
 /**
  * Disallow spaces in between for statement.
  *
@@ -5197,7 +5676,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],47:[function(require,module,exports){
+},{"assert":132}],51:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in function declarations.
  *
@@ -5298,7 +5777,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],48:[function(require,module,exports){
+},{"assert":132}],52:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in function expressions (both [named](#disallowspacesinnamedfunctionexpression)
  * and [anonymous](#disallowspacesinanonymousfunctionexpression)).
@@ -5411,7 +5890,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],49:[function(require,module,exports){
+},{"assert":132}],53:[function(require,module,exports){
 /**
  * Expression
  *
@@ -5530,7 +6009,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],50:[function(require,module,exports){
+},{"assert":132}],54:[function(require,module,exports){
 /**
  * Disallows space before `()` or `{}` in named function expressions.
  *
@@ -5636,7 +6115,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],51:[function(require,module,exports){
+},{"assert":132}],55:[function(require,module,exports){
 /**
  * Disallows space after opening array square bracket and before closing.
  *
@@ -5763,7 +6242,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],52:[function(require,module,exports){
+},{"assert":132}],56:[function(require,module,exports){
 /**
  * Disallows space after opening square bracket and before closing.
  *
@@ -5879,7 +6358,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],53:[function(require,module,exports){
+},{"assert":132}],57:[function(require,module,exports){
 /**
  * Disallows space after opening object curly brace and before closing.
  *
@@ -5896,7 +6375,7 @@ module.exports.prototype = {
  * }
  *
  * // or
- * * "disallowSpacesInsideObjectBrackets": true | "all" | "nested"
+ * "disallowSpacesInsideObjectBrackets": true | "all" | "nested"
  * ```
  *
  * ##### Valid for mode `"all"`
@@ -5999,7 +6478,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],54:[function(require,module,exports){
+},{"assert":132}],58:[function(require,module,exports){
 /**
  * Disallows space after opening round bracket and before closing.
  *
@@ -6121,7 +6600,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],55:[function(require,module,exports){
+},{"assert":132}],59:[function(require,module,exports){
 /**
  * Disallows an extra comma following the final element of an array or object literal.
  *
@@ -6182,7 +6661,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],56:[function(require,module,exports){
+},{"assert":132}],60:[function(require,module,exports){
 /**
  * Requires all lines to end on a non-whitespace character
  *
@@ -6260,7 +6739,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],57:[function(require,module,exports){
+},{"assert":132}],61:[function(require,module,exports){
 /**
  * Requires the variable to be the left hand operator when doing a boolean comparison
  *
@@ -6333,7 +6812,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],58:[function(require,module,exports){
+},{"assert":132}],62:[function(require,module,exports){
 /**
  * Requires all lines to be at most the number of characters specified
  *
@@ -6452,7 +6931,55 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],59:[function(require,module,exports){
+},{"assert":132}],63:[function(require,module,exports){
+/**
+ * Requires the file to be at most the number of lines specified
+ *
+ * Type: `Integer`
+ *
+ * Values:
+*  - `Integer`: file should be at most the number of lines specified
+ *
+ * #### Example
+ *
+ * ```js
+ * "maximumNumberOfLines": 100
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(options) {
+        assert(
+            typeof options === 'number',
+            this.getOptionName() + ' option requires number value or should be removed'
+        );
+        this._maximumNumberOfLines = options;
+    },
+
+    getOptionName: function() {
+        return 'maximumNumberOfLines';
+    },
+
+    check: function(file, errors) {
+        var firstToken = file.getFirstToken();
+        var lastToken = file.getLastToken();
+
+        errors.assert.linesBetween({
+            token: firstToken,
+            nextToken: lastToken,
+            atMost: this._maximumNumberOfLines - 1,
+            message: 'File must be at most ' + this._maximumNumberOfLines + ' lines long'
+        });
+    }
+
+};
+
+},{"assert":132}],64:[function(require,module,exports){
 /**
  * Requires proper alignment in object literals.
  *
@@ -6557,7 +7084,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],60:[function(require,module,exports){
+},{"assert":132}],65:[function(require,module,exports){
 /**
  * Requires that a function expression be anonymous.
  *
@@ -6621,7 +7148,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],61:[function(require,module,exports){
+},{"assert":132}],66:[function(require,module,exports){
 /**
  * Requires blocks to begin and end with a newline
  *
@@ -6718,13 +7245,16 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],62:[function(require,module,exports){
+},{"assert":132}],67:[function(require,module,exports){
 /**
  * Requires identifiers to be camelCased or UPPERCASE_WITH_UNDERSCORES
  *
  * Types: `Boolean` or `String`
  *
- * Values: `true` or `"ignoreProperties"`
+ * Values:
+ *
+ * - `true`
+ * - `"ignoreProperties"` allows an exception for object property names.
  *
  * JSHint: [`camelcase`](http://jshint.com/docs/options/#camelcase)
  *
@@ -6807,7 +7337,8 @@ module.exports.prototype = {
                     return;
                 }
 
-                if (prevToken && prevToken.value === '.') {
+                if (prevToken && (prevToken.value === '.' ||
+                    prevToken.value === 'get' || prevToken.value === 'set')) {
                     return;
                 }
             }
@@ -6821,7 +7352,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],63:[function(require,module,exports){
+},{"assert":132}],68:[function(require,module,exports){
 /**
  * Requires the first alphabetical character of a comment to be uppercase, unless it is part of a multi-line textblock.
  *
@@ -6876,12 +7407,12 @@ module.exports.prototype = {
  * ```
  *
  * ```js
- * "requireCapitalizedComments": { allExcept: ["jshint"] }
+ * "requireCapitalizedComments": { "allExcept": ["jshint"] }
  * ```
  *
  * Valid:
  *
- * ```
+ * ```js
  * function sayHello() {
  *     \/* jshint: -W071 *\/
  *
@@ -6892,7 +7423,7 @@ module.exports.prototype = {
  *
  * * Invalid:
  *
- * ```
+ * ```js
  * function sayHello() {
  *     \/* jshint: -W071 *\/
  *
@@ -6903,7 +7434,7 @@ module.exports.prototype = {
  *
  * * Invalid:
  *
- * ```
+ * ```js
  * function sayHello() {
  *     \/* istanbul ignore next *\/
  *
@@ -6964,7 +7495,7 @@ module.exports.prototype = {
         var letterPattern = require('../../patterns/L');
         var upperCasePattern = require('../../patterns/Lu');
 
-        file.iterateTokensByType(['Line', 'Block'], function(comment) {
+        file.iterateTokensByType(['Line', 'Block'], function(comment, index, comments) {
             // strip leading whitespace and any asterisks
             // split on whitespace and colons
             var splitComment = comment.value.replace(/(^\s+|[\*])/g, '').split(/[\s\:]/g);
@@ -6982,8 +7513,12 @@ module.exports.prototype = {
                 return;
             }
 
+            inTextBlock = inTextBlock &&
+                comments[index - 1].type === 'Line' &&
+                comments[index - 1].loc.start.line + 1 === comment.loc.start.line;
+
             var isUpperCase = upperCasePattern.test(firstChar);
-            var isValid = isUpperCase || (inTextBlock && !isUpperCase);
+            var isValid = isUpperCase || inTextBlock;
 
             if (!isValid) {
                 errors.add(
@@ -6992,12 +7527,12 @@ module.exports.prototype = {
                 );
             }
 
-            inTextBlock = !inTextBlock ? isLetter && isUpperCase : isLetter;
+            inTextBlock = comment.type === 'Line';
         });
     }
 };
 
-},{"../../patterns/L":145,"../../patterns/Lu":147,"assert":122}],64:[function(require,module,exports){
+},{"../../patterns/L":156,"../../patterns/Lu":158,"assert":132}],69:[function(require,module,exports){
 /**
  * Requires constructors to be capitalized (except for `this`)
  *
@@ -7012,7 +7547,7 @@ module.exports.prototype = {
  * ```js
  * "requireCapitalizedConstructors": true
  * "requireCapitalizedConstructors": {
- *     allExcept: ["somethingNative"]
+ *     "allExcept": ["somethingNative"]
  * }
  * ```
  *
@@ -7074,7 +7609,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],65:[function(require,module,exports){
+},{"assert":132}],70:[function(require,module,exports){
 /**
  * Requires commas as last token on a line in lists.
  *
@@ -7139,7 +7674,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],66:[function(require,module,exports){
+},{"assert":132}],71:[function(require,module,exports){
 /**
  * Requires curly braces after statements.
  *
@@ -7284,14 +7819,13 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],67:[function(require,module,exports){
+},{"../utils":131,"assert":132}],72:[function(require,module,exports){
 /**
  * Require a $ before variable names that are jquery assignments.
  *
- * Type: `Boolean`
+ * Types: `Boolean` or `String`
  *
- * Value: `true`
- *
+ * Values: `true` or `"ignoreProperties"`
  *
  * #### Example
  *
@@ -7299,13 +7833,34 @@ module.exports.prototype = {
  * "requireDollarBeforejQueryAssignment": true
  * ```
  *
- * ##### Valid
+ * ##### Valid example for mode `true`
  *
  * ```js
  * var $x = $(".foo");
+ * var y = {
+ *   $x: $(".bar")
+ * };
  * ```
  *
- * ##### Invalid
+ * ##### Invalid example for mode `true`
+ *
+ * ```js
+ * var x = $(".foo");
+ * var y = {
+ *   x: $(".bar")
+ * };
+ * ```
+ *
+ * ##### Valid example for mode `ignoreProperties`
+ *
+ * ```js
+ * var $x = $(".foo");
+ * var y = {
+ *   x: $(".bar")
+ * };
+ * ```
+ *
+ * ##### Invalid example for mode `ignoreProperties`
  *
  * ```js
  * var x = $(".foo");
@@ -7318,11 +7873,15 @@ module.exports = function() {};
 
 module.exports.prototype = {
 
-    configure: function(requireDollarBeforejQueryAssignment) {
+    _ignoreProperties : false,
+
+    configure: function(options) {
         assert(
-            requireDollarBeforejQueryAssignment === true,
-            'requireDollarBeforejQueryAssignment option requires true value or should be removed'
+            options === true || options === 'ignoreProperties',
+            this.getOptionName() + ' option requires true or "ignoreProperties" value, or should be removed'
         );
+
+        this._ignoreProperties = (options === 'ignoreProperties');
     },
 
     getOptionName: function() {
@@ -7330,6 +7889,8 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
+        var ignoreProperties = this._ignoreProperties;
+
         file.iterateNodesByType(['VariableDeclarator', 'AssignmentExpression', 'ObjectExpression'], function(token) {
             var type = token.type;
             var left;
@@ -7340,6 +7901,10 @@ module.exports.prototype = {
                 left = token.id;
                 varName = left.name;
                 right = token.init;
+
+            } else if (ignoreProperties) {
+                return;
+
             } else if (type === 'AssignmentExpression') {
                 left = token.left;
                 if (left.computed) {
@@ -7348,6 +7913,7 @@ module.exports.prototype = {
 
                 varName = left.name || left.property.name;
                 right = token.right;
+
             } else {// type === 'ObjectExpression'
                 var props = token.properties[0];
 
@@ -7365,7 +7931,7 @@ module.exports.prototype = {
                 right = props.value;
             }
 
-            if (varName[0] === '$') {
+            if (varName.indexOf('$') === 0 || varName.indexOf('_$') === 0) {
                 return;
             }
 
@@ -7400,7 +7966,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],68:[function(require,module,exports){
+},{"assert":132}],73:[function(require,module,exports){
 /**
  * Requires member expressions to use dot notation when possible
  *
@@ -7534,7 +8100,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],69:[function(require,module,exports){
+},{"../utils":131,"assert":132}],74:[function(require,module,exports){
 /**
  * Requires function declarations by disallowing assignment of functions
  * expressions to variables. Function expressions are allowed in all other
@@ -7626,7 +8192,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],70:[function(require,module,exports){
+},{"assert":132}],75:[function(require,module,exports){
 /**
  * Requires placing keywords on a new line.
  *
@@ -7688,7 +8254,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],71:[function(require,module,exports){
+},{"assert":132}],76:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -7714,7 +8280,7 @@ module.exports.prototype = {
 
 };
 
-},{}],72:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /**
  * Requires placing line feed after assigning a variable.
  *
@@ -7782,7 +8348,9 @@ module.exports.prototype = {
 
             for (var i = 0; i < node.declarations.length; i++) {
                 var thisDeclaration = node.declarations[i];
-                if (thisDeclaration.parentNode.kind === 'var') {
+                if (thisDeclaration.parentNode.kind === 'var' ||
+                    thisDeclaration.parentNode.kind === 'let' ||
+                    thisDeclaration.parentNode.kind === 'const') {
                     if (lastDeclaration && lastDeclaration.init) {
                         errors.assert.differentLine({
                             token: lastDeclaration,
@@ -7798,7 +8366,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],73:[function(require,module,exports){
+},{"assert":132}],78:[function(require,module,exports){
 /**
  * Requires placing line feed at file end.
  *
@@ -7842,7 +8410,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],74:[function(require,module,exports){
+},{"assert":132}],79:[function(require,module,exports){
 /**
  * Requires multiple `var` declaration.
  *
@@ -7960,7 +8528,139 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],75:[function(require,module,exports){
+},{"assert":132}],80:[function(require,module,exports){
+/**
+ * Require unassigned functions to be named inline
+ *
+ * Types: `Boolean` or `Object`
+ *
+ * Values:
+ *  - `true`
+ *  - `Object`:
+ *     - `allExcept`: array of quoted identifiers
+ *
+ * #### Example
+ *
+ * ```js
+ * "requireNamedUnassignedFunctions": { "allExcept": ["describe", "it"] }
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * [].forEach(function x() {});
+ * var y = function() {};
+ * function z() {}
+ * it(function () {});
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * [].forEach(function () {});
+ * before(function () {});
+ * ```
+ */
+
+var assert = require('assert');
+var pathval = require('pathval');
+
+function getNodeName(node) {
+    if (node.type === 'Identifier') {
+        return node.name;
+    } else {
+        return node.value;
+    }
+}
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(options) {
+        assert(
+            options === true ||
+            typeof options === 'object',
+            this.getOptionName() + ' option requires true value ' +
+            'or an object with String[] `allExcept` property'
+        );
+
+        // verify first item in `allExcept` property in object (if it's an object)
+        assert(
+            typeof options !== 'object' ||
+            Array.isArray(options.allExcept) &&
+            typeof options.allExcept[0] === 'string',
+            'Property `allExcept` in ' + this.getOptionName() + ' should be an array of strings'
+        );
+
+        if (options.allExcept) {
+            this._allExceptItems = options.allExcept.map(function(item) {
+                var parts = pathval.parse(item).map(function extractPart (part) {
+                    return part.i !== undefined ? part.i : part.p;
+                });
+                return JSON.stringify(parts);
+            });
+        }
+    },
+
+    getOptionName: function() {
+        return 'requireNamedUnassignedFunctions';
+    },
+
+    check: function(file, errors) {
+        var _this = this;
+        file.iterateNodesByType('FunctionExpression', function(node) {
+            var parentNode = node.parentNode;
+            // If the function has been named via left hand assignment, skip it
+            //   e.g. `var hello = function() {`, `foo.bar = function() {`
+            if (parentNode.type.match(/VariableDeclarator|Property|AssignmentExpression/)) {
+                return;
+            }
+
+            // If the function has been named, skip it
+            //   e.g. `[].forEach(function hello() {`
+            if (node.id !== null) {
+                return;
+            }
+
+            // If we have exceptions and the function is being invoked, detect whether we excepted it
+            if (_this._allExceptItems && parentNode.type === 'CallExpression') {
+                // Determine the path that resolves to our call expression
+                // We must cover both direct calls (e.g. `it(function() {`) and
+                //   member expressions (e.g. `foo.bar(function() {`)
+                var memberNode = parentNode.callee;
+                var canBeRepresented = true;
+                var fullpathParts = [];
+                while (memberNode) {
+                    if (memberNode.type.match(/Identifier|Literal/)) {
+                        fullpathParts.unshift(getNodeName(memberNode));
+                    } else if (memberNode.type === 'MemberExpression') {
+                        fullpathParts.unshift(getNodeName(memberNode.property));
+                    } else {
+                        canBeRepresented = false;
+                        break;
+                    }
+                    memberNode = memberNode.object;
+                }
+
+                // If the path is not-dynamic (i.e. can be represented by static parts),
+                //   then check it against our exceptions
+                if (canBeRepresented) {
+                    var fullpath = JSON.stringify(fullpathParts);
+                    for (var i = 0, l = _this._allExceptItems.length; i < l; i++) {
+                        if (fullpath === _this._allExceptItems[i]) {
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Complain that this function must be named
+            errors.add('Inline functions need to be named', node.loc.start);
+        });
+    }
+};
+
+},{"assert":132,"pathval":154}],81:[function(require,module,exports){
 /**
  * Requires newline before opening curly brace of all block statements.
  *
@@ -8062,7 +8762,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],76:[function(require,module,exports){
+},{"assert":132}],82:[function(require,module,exports){
 /**
  * Requires operators to appear before line breaks and not after.
  *
@@ -8148,7 +8848,8 @@ module.exports.prototype = {
             errors.assert.sameLine({
                 token: file.getPrevToken(operatorToken),
                 nextToken: operatorToken,
-                message: 'Operator ' + operatorToken.value + ' should not be on a new line'
+                message: 'Operator ' + operatorToken.value + ' should not be on a new line',
+                stickToPreviousToken: true
             });
         }
 
@@ -8186,7 +8887,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],77:[function(require,module,exports){
+},{"../utils":131,"assert":132}],83:[function(require,module,exports){
 /**
  * Requires an extra blank newline after var declarations, as long
  * as it is not the last expression in the current block.
@@ -8242,12 +8943,24 @@ module.exports.prototype = {
 
     check: function(file, errors) {
         file.iterateNodesByType('VariableDeclaration', function(node) {
-            var endOfDeclaration = file.findNextToken(file.getFirstNodeToken(node), 'Punctuator', ';');
+            if (node.parentNode.type === 'ForStatement' ||
+                node.parentNode.type === 'ForInStatement' ||
+                node.parentNode.type === 'ForOfStatement') {
+                return;
+            }
+
+            var endOfDeclaration = file.getLastNodeToken(node);
             var nextToken = file.getNextToken(endOfDeclaration);
 
-            if ((nextToken.type === 'Keyword' && nextToken.value === 'var') ||
-                (nextToken.type === 'Punctuator' && nextToken.value === '}') ||
-                nextToken.type === 'EOF') {
+            if (nextToken.value in {'var': true, 'let': true, 'const': true}) {
+                return;
+            }
+
+            if (nextToken.value === '}') {
+                return;
+            }
+
+            if (nextToken.type === 'EOF') {
                 return;
             }
 
@@ -8261,18 +8974,27 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],78:[function(require,module,exports){
+},{"assert":132}],84:[function(require,module,exports){
 /**
  * Requires newline after blocks
  *
- * Type: `Boolean`
+ * Type: `Boolean` or `Object`
  *
- * Value: `true`
+ * Values:
+ * - `true`: always require a newline after blocks
+ * - `Object`:
+ *      - `"allExcept"`: `Array`
+ *          - `"inCallExpressions"` Blocks don't need a line of padding in argument lists
+ *          - `"inArrayExpressions"` Blocks don't need a line of padding in arrays
+ *          - `"inProperties"` Blocks don't need a line of padding as object properties
  *
  * #### Example
  *
  * ```js
  * "requirePaddingNewLinesAfterBlocks": true
+ * "requirePaddingNewLinesAfterBlocks": {
+ *     "allExcept": ["inCallExpressions", "inArrayExpressions", "inProperties"]
+ * }
  * ```
  *
  * ##### Valid
@@ -8296,7 +9018,52 @@ module.exports.prototype = {
  *             return 2;
  *         }
  *     };
+ *
+ *     func(
+ *          function() {
+ *          }
+ *
+ *     );
+ *
+ *     var a = [
+ *         function() {
+ *         }
+ *
+ *     ]
+ *
  * }
+ * ```
+ *
+ * ##### Valid for `{ "allExcept": ["inCallExpressions"] }`
+ *
+ * ```js
+ * func(
+ *     2,
+ *     3,
+ *     function() {
+ *     }
+ * );
+ * ```
+ *
+ * ##### Valid for `{ "allExcept": ["inArrayExpressions"] }`
+ *
+ * ```js
+ * var foo = [
+ *     2,
+ *     3,
+ *     function() {
+ *     }
+ * ];
+ * ```
+* ##### Valid for `{ "allExcept": ["inProperties"] }`
+ *
+ * ```js
+ * var foo = {
+ *     a: 2,
+ *     b: function() {
+ *     },
+ *     c: 3
+ * ];
  * ```
  *
  * ##### Invalid
@@ -8309,14 +9076,6 @@ module.exports.prototype = {
  *         }
  *         continue;
  *     }
- *     var obj = {
- *         foo: function() {
- *             return 1;
- *         },
- *         bar: function() {
- *             return 2;
- *         }
- *     };
  * }
  * ```
  */
@@ -8331,15 +9090,57 @@ var excludes = {
     'FunctionExpression': ['.'],
 };
 
+var exceptions = {
+    'CallExpression': false,
+    'ArrayExpression': false,
+    'Property': false
+};
+
+function isException(parent) {
+    var grandpa = parent.parentNode;
+
+    // Check if this block is used in call or array expression
+    if (exceptions[grandpa.type]) {
+        if (grandpa.arguments) {
+            return grandpa.arguments.indexOf(parent) > -1;
+        } else {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 module.exports = function() {};
 
 module.exports.prototype = {
 
     configure: function(value) {
-        assert(
-            value === true,
-            this.getOptionName() + ' option requires a true value or should be removed'
-        );
+        var optionName = this.getOptionName();
+
+        if (typeof value === 'object') {
+            assert(Array.isArray(value.allExcept), optionName + ' option requires "allExcept" ' +
+                'to be an array');
+            assert(value.allExcept.length > 0, optionName + ' option requires "allExcept" ' +
+                'to have at least one item or be set to `true`');
+
+            value.allExcept.forEach(function(except) {
+                if (except === 'inCallExpressions') {
+                    exceptions.CallExpression = true;
+                } else if (except === 'inArrayExpressions') {
+                    exceptions.ArrayExpression = true;
+                } else if (except === 'inProperties') {
+                    exceptions.Property = true;
+                } else {
+                    assert(false, optionName + ' option requires "allExcept" to only have ' +
+                        '"inCallExpressions" or "inArrayExpressions"');
+                }
+            });
+        } else {
+            assert(value === true,
+                optionName + ' option requires true value or object'
+            );
+        }
     },
 
     getOptionName: function() {
@@ -8351,6 +9152,10 @@ module.exports.prototype = {
 
             var closingBracket = file.getLastNodeToken(node);
             var parentNode = node.parentNode;
+
+            if (isException(parentNode)) {
+                return;
+            }
 
             var nextToken = file.getNextToken(closingBracket);
 
@@ -8373,7 +9178,7 @@ module.exports.prototype = {
                     token: closingBracket,
                     nextToken: nextToken,
                     atLeast: 2,
-                    message: 'Missing newline after closing curly brace'
+                    message: 'Missing newline after block'
                 });
 
                 return;
@@ -8382,7 +9187,146 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],79:[function(require,module,exports){
+},{"assert":132}],85:[function(require,module,exports){
+/**
+ * Requires a blank line after `'use strict';` statements
+ *
+ * Values: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "requirePaddingNewLinesAfterUseStrict": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * 'use strict';
+ *
+ * // code
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * 'use strict';
+ * // code
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(requirePaddingNewLinesAfterUseStrict) {
+        assert(
+            requirePaddingNewLinesAfterUseStrict === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requirePaddingNewLinesAfterUseStrict';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('ExpressionStatement', function(node) {
+            var expression = node.expression;
+
+            if (expression.type !== 'Literal' || expression.value !== 'use strict') {
+                return;
+            }
+
+            var endOfNode = file.getLastNodeToken(node);
+            var nextToken = file.getNextToken(endOfNode, {
+                includeComments: true
+            });
+
+            errors.assert.linesBetween({
+                atLeast: 2,
+                token: endOfNode,
+                nextToken: nextToken
+            });
+        });
+    }
+};
+
+},{"assert":132}],86:[function(require,module,exports){
+/**
+ * Requires newline before module.exports
+ *
+ * Type: `Boolean`
+ *
+ * Value: `true`
+ *
+ * #### Example
+ *
+ * ```js
+ * "requirePaddingNewLinesBeforeExport": true
+ * ```
+ *
+ * ##### Valid
+ *
+ * ```js
+ * var a = 2;
+ *
+ * module.exports = a;
+ * ```
+ *
+ * ##### Invalid
+ *
+ * ```js
+ * var a = 2;
+ * module.exports = a;
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(value) {
+        assert(
+            value === true,
+            this.getOptionName() + ' option requires a true value or should be removed'
+        );
+    },
+
+    getOptionName: function() {
+        return 'requirePaddingNewLinesBeforeExport';
+    },
+
+    check: function(file, errors) {
+        file.iterateNodesByType('AssignmentExpression', function(node) {
+            var left = node.left;
+            if (!(
+                left.object &&
+                left.object.name === 'module' &&
+                left.property &&
+                left.property.name === 'exports')) {
+                return;
+            }
+
+            var firstToken = file.getFirstNodeToken(node);
+            var prevToken = file.getPrevToken(firstToken);
+
+            errors.assert.linesBetween({
+                atLeast: 2,
+                token: prevToken,
+                nextToken: firstToken,
+                message: 'Missing newline before export'
+            });
+        });
+    }
+
+};
+
+},{"assert":132}],87:[function(require,module,exports){
 /**
  * Requires an empty line above the specified keywords unless the keyword is the first expression in a block.
  *
@@ -8500,7 +9444,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],80:[function(require,module,exports){
+},{"../utils":131,"assert":132}],88:[function(require,module,exports){
 /**
  * Requires newline before line comments
  *
@@ -8521,6 +9465,7 @@ module.exports.prototype = {
  *
  * ```js
  * var a = 2;
+ * var b = 3; // comment
  *
  * // comment
  * return a;
@@ -8590,6 +9535,13 @@ module.exports.prototype = {
                 return;
             }
 
+            var firstToken = file.getFirstTokenOnLine(comment.loc.start.line);
+
+            // Should not consider code and comment on the same line (#1194)
+            if (firstToken !== undefined && firstToken.type !== 'EOF') {
+                return;
+            }
+
             var prevToken = file.getPrevToken(comment, {includeComments: true});
 
             if (prevToken.type === 'Line') {
@@ -8610,7 +9562,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],81:[function(require,module,exports){
+},{"assert":132}],89:[function(require,module,exports){
 /**
  * Requires blocks to begin and end with 2 newlines
  *
@@ -8721,7 +9673,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],82:[function(require,module,exports){
+},{"assert":132}],90:[function(require,module,exports){
 /**
  * Requires newline inside curly braces of all objects.
  *
@@ -8800,7 +9752,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],83:[function(require,module,exports){
+},{"assert":132}],91:[function(require,module,exports){
 /**
  * Requires parentheses around immediately invoked function expressions.
  *
@@ -8881,7 +9833,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],84:[function(require,module,exports){
+},{"../utils":131,"assert":132}],92:[function(require,module,exports){
 /**
  * Requires quoted keys in objects.
  *
@@ -8941,7 +9893,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],85:[function(require,module,exports){
+},{"assert":132}],93:[function(require,module,exports){
 module.exports = function() {};
 
 module.exports.prototype = {
@@ -8967,7 +9919,7 @@ module.exports.prototype = {
 
 };
 
-},{}],86:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /**
  * Requires semicolon after:
  *
@@ -9040,26 +9992,26 @@ module.exports.prototype = {
             }
 
             // get last token inside node
-            var token = file.getLastNodeToken(node);
+            var lastToken = file.getLastNodeToken(node);
+            var checkToken = lastToken;
 
             // if last token is not a semicolon punctuator, try to get next token in file
-            if (token && (token.type !== 'Punctuator' || token.value !== ';')) {
-                token = file.getNextToken(token);
+            if (checkToken && (checkToken.type !== 'Punctuator' || checkToken.value !== ';')) {
+                checkToken = file.getNextToken(checkToken);
             }
 
             // check token is semicolon
-            if (!token || token.type !== 'Punctuator' || token.value !== ';') {
+            if (!checkToken || checkToken.type !== 'Punctuator' || checkToken.value !== ';') {
                 errors.add(
                     'Missing semicolon after statement',
-                    (token || node).loc.end
+                    (lastToken || node).loc.end
                 );
             }
         });
     }
-
 };
 
-},{"assert":122}],87:[function(require,module,exports){
+},{"assert":132}],95:[function(require,module,exports){
 /**
  * Disallows sticking binary operators to the right.
  *
@@ -9180,7 +10132,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],88:[function(require,module,exports){
+},{"../utils":131,"assert":132}],96:[function(require,module,exports){
 /**
  * Requires space after keyword.
  *
@@ -9267,7 +10219,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],89:[function(require,module,exports){
+},{"../utils":131,"assert":132}],97:[function(require,module,exports){
 /**
  * Requires that a line comment (`//`) be followed by a space.
  *
@@ -9359,7 +10311,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],90:[function(require,module,exports){
+},{"assert":132}],98:[function(require,module,exports){
 /**
  * Requires space after object keys.
  *
@@ -9419,7 +10371,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],91:[function(require,module,exports){
+},{"assert":132}],99:[function(require,module,exports){
 /**
  * Disallows sticking unary operators to the right.
  *
@@ -9503,7 +10455,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],92:[function(require,module,exports){
+},{"../utils":131,"assert":132}],100:[function(require,module,exports){
 /**
  * Disallows sticking binary operators to the left.
  *
@@ -9628,18 +10580,21 @@ module.exports.prototype = {
 
 };
 
-},{"../../lib/utils":121,"assert":122}],93:[function(require,module,exports){
+},{"../../lib/utils":131,"assert":132}],101:[function(require,module,exports){
 /**
- * Requires space before block statements (for loops, control structures).
+ * Requires space(s) before block statements (for loops, control structures).
  *
- * Type: `Boolean`
+ * Type: `Boolean` or `Integer`
  *
- * Value: `true`
+ * Values:
+ *
+ * - `true` require a single space
+ * - `Integer` require *at least* specified number of spaces
  *
  * #### Example
  *
  * ```js
- * "requireSpaceBeforeBlockStatements": true
+ * "requireSpaceBeforeBlockStatements": 1
  * ```
  *
  * ##### Valid
@@ -9684,11 +10639,18 @@ var assert = require('assert');
 module.exports = function() {};
 
 module.exports.prototype = {
-    configure: function(options) {
+    configure: function(requireSpaceBeforeBlockStatements) {
         assert(
-            options === true,
-            this.getOptionName() + ' option requires a true value or should be removed'
+            typeof requireSpaceBeforeBlockStatements === 'boolean' ||
+            typeof requireSpaceBeforeBlockStatements === 'number',
+            this.getOptionName() + ' option requires number or bolean'
         );
+        assert(
+            requireSpaceBeforeBlockStatements >= 1,
+            this.getOptionName() +
+              ' option requires true value or a number greater than equal to 1 or should be removed'
+        );
+        this._count = +requireSpaceBeforeBlockStatements;
     },
 
     getOptionName: function() {
@@ -9696,22 +10658,23 @@ module.exports.prototype = {
     },
 
     check: function(file, errors) {
+        var count = this._count;
         file.iterateNodesByType('BlockStatement', function(node) {
             var first = file.getFirstNodeToken(node);
 
             errors.assert.spacesBetween({
                 token: file.getPrevToken(first),
                 nextToken: first,
-                exactly: 1,
+                atLeast: count,
                 disallowNewLine: true,
-                message: 'One space required before opening brace for block expressions'
+                message: 'One (or more) spaces required before opening brace for block expressions'
             });
         });
     }
 
 };
 
-},{"assert":122}],94:[function(require,module,exports){
+},{"assert":132}],102:[function(require,module,exports){
 /**
  * Requires space before keyword.
  *
@@ -9789,7 +10752,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],95:[function(require,module,exports){
+},{"../utils":131,"assert":132}],103:[function(require,module,exports){
 /**
  * Requires space after object keys.
  *
@@ -9851,7 +10814,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],96:[function(require,module,exports){
+},{"assert":132}],104:[function(require,module,exports){
 /**
  * Disallows sticking unary operators to the left.
  *
@@ -9927,7 +10890,7 @@ module.exports.prototype = {
     }
 };
 
-},{"../utils":121,"assert":122}],97:[function(require,module,exports){
+},{"../utils":131,"assert":132}],105:[function(require,module,exports){
 /**
  * Ensure there are spaces after argument separators in call expressions.
  *
@@ -9986,7 +10949,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],98:[function(require,module,exports){
+},{"assert":132}],106:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in anonymous function expressions.
  *
@@ -10103,7 +11066,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],99:[function(require,module,exports){
+},{"assert":132}],107:[function(require,module,exports){
 /**
  * Requires space before `()` in call expressions.
  *
@@ -10160,7 +11123,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],100:[function(require,module,exports){
+},{"assert":132}],108:[function(require,module,exports){
 /**
  * Requires space before and/or after `?` or `:` in conditional expressions.
  *
@@ -10302,7 +11265,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],101:[function(require,module,exports){
+},{"assert":132}],109:[function(require,module,exports){
 /**
  * Requires spaces inbetween for statement.
  *
@@ -10385,7 +11348,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],102:[function(require,module,exports){
+},{"assert":132}],110:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in function declarations.
  *
@@ -10487,7 +11450,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],103:[function(require,module,exports){
+},{"assert":132}],111:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in function expressions (both [named](#requirespacesinnamedfunctionexpression)
  * and [anonymous](#requirespacesinanonymousfunctionexpression)).
@@ -10600,7 +11563,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],104:[function(require,module,exports){
+},{"assert":132}],112:[function(require,module,exports){
 /**
  * Expression
  *
@@ -10719,7 +11682,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],105:[function(require,module,exports){
+},{"assert":132}],113:[function(require,module,exports){
 /**
  * Requires space before `()` or `{}` in named function expressions.
  *
@@ -10824,7 +11787,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],106:[function(require,module,exports){
+},{"assert":132}],114:[function(require,module,exports){
 /**
  * Requires space after opening array square bracket and before closing.
  *
@@ -10952,7 +11915,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],107:[function(require,module,exports){
+},{"assert":132}],115:[function(require,module,exports){
 /**
  * Requires space after opening square bracket and before closing.
  *
@@ -11070,7 +12033,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],108:[function(require,module,exports){
+},{"assert":132}],116:[function(require,module,exports){
 /**
  * Requires space after opening object curly brace and before closing.
  *
@@ -11198,7 +12161,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],109:[function(require,module,exports){
+},{"assert":132}],117:[function(require,module,exports){
 /**
  * Requires space after opening round bracket and before closing.
  *
@@ -11344,7 +12307,7 @@ module.exports.prototype = {
     }
 };
 
-},{"assert":122}],110:[function(require,module,exports){
+},{"assert":132}],118:[function(require,module,exports){
 /**
  * Requires an extra comma following the final element of an array or object literal.
  *
@@ -11457,7 +12420,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],111:[function(require,module,exports){
+},{"assert":132}],119:[function(require,module,exports){
 /**
  * Requires the variable to be the right hand operator when doing a boolean comparison
  *
@@ -11529,7 +12492,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],112:[function(require,module,exports){
+},{"assert":132}],120:[function(require,module,exports){
 /**
  * Option to check `var that = this` expressions
  *
@@ -11613,7 +12576,8 @@ module.exports.prototype = {
 };
 
 /**
- * Check if at least one keyword equals to passed name
+ * Check if at least one keyword equals to passed name.
+ *
  * @param {String} name
  * @param {Array} keywords
  * @return {Boolean}
@@ -11628,7 +12592,137 @@ function checkKeywords(name, keywords) {
     return true;
 }
 
-},{"assert":122}],113:[function(require,module,exports){
+},{"assert":132}],121:[function(require,module,exports){
+/**
+ * Validates proper alignment of function parameters.
+ *
+ * Type: `Object` or `Boolean`
+ *
+ * Values: `"lineBreakAfterOpeningBrace"`, `"lineBreakBeforeClosingBrace"` as child properties or `true`.
+ *
+ * #### Example
+ *
+ * ```js
+ * "validateAlignedFunctionParameters": {
+ *   "lineBreakAfterOpeningBrace": true,
+ *   "lineBreakBeforeClosingBrace": true
+ * }
+ * ```
+ *
+ * ##### Valid
+ * ```js
+ * function (
+ *   thisIs,
+ *   theLongestList,
+ *   ofParametersEverWritten
+ * ) {}
+ * ```
+ * ##### Invalid
+ * ```js
+ * function (thisIs,
+ *           theLongestList,
+ *           ofParametersEverWritten) {}
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+
+    configure: function(options) {
+        var validProperties = [
+            'lineBreakAfterOpeningBrace',
+            'lineBreakBeforeClosingBrace'
+        ];
+        var optionName = this.getOptionName();
+
+        assert(
+            typeof options === 'object' || options === true,
+            optionName + ' option must be an object or boolean true'
+        );
+
+        if (typeof options === 'object') {
+            validProperties.forEach(function(key) {
+                var isPresent = key in options;
+
+                if (isPresent) {
+                    assert(
+                        options[key] === true,
+                        optionName + '.' + key + ' property requires true value or should be removed'
+                    );
+                }
+            });
+
+            validProperties.forEach(function(property) {
+                this['_' + property] = Boolean(options[property]);
+            }.bind(this));
+        }
+    },
+
+    getOptionName: function() {
+        return 'validateAlignedFunctionParameters';
+    },
+
+    check: function(file, errors) {
+        var lineBreakAfterOpeningBrace = this._lineBreakAfterOpeningBrace;
+        var lineBreakBeforeClosingBrace = this._lineBreakBeforeClosingBrace;
+
+        file.iterateNodesByType(['FunctionDeclaration', 'FunctionExpression'], function(node) {
+
+            // ignore this rule if there are no parameters
+            if (!(node.params && node.params.length > 0)) {
+                return;
+            }
+
+            // ignore this rule if the parameters are not multi-line
+            var firstParameter = file.getFirstNodeToken(node.params[0]);
+            var lastParameter = node.params[node.params.length - 1];
+            if (firstParameter.loc.start.line === lastParameter.loc.end.line) {
+                return;
+            }
+
+            // look for the furthest parameter start position
+            var maxParamStartPos = 0;
+            node.params.forEach(function(parameter) {
+                maxParamStartPos = Math.max(maxParamStartPos, parameter.loc.start.column);
+            });
+
+            // make sure all parameters are lined up
+            node.params.forEach(function(parameter) {
+                if (parameter.loc.start.column !== maxParamStartPos) {
+                    errors.add('Multi-line parameters are not aligned.', parameter.loc.start);
+                }
+            });
+
+            // make sure the first parameter is on a new line
+            if (lineBreakAfterOpeningBrace) {
+                var openingBrace = file.getPrevToken(firstParameter);
+                errors.assert.differentLine({
+                    token: openingBrace,
+                    nextToken: firstParameter,
+                    message: 'There is no line break after the opening brace'
+                });
+            }
+
+            // make sure the closing brace is on a new line
+            if (lineBreakBeforeClosingBrace) {
+                var bodyToken = file.getFirstNodeToken(node.body);
+                var closingBrace = file.getPrevToken(bodyToken);
+                errors.assert.differentLine({
+                    token: lastParameter,
+                    nextToken: closingBrace,
+                    message: 'There is no line break before the closing brace'
+                });
+            }
+
+        });
+    }
+
+};
+
+},{"assert":132}],122:[function(require,module,exports){
 /**
  * Validates indentation for switch statements and block statements
  *
@@ -12191,7 +13285,7 @@ module.exports.prototype = {
 
 };
 
-},{"../utils":121,"assert":122}],114:[function(require,module,exports){
+},{"../utils":131,"assert":132}],123:[function(require,module,exports){
 var assert = require('assert');
 
 module.exports = function() {};
@@ -12284,7 +13378,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],115:[function(require,module,exports){
+},{"assert":132}],124:[function(require,module,exports){
 /**
  * Option to check line break characters
  *
@@ -12357,7 +13451,171 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],116:[function(require,module,exports){
+},{"assert":132}],125:[function(require,module,exports){
+/**
+ * Requires each element in array on a single line when array length is more than passed maximum
+ * number or array fills more than one line.
+ * Set `ignoreBrackets` to `true` to allow elements on the same line with brackets.
+ *
+ * Type: `Boolean` or `Number` (maximum) or `Object` (`{maximum: Number, ignoreBrackets: Boolean}`)
+ *
+ * Values: `true`
+ *
+ * Default: `{maximum: Infinity, ignoreBrackets: false}`
+ *
+ * #### Example
+ *
+ * ```js
+ * "validateNewlineAfterArrayElements": {
+ *   "maximum": 3
+ * }
+ * ```
+ *
+ * ##### Valid for `true`
+ *
+ * ```js
+ * var x = [{a: 1}, [2], '3', 4, 5, 6];
+ * var x = [
+ *   {a: 1},
+ *   [2],
+ *   '3',
+ *   4
+ * ];
+ * ```
+ *
+ * ##### Invalid for `true`
+ *
+ * ```js
+ * var x = [1,
+ *   2];
+ * ```
+ *
+ * ##### Valid for `3`
+ *
+ * ```js
+ * var x = [{a: 1}, [2], '3'];
+ * var x = [
+ *   1,
+ *   2,
+ *   3,
+ *   4
+ * ];
+ * ```
+ *
+ * ##### Invalid for `3`
+ *
+ * ```js
+ * var x = [1, 2, 3, 4];
+ * var x = [1,
+ *   2,
+ *   3];
+ * var x = [
+ *     1, 2
+ * ];
+ * ```
+ *
+ * ##### Valid for `{maximum: 2, ignoreBrackets: true}`
+ *
+ * ```js
+ * var x = [{a: 1}, [2]];
+ * var x = [1,
+ *   2,
+ *   3];
+ * ```
+ *
+ * ##### Invalid for `{maximum: 2, ignoreBrackets: true}`
+ *
+ * ```js
+ * var x = [1, 2, 3];
+ * var x = [1, 2,
+ *   3];
+ * var x = [1,
+ *   2, 3];
+ * ```
+ */
+
+var assert = require('assert');
+
+module.exports = function() {};
+
+module.exports.prototype = {
+    configure: function(opts) {
+        assert(
+            opts === true ||
+            typeof opts === 'number' && opts >= 1 ||
+            typeof opts === 'object',
+            this.getOptionName() + ' option requires maximal number of items ' +
+                'or true value either should be removed'
+        );
+        if (typeof opts === 'object') {
+            this._options = opts;
+
+            if ('maximum' in opts) {
+                assert(typeof opts.maximum === 'number' && opts.maximum >= 1,
+                    'maximum property requires a positive number or should be removed');
+            } else {
+                opts.maximum = Infinity;
+            }
+
+            if ('ignoreBrackets' in opts) {
+                assert(opts.ignoreBrackets === true,
+                    'ignoreBrackets property requires true value or should be removed');
+            } else {
+                opts.ignoreBrackets = false;
+            }
+
+        } else {
+            this._options = {
+                maximum: opts === true ? Infinity : opts,
+                ignoreBrackets: false
+            };
+        }
+    },
+
+    getOptionName: function() {
+        return 'validateNewlineAfterArrayElements';
+    },
+
+    check: function(file, errors) {
+        var maximum = this._options.maximum;
+        var ignoreBrackets = this._options.ignoreBrackets;
+
+        file.iterateNodesByType(['ArrayExpression'], function(node) {
+            var els = node.elements;
+            if (els.length <= maximum && node.loc.start.line === node.loc.end.line) {
+                return;
+            }
+
+            if (!ignoreBrackets) {
+                if (els[0] && els[0].loc.start.line === node.loc.start.line) {
+                    errors.add('First element should be placed on new line', els[0].loc.start);
+                }
+                if (els[els.length - 1] && els[els.length - 1].loc.end.line === node.loc.end.line) {
+                    errors.add('Closing bracket should be placed on new line', node.loc.end);
+                }
+            }
+
+            var prevLine = 0;
+            els.forEach(function(elem) {
+                if (!elem) {
+                    // skip holes
+                    return;
+                }
+                var line = elem.loc.start.line;
+                if (prevLine === line) {
+                    errors.add('Multiple elements at a single line in multiline array', {
+                        line: line,
+                        column: elem.loc.start.column
+                    });
+                }
+                prevLine = line;
+            });
+
+        });
+    }
+};
+
+},{"assert":132}],126:[function(require,module,exports){
 /**
  * Enable validation of separators between function parameters. Will ignore newlines.
  *
@@ -12461,7 +13719,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],117:[function(require,module,exports){
+},{"assert":132}],127:[function(require,module,exports){
 /**
  * Requires all quote marks to be either the supplied value, or consistent if `true`
  *
@@ -12581,7 +13839,7 @@ module.exports.prototype = {
 
 };
 
-},{"assert":122}],118:[function(require,module,exports){
+},{"assert":132}],128:[function(require,module,exports){
 var defaultEsprima = require('esprima');
 var harmonyEsprima = require('esprima-harmony-jscs');
 var Errors = require('./errors');
@@ -12592,8 +13850,10 @@ var MAX_FIX_ATTEMPTS = 5;
 
 /**
  * Starts Code Style checking process.
+ * Params are deprecated, should be removed in 2.0
  *
  * @name StringChecker
+ *
  * @param {Boolean|Object} options either a boolean flag representing verbosity (deprecated), or an options object
  * @param {Boolean} options.verbose true adds the rule name to the error messages it produces, false does not
  * @param {Boolean} options.esnext true attempts to parse the code as es6, false does not
@@ -12657,12 +13917,17 @@ StringChecker.prototype = {
             this._esprima = harmonyEsprima;
         }
 
+        if (this._verbose === false) {
+            this._verbose = this._configuration.getVerbose();
+        }
+
         this._configuredRules = this._configuration.getConfiguredRules();
         this._maxErrors = this._configuration.getMaxErrors();
     },
 
     /**
      * Checks file provided with a string.
+     *
      * @param {String} source
      * @param {String} [filename='input']
      * @returns {Errors}
@@ -12714,7 +13979,16 @@ StringChecker.prototype = {
 
         this._configuredRules.forEach(function(rule) {
             errors.setCurrentRule(rule.getOptionName());
-            rule.check(file, errors);
+
+            try {
+                rule.check(file, errors);
+            } catch (e) {
+                errors.add('Error running rule ' + rule.getOptionName() + ': ' +
+                    'This is an issue with JSCS and not your codebase.\n' +
+                    'Please file an issue (with the stack trace below) at: ' +
+                    'https://github.com/jscs-dev/node-jscs/issues/new\n' +
+                    e.stack, 1, 0);
+            }
         }, this);
 
         this._configuration.getUnsupportedRuleNames().forEach(function(rulename) {
@@ -12776,6 +14050,7 @@ StringChecker.prototype = {
 
     /**
      * Checks file provided with a string.
+     *
      * @param {String} source
      * @param {String} [filename='input']
      * @returns {{output: String, errors: Errors}}
@@ -12870,7 +14145,7 @@ StringChecker.prototype = {
 
 module.exports = StringChecker;
 
-},{"./config/configuration":1,"./errors":2,"./js-file":3,"esprima":136,"esprima-harmony-jscs":135}],119:[function(require,module,exports){
+},{"./config/configuration":1,"./errors":2,"./js-file":3,"esprima":146,"esprima-harmony-jscs":145}],129:[function(require,module,exports){
 var utils = require('util');
 var EventEmitter = require('events').EventEmitter;
 
@@ -12891,6 +14166,7 @@ utils.inherits(TokenAssert, EventEmitter);
 /**
  * Requires to have whitespace between specified tokens. Ignores newlines.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {String} [options.message]
@@ -12904,6 +14180,7 @@ TokenAssert.prototype.whitespaceBetween = function(options) {
 /**
  * Requires to have no whitespace between specified tokens.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {String} [options.message]
@@ -12917,6 +14194,7 @@ TokenAssert.prototype.noWhitespaceBetween = function(options) {
 /**
  * Requires to have the whitespace between specified tokens with the provided options.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {String} [options.message]
@@ -12989,6 +14267,7 @@ TokenAssert.prototype.spacesBetween = function(options) {
 /**
  * Requires the specified line to have the expected indentation.
  *
+ * @param {Object} options
  * @param {Number} options.lineNumber
  * @param {Number} options.actual
  * @param {Number} options.expected
@@ -13037,7 +14316,7 @@ TokenAssert.prototype.indentation = function(options) {
  * Updates the whitespace of a line by passing split lines to a callback function
  * for editing.
  *
- * @param  {Number} lineNumber
+ * @param  {Object} token
  * @param  {Function} callback
  */
 TokenAssert.prototype._updateWhitespaceByLine = function(token, callback) {
@@ -13052,8 +14331,10 @@ TokenAssert.prototype._updateWhitespaceByLine = function(token, callback) {
  * Updates the whitespace of a line by passing split lines to a callback function
  * for editing.
  *
- * @param  {Number} lineNumber
- * @param  {Function} callback
+ * @param  {Object} token
+ * @param  {Function} indentChar
+ * @param  {Number} actual
+ * @param  {Number} expected
  */
 TokenAssert.prototype._updateCommentWhitespace = function(token, indentChar, actual, expected) {
     var difference = expected - actual;
@@ -13101,8 +14382,10 @@ TokenAssert.prototype._setEmptyLineIndentation = function(lineNumber, newWhitesp
 /**
  * Requires tokens to be on the same line.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
+ * @param {Boolean} [options.stickToPreviousToken]
  * @param {String} [options.message]
  */
 TokenAssert.prototype.sameLine = function(options) {
@@ -13114,6 +14397,7 @@ TokenAssert.prototype.sameLine = function(options) {
 /**
  * Requires tokens to be on different lines.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {Object} [options.message]
@@ -13128,12 +14412,15 @@ TokenAssert.prototype.differentLine = function(options) {
  * Requires tokens to have a certain amount of lines between them.
  * Set at least one of atLeast or atMost OR set exactly.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {Object} [options.message]
  * @param {Object} [options.atLeast] At least how many lines the tokens are apart
  * @param {Object} [options.atMost] At most how many lines the tokens are apart
  * @param {Object} [options.exactly] Exactly how many lines the tokens are apart
+ * @param {Boolean} [options.stickToPreviousToken] When auto-fixing stick the
+ *     nextToken onto the previous token.
  */
 TokenAssert.prototype.linesBetween = function(options) {
     var token = options.token;
@@ -13171,7 +14458,7 @@ TokenAssert.prototype.linesBetween = function(options) {
         }
 
         if (fixed) {
-            this._augmentLineCount(nextToken, lineCount);
+            this._augmentLineCount(options, lineCount);
         }
 
         this.emit('error', {
@@ -13195,6 +14482,7 @@ TokenAssert.prototype.linesBetween = function(options) {
  * Throws errors if atLeast, atMost, and exactly options don't mix together properly or
  * if the tokens provided are equivalent.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.nextToken
  * @param {Object} [options.atLeast] At least how many spaces the tokens are apart
@@ -13231,11 +14519,18 @@ TokenAssert.prototype._validateOptions = function(options) {
 /**
  * Augments token whitespace to contain the correct number of newlines while preserving indentation
  *
- * @param {Object} token
+ * @param {Object} options
+ * @param {Object} options.nextToken
+ * @param {Boolean} [options.stickToPreviousToken]
  * @param {Number} lineCount
  */
-TokenAssert.prototype._augmentLineCount = function(token, lineCount) {
+TokenAssert.prototype._augmentLineCount = function(options, lineCount) {
+    var token = options.nextToken;
     if (lineCount === 0) {
+        if (options.stickToPreviousToken) {
+            var nextToken = this._file.getNextToken(token, {includeComments: true});
+            nextToken.whitespaceBefore = token.whitespaceBefore;
+        }
         token.whitespaceBefore = ' ';
         return;
     }
@@ -13262,6 +14557,7 @@ TokenAssert.prototype._augmentLineCount = function(token, lineCount) {
 /**
  * Requires specific token before given.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.expectedTokenBefore
  * @param {String} [options.message]
@@ -13300,6 +14596,7 @@ TokenAssert.prototype.tokenBefore = function(options) {
 /**
  * Disallows specific token before given.
  *
+ * @param {Object} options
  * @param {Object} options.token
  * @param {Object} options.expectedTokenBefore
  * @param {String} [options.message]
@@ -13325,7 +14622,7 @@ TokenAssert.prototype.noTokenBefore = function(options) {
 
 module.exports = TokenAssert;
 
-},{"events":123,"util":128}],120:[function(require,module,exports){
+},{"events":133,"util":138}],130:[function(require,module,exports){
 var estraverse = require('estraverse');
 
 module.exports = {
@@ -13346,6 +14643,7 @@ function iterate(node, cb) {
                         var pathElement = path.pop();
                         if (typeof pathElement === 'string') {
                             collectionKey = pathElement;
+                            break;
                         }
                     }
 
@@ -13387,11 +14685,11 @@ function iterate(node, cb) {
     }
 }
 
-},{"estraverse":137}],121:[function(require,module,exports){
+},{"estraverse":147}],131:[function(require,module,exports){
 var path = require('path');
 var Vow = require('vow');
 
-// 7.5.2 Keywords
+// 7.5.2, 7.6.1 Reserved words
 var ES3_KEYWORDS = {
     'break': true,
     'case': true,
@@ -13401,6 +14699,7 @@ var ES3_KEYWORDS = {
     'delete': true,
     'do': true,
     'else': true,
+    'false': true,
     'finally': true,
     'for': true,
     'function': true,
@@ -13413,6 +14712,7 @@ var ES3_KEYWORDS = {
     'switch': true,
     'this': true,
     'throw': true,
+    'true': true,
     'try': true,
     'typeof': true,
     'var': true,
@@ -13581,6 +14881,7 @@ exports.trimUnderscores = function(name) {
 
 /**
  * Whether or not the given path is relative
+ *
  * @param  {String}  path
  * @return {Boolean}
  */
@@ -13668,7 +14969,7 @@ exports.unaryOperators = ['-', '+', '!', '~'].concat(exports.incrementAndDecreme
  */
 exports.operators = exports.binaryOperators.concat(exports.unaryOperators);
 
-},{"path":125,"vow":144}],122:[function(require,module,exports){
+},{"path":135,"vow":155}],132:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -14029,7 +15330,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":128}],123:[function(require,module,exports){
+},{"util/":138}],133:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -14332,7 +15633,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],124:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -14357,7 +15658,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],125:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -14585,7 +15886,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":126}],126:[function(require,module,exports){
+},{"_process":136}],136:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -14645,14 +15946,14 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],127:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],128:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -15242,7 +16543,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":127,"_process":126,"inherits":124}],129:[function(require,module,exports){
+},{"./support/isBuffer":137,"_process":136,"inherits":134}],139:[function(require,module,exports){
 (function (process){
 'use strict';
 var escapeStringRegexp = require('escape-string-regexp');
@@ -15346,7 +16647,7 @@ module.exports.stripColor = stripAnsi;
 module.exports.supportsColor = supportsColor;
 
 }).call(this,require('_process'))
-},{"_process":126,"ansi-styles":130,"escape-string-regexp":131,"has-ansi":138,"strip-ansi":132,"supports-color":134}],130:[function(require,module,exports){
+},{"_process":136,"ansi-styles":140,"escape-string-regexp":141,"has-ansi":148,"strip-ansi":142,"supports-color":144}],140:[function(require,module,exports){
 'use strict';
 
 var styles = module.exports = {
@@ -15404,7 +16705,7 @@ Object.keys(styles).forEach(function (groupName) {
 	});
 });
 
-},{}],131:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 'use strict';
 
 var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
@@ -15417,7 +16718,7 @@ module.exports = function (str) {
 	return str.replace(matchOperatorsRe,  '\\$&');
 };
 
-},{}],132:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 'use strict';
 var ansiRegex = require('ansi-regex')();
 
@@ -15425,13 +16726,13 @@ module.exports = function (str) {
 	return typeof str === 'string' ? str.replace(ansiRegex, '') : str;
 };
 
-},{"ansi-regex":133}],133:[function(require,module,exports){
+},{"ansi-regex":143}],143:[function(require,module,exports){
 'use strict';
 module.exports = function () {
 	return /(?:(?:\u001b\[)|\u009b)(?:(?:[0-9]{1,3})?(?:(?:;[0-9]{0,3})*)?[A-M|f-m])|\u001b[A-M]/g;
 };
 
-},{}],134:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 (function (process){
 'use strict';
 var argv = process.argv;
@@ -15478,7 +16779,7 @@ module.exports = (function () {
 })();
 
 }).call(this,require('_process'))
-},{"_process":126}],135:[function(require,module,exports){
+},{"_process":136}],145:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -20833,7 +22134,7 @@ module.exports = (function () {
     }
 
     // Sync with *.json manifests.
-    exports.version = '1.1.0-dev-harmony';
+    exports.version = '1.1.0-bin';
 
     exports.tokenize = tokenize;
 
@@ -20864,7 +22165,7 @@ module.exports = (function () {
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],136:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -24638,7 +25939,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],137:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -25485,48 +26786,48 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],138:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 'use strict';
 var ansiRegex = require('ansi-regex');
 var re = new RegExp(ansiRegex().source); // remove the `g` flag
 module.exports = re.test.bind(re);
 
-},{"ansi-regex":139}],139:[function(require,module,exports){
-arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],140:[function(require,module,exports){
-(function (process){
+},{"ansi-regex":149}],149:[function(require,module,exports){
+arguments[4][143][0].apply(exports,arguments)
+},{"dup":143}],150:[function(require,module,exports){
 module.exports = minimatch
 minimatch.Minimatch = Minimatch
 
-var isWindows = false
-if (typeof process !== 'undefined' && process.platform === 'win32')
-  isWindows = true
+var path = { sep: '/' }
+try {
+  path = require('path')
+} catch (er) {}
 
 var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
-  , expand = require("brace-expansion")
+var expand = require('brace-expansion')
 
-  // any single thing other than /
-  // don't need to escape / when using new RegExp()
-  , qmark = "[^/]"
+// any single thing other than /
+// don't need to escape / when using new RegExp()
+var qmark = '[^/]'
 
-  // * => any number of characters
-  , star = qmark + "*?"
+// * => any number of characters
+var star = qmark + '*?'
 
-  // ** when dots are allowed.  Anything goes, except .. and .
-  // not (^ or / followed by one or two dots followed by $ or /),
-  // followed by anything, any number of times.
-  , twoStarDot = "(?:(?!(?:\\\/|^)(?:\\.{1,2})($|\\\/)).)*?"
+// ** when dots are allowed.  Anything goes, except .. and .
+// not (^ or / followed by one or two dots followed by $ or /),
+// followed by anything, any number of times.
+var twoStarDot = '(?:(?!(?:\\\/|^)(?:\\.{1,2})($|\\\/)).)*?'
 
-  // not a ^ or / followed by a dot,
-  // followed by anything, any number of times.
-  , twoStarNoDot = "(?:(?!(?:\\\/|^)\\.).)*?"
+// not a ^ or / followed by a dot,
+// followed by anything, any number of times.
+var twoStarNoDot = '(?:(?!(?:\\\/|^)\\.).)*?'
 
-  // characters that need to be escaped in RegExp.
-  , reSpecials = charSet("().*{}+?[]^$\\!")
+// characters that need to be escaped in RegExp.
+var reSpecials = charSet('().*{}+?[]^$\\!')
 
 // "abc" -> { a:true, b:true, c:true }
 function charSet (s) {
-  return s.split("").reduce(function (set, c) {
+  return s.split('').reduce(function (set, c) {
     set[c] = true
     return set
   }, {})
@@ -25577,21 +26878,20 @@ Minimatch.defaults = function (def) {
   return minimatch.defaults(def).Minimatch
 }
 
-
 function minimatch (p, pattern, options) {
-  if (typeof pattern !== "string") {
-    throw new TypeError("glob pattern string required")
+  if (typeof pattern !== 'string') {
+    throw new TypeError('glob pattern string required')
   }
 
   if (!options) options = {}
 
   // shortcut: comments match nothing.
-  if (!options.nocomment && pattern.charAt(0) === "#") {
+  if (!options.nocomment && pattern.charAt(0) === '#') {
     return false
   }
 
   // "" only matches ""
-  if (pattern.trim() === "") return p === ""
+  if (pattern.trim() === '') return p === ''
 
   return new Minimatch(pattern, options).match(p)
 }
@@ -25601,16 +26901,17 @@ function Minimatch (pattern, options) {
     return new Minimatch(pattern, options)
   }
 
-  if (typeof pattern !== "string") {
-    throw new TypeError("glob pattern string required")
+  if (typeof pattern !== 'string') {
+    throw new TypeError('glob pattern string required')
   }
 
   if (!options) options = {}
   pattern = pattern.trim()
 
   // windows support: need to use /, not \
-  if (isWindows)
-    pattern = pattern.split("\\").join("/")
+  if (path.sep !== '/') {
+    pattern = pattern.split(path.sep).join('/')
+  }
 
   this.options = options
   this.set = []
@@ -25624,7 +26925,7 @@ function Minimatch (pattern, options) {
   this.make()
 }
 
-Minimatch.prototype.debug = function() {}
+Minimatch.prototype.debug = function () {}
 
 Minimatch.prototype.make = make
 function make () {
@@ -25635,7 +26936,7 @@ function make () {
   var options = this.options
 
   // empty patterns and comments match nothing.
-  if (!options.nocomment && pattern.charAt(0) === "#") {
+  if (!options.nocomment && pattern.charAt(0) === '#') {
     this.comment = true
     return
   }
@@ -25674,7 +26975,7 @@ function make () {
 
   // filter out everything that didn't compile properly.
   set = set.filter(function (s) {
-    return -1 === s.indexOf(false)
+    return s.indexOf(false) === -1
   })
 
   this.debug(this.pattern, set)
@@ -25685,17 +26986,17 @@ function make () {
 Minimatch.prototype.parseNegate = parseNegate
 function parseNegate () {
   var pattern = this.pattern
-    , negate = false
-    , options = this.options
-    , negateOffset = 0
+  var negate = false
+  var options = this.options
+  var negateOffset = 0
 
   if (options.nonegate) return
 
-  for ( var i = 0, l = pattern.length
-      ; i < l && pattern.charAt(i) === "!"
-      ; i ++) {
+  for (var i = 0, l = pattern.length
+    ; i < l && pattern.charAt(i) === '!'
+    ; i++) {
     negate = !negate
-    negateOffset ++
+    negateOffset++
   }
 
   if (negateOffset) this.pattern = pattern.substr(negateOffset)
@@ -25720,21 +27021,22 @@ Minimatch.prototype.braceExpand = braceExpand
 
 function braceExpand (pattern, options) {
   if (!options) {
-    if (this instanceof Minimatch)
+    if (this instanceof Minimatch) {
       options = this.options
-    else
+    } else {
       options = {}
+    }
   }
 
-  pattern = typeof pattern === "undefined"
+  pattern = typeof pattern === 'undefined'
     ? this.pattern : pattern
 
-  if (typeof pattern === "undefined") {
-    throw new Error("undefined pattern")
+  if (typeof pattern === 'undefined') {
+    throw new Error('undefined pattern')
   }
 
   if (options.nobrace ||
-      !pattern.match(/\{.*\}/)) {
+    !pattern.match(/\{.*\}/)) {
     // shortcut. no need to expand.
     return [pattern]
   }
@@ -25759,87 +27061,86 @@ function parse (pattern, isSub) {
   var options = this.options
 
   // shortcuts
-  if (!options.noglobstar && pattern === "**") return GLOBSTAR
-  if (pattern === "") return ""
+  if (!options.noglobstar && pattern === '**') return GLOBSTAR
+  if (pattern === '') return ''
 
-  var re = ""
-    , hasMagic = !!options.nocase
-    , escaping = false
-    // ? => one single character
-    , patternListStack = []
-    , plType
-    , stateChar
-    , inClass = false
-    , reClassStart = -1
-    , classStart = -1
-    // . and .. never match anything that doesn't start with .,
-    // even when options.dot is set.
-    , patternStart = pattern.charAt(0) === "." ? "" // anything
-      // not (start or / followed by . or .. followed by / or end)
-      : options.dot ? "(?!(?:^|\\\/)\\.{1,2}(?:$|\\\/))"
-      : "(?!\\.)"
-    , self = this
+  var re = ''
+  var hasMagic = !!options.nocase
+  var escaping = false
+  // ? => one single character
+  var patternListStack = []
+  var plType
+  var stateChar
+  var inClass = false
+  var reClassStart = -1
+  var classStart = -1
+  // . and .. never match anything that doesn't start with .,
+  // even when options.dot is set.
+  var patternStart = pattern.charAt(0) === '.' ? '' // anything
+  // not (start or / followed by . or .. followed by / or end)
+  : options.dot ? '(?!(?:^|\\\/)\\.{1,2}(?:$|\\\/))'
+  : '(?!\\.)'
+  var self = this
 
   function clearStateChar () {
     if (stateChar) {
       // we had some state-tracking character
       // that wasn't consumed by this pass.
       switch (stateChar) {
-        case "*":
+        case '*':
           re += star
           hasMagic = true
-          break
-        case "?":
+        break
+        case '?':
           re += qmark
           hasMagic = true
-          break
+        break
         default:
-          re += "\\"+stateChar
-          break
+          re += '\\' + stateChar
+        break
       }
       self.debug('clearStateChar %j %j', stateChar, re)
       stateChar = false
     }
   }
 
-  for ( var i = 0, len = pattern.length, c
-      ; (i < len) && (c = pattern.charAt(i))
-      ; i ++ ) {
-
-    this.debug("%s\t%s %s %j", pattern, i, re, c)
+  for (var i = 0, len = pattern.length, c
+    ; (i < len) && (c = pattern.charAt(i))
+    ; i++) {
+    this.debug('%s\t%s %s %j', pattern, i, re, c)
 
     // skip over any that are escaped.
     if (escaping && reSpecials[c]) {
-      re += "\\" + c
+      re += '\\' + c
       escaping = false
       continue
     }
 
-    SWITCH: switch (c) {
-      case "/":
+    switch (c) {
+      case '/':
         // completely not allowed, even escaped.
         // Should already be path-split by now.
         return false
 
-      case "\\":
+      case '\\':
         clearStateChar()
         escaping = true
-        continue
+      continue
 
       // the various stateChar values
       // for the "extglob" stuff.
-      case "?":
-      case "*":
-      case "+":
-      case "@":
-      case "!":
-        this.debug("%s\t%s %s %j <-- stateChar", pattern, i, re, c)
+      case '?':
+      case '*':
+      case '+':
+      case '@':
+      case '!':
+        this.debug('%s\t%s %s %j <-- stateChar', pattern, i, re, c)
 
         // all of those are literals inside a class, except that
         // the glob [!a] means [^a] in regexp
         if (inClass) {
           this.debug('  in class')
-          if (c === "!" && i === classStart + 1) c = "^"
+          if (c === '!' && i === classStart + 1) c = '^'
           re += c
           continue
         }
@@ -25854,70 +27155,70 @@ function parse (pattern, isSub) {
         // just clear the statechar *now*, rather than even diving into
         // the patternList stuff.
         if (options.noext) clearStateChar()
-        continue
+      continue
 
-      case "(":
+      case '(':
         if (inClass) {
-          re += "("
+          re += '('
           continue
         }
 
         if (!stateChar) {
-          re += "\\("
+          re += '\\('
           continue
         }
 
         plType = stateChar
-        patternListStack.push({ type: plType
-                              , start: i - 1
-                              , reStart: re.length })
+        patternListStack.push({ type: plType, start: i - 1, reStart: re.length })
         // negation is (?:(?!js)[^/]*)
-        re += stateChar === "!" ? "(?:(?!" : "(?:"
+        re += stateChar === '!' ? '(?:(?!' : '(?:'
         this.debug('plType %j %j', stateChar, re)
         stateChar = false
-        continue
+      continue
 
-      case ")":
+      case ')':
         if (inClass || !patternListStack.length) {
-          re += "\\)"
+          re += '\\)'
           continue
         }
 
         clearStateChar()
         hasMagic = true
-        re += ")"
+        re += ')'
         plType = patternListStack.pop().type
         // negation is (?:(?!js)[^/]*)
         // The others are (?:<pattern>)<type>
         switch (plType) {
-          case "!":
-            re += "[^/]*?)"
+          case '!':
+            re += '[^/]*?)'
             break
-          case "?":
-          case "+":
-          case "*": re += plType
-          case "@": break // the default anyway
+          case '?':
+          case '+':
+          case '*':
+            re += plType
+            break
+          case '@': break // the default anyway
         }
-        continue
+      continue
 
-      case "|":
+      case '|':
         if (inClass || !patternListStack.length || escaping) {
-          re += "\\|"
+          re += '\\|'
           escaping = false
           continue
         }
 
         clearStateChar()
-        re += "|"
-        continue
+        re += '|'
+      continue
 
       // these are mostly the same in regexp and glob
-      case "[":
+      case '[':
         // swallow any state-tracking char before the [
         clearStateChar()
 
         if (inClass) {
-          re += "\\" + c
+          re += '\\' + c
           continue
         }
 
@@ -25925,24 +27226,47 @@ function parse (pattern, isSub) {
         classStart = i
         reClassStart = re.length
         re += c
-        continue
+      continue
 
-      case "]":
+      case ']':
         //  a right bracket shall lose its special
         //  meaning and represent itself in
         //  a bracket expression if it occurs
         //  first in the list.  -- POSIX.2 2.8.3.2
         if (i === classStart + 1 || !inClass) {
-          re += "\\" + c
+          re += '\\' + c
           escaping = false
           continue
+        }
+
+        // handle the case where we left a class open.
+        // "[z-a]" is valid, equivalent to "\[z-a\]"
+        if (inClass) {
+          // split where the last [ was, make sure we don't have
+          // an invalid re. if so, re-walk the contents of the
+          // would-be class to re-translate any characters that
+          // were passed through as-is
+          // TODO: It would probably be faster to determine this
+          // without a try/catch and a new RegExp, but it's tricky
+          // to do safely.  For now, this is safe and works.
+          var cs = pattern.substring(classStart + 1, i)
+          try {
+            RegExp('[' + cs + ']')
+          } catch (er) {
+            // not a valid class!
+            var sp = this.parse(cs, SUBPARSE)
+            re = re.substr(0, reClassStart) + '\\[' + sp[0] + '\\]'
+            hasMagic = hasMagic || sp[1]
+            inClass = false
+            continue
+          }
         }
 
         // finish up the class.
         hasMagic = true
         inClass = false
         re += c
-        continue
+      continue
 
       default:
         // swallow any state char that wasn't consumed
@@ -25952,15 +27276,14 @@ function parse (pattern, isSub) {
           // no need
           escaping = false
         } else if (reSpecials[c]
-                   && !(c === "^" && inClass)) {
-          re += "\\"
+          && !(c === '^' && inClass)) {
+          re += '\\'
         }
 
         re += c
 
     } // switch
   } // for
-
 
   // handle the case where we left a class open.
   // "[abc" is valid, equivalent to "\[abc"
@@ -25969,9 +27292,9 @@ function parse (pattern, isSub) {
     // this is a huge pita.  We now have to re-walk
     // the contents of the would-be class to re-translate
     // any characters that were passed through as-is
-    var cs = pattern.substr(classStart + 1)
-      , sp = this.parse(cs, SUBPARSE)
-    re = re.substr(0, reClassStart) + "\\[" + sp[0]
+    cs = pattern.substr(classStart + 1)
+    sp = this.parse(cs, SUBPARSE)
+    re = re.substr(0, reClassStart) + '\\[' + sp[0]
     hasMagic = hasMagic || sp[1]
   }
 
@@ -25981,14 +27304,13 @@ function parse (pattern, isSub) {
   // and escape any | chars that were passed through as-is for the regexp.
   // Go through and escape them, taking care not to double-escape any
   // | chars that were already escaped.
-  var pl
-  while (pl = patternListStack.pop()) {
+  for (var pl = patternListStack.pop(); pl; pl = patternListStack.pop()) {
     var tail = re.slice(pl.reStart + 3)
     // maybe some even number of \, then maybe 1 \, followed by a |
     tail = tail.replace(/((?:\\{2})*)(\\?)\|/g, function (_, $1, $2) {
       if (!$2) {
         // the | isn't already escaped, so escape it.
-        $2 = "\\"
+        $2 = '\\'
       }
 
       // need to escape all those slashes *again*, without escaping the
@@ -25997,46 +27319,44 @@ function parse (pattern, isSub) {
       // it exactly after itself.  That's why this trick works.
       //
       // I am sorry that you have to see this.
-      return $1 + $1 + $2 + "|"
+      return $1 + $1 + $2 + '|'
     })
 
-    this.debug("tail=%j\n   %s", tail, tail)
-    var t = pl.type === "*" ? star
-          : pl.type === "?" ? qmark
-          : "\\" + pl.type
+    this.debug('tail=%j\n   %s', tail, tail)
+    var t = pl.type === '*' ? star
+      : pl.type === '?' ? qmark
+      : '\\' + pl.type
 
     hasMagic = true
-    re = re.slice(0, pl.reStart)
-       + t + "\\("
-       + tail
+    re = re.slice(0, pl.reStart) + t + '\\(' + tail
   }
 
   // handle trailing things that only matter at the very end.
   clearStateChar()
   if (escaping) {
     // trailing \\
-    re += "\\\\"
+    re += '\\\\'
   }
 
   // only need to apply the nodot start if the re starts with
   // something that could conceivably capture a dot
   var addPatternStart = false
   switch (re.charAt(0)) {
-    case ".":
-    case "[":
-    case "(": addPatternStart = true
+    case '.':
+    case '[':
+    case '(': addPatternStart = true
   }
 
   // if the re is not "" at this point, then we need to make sure
   // it doesn't match against an empty path part.
   // Otherwise a/* will match a/, which it should not.
-  if (re !== "" && hasMagic) re = "(?=.)" + re
+  if (re !== '' && hasMagic) re = '(?=.)' + re
 
   if (addPatternStart) re = patternStart + re
 
   // parsing just a piece of a larger pattern.
   if (isSub === SUBPARSE) {
-    return [ re, hasMagic ]
+    return [re, hasMagic]
   }
 
   // skip the regexp for non-magical patterns
@@ -26046,8 +27366,8 @@ function parse (pattern, isSub) {
     return globUnescape(pattern)
   }
 
-  var flags = options.nocase ? "i" : ""
-    , regExp = new RegExp("^" + re + "$", flags)
+  var flags = options.nocase ? 'i' : ''
+  var regExp = new RegExp('^' + re + '$', flags)
 
   regExp._glob = pattern
   regExp._src = re
@@ -26071,34 +27391,38 @@ function makeRe () {
   // when you just want to work with a regex.
   var set = this.set
 
-  if (!set.length) return this.regexp = false
+  if (!set.length) {
+    this.regexp = false
+    return this.regexp
+  }
   var options = this.options
 
   var twoStar = options.noglobstar ? star
-      : options.dot ? twoStarDot
-      : twoStarNoDot
-    , flags = options.nocase ? "i" : ""
+    : options.dot ? twoStarDot
+    : twoStarNoDot
+  var flags = options.nocase ? 'i' : ''
 
   var re = set.map(function (pattern) {
     return pattern.map(function (p) {
       return (p === GLOBSTAR) ? twoStar
-           : (typeof p === "string") ? regExpEscape(p)
-           : p._src
-    }).join("\\\/")
-  }).join("|")
+      : (typeof p === 'string') ? regExpEscape(p)
+      : p._src
+    }).join('\\\/')
+  }).join('|')
 
   // must match entire pattern
   // ending in a * or ** will make it less strict.
-  re = "^(?:" + re + ")$"
+  re = '^(?:' + re + ')$'
 
   // can match anything, as long as it's not this.
-  if (this.negate) re = "^(?!" + re + ").*$"
+  if (this.negate) re = '^(?!' + re + ').*$'
 
   try {
-    return this.regexp = new RegExp(re, flags)
+    this.regexp = new RegExp(re, flags)
   } catch (ex) {
-    return this.regexp = false
+    this.regexp = false
   }
+  return this.regexp
 }
 
 minimatch.match = function (list, pattern, options) {
@@ -26115,23 +27439,24 @@ minimatch.match = function (list, pattern, options) {
 
 Minimatch.prototype.match = match
 function match (f, partial) {
-  this.debug("match", f, this.pattern)
+  this.debug('match', f, this.pattern)
   // short-circuit in the case of busted things.
   // comments, etc.
   if (this.comment) return false
-  if (this.empty) return f === ""
+  if (this.empty) return f === ''
 
-  if (f === "/" && partial) return true
+  if (f === '/' && partial) return true
 
   var options = this.options
 
   // windows: need to use /, not \
-  if (isWindows)
-    f = f.split("\\").join("/")
+  if (path.sep !== '/') {
+    f = f.split(path.sep).join('/')
+  }
 
   // treat the test path as a set of pathparts.
   f = f.split(slashSplit)
-  this.debug(this.pattern, "split", f)
+  this.debug(this.pattern, 'split', f)
 
   // just ONE of the pattern sets in this.set needs to match
   // in order for it to be valid.  If negating, then just one
@@ -26139,17 +27464,19 @@ function match (f, partial) {
   // Either way, return on the first hit.
 
   var set = this.set
-  this.debug(this.pattern, "set", set)
+  this.debug(this.pattern, 'set', set)
 
   // Find the basename of the path by looking for the last non-empty segment
-  var filename;
-  for (var i = f.length - 1; i >= 0; i--) {
+  var filename
+  var i
+  for (i = f.length - 1; i >= 0; i--) {
     filename = f[i]
     if (filename) break
   }
 
-  for (var i = 0, l = set.length; i < l; i ++) {
-    var pattern = set[i], file = f
+  for (i = 0; i < set.length; i++) {
+    var pattern = set[i]
+    var file = f
     if (options.matchBase && pattern.length === 1) {
       file = [filename]
     }
@@ -26174,23 +27501,20 @@ function match (f, partial) {
 Minimatch.prototype.matchOne = function (file, pattern, partial) {
   var options = this.options
 
-  this.debug("matchOne",
-              { "this": this
-              , file: file
-              , pattern: pattern })
+  this.debug('matchOne',
+    { 'this': this, file: file, pattern: pattern })
 
-  this.debug("matchOne", file.length, pattern.length)
+  this.debug('matchOne', file.length, pattern.length)
 
-  for ( var fi = 0
-          , pi = 0
-          , fl = file.length
-          , pl = pattern.length
+  for (var fi = 0,
+      pi = 0,
+      fl = file.length,
+      pl = pattern.length
       ; (fi < fl) && (pi < pl)
-      ; fi ++, pi ++ ) {
-
-    this.debug("matchOne loop")
+      ; fi++, pi++) {
+    this.debug('matchOne loop')
     var p = pattern[pi]
-      , f = file[fi]
+    var f = file[fi]
 
     this.debug(pattern, p, f)
 
@@ -26224,7 +27548,7 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
       //       - matchOne(z/c, c) -> no
       //       - matchOne(c, c) yes, hit
       var fr = fi
-        , pr = pi + 1
+      var pr = pi + 1
       if (pr === pl) {
         this.debug('** at the end')
         // a ** at the end will just swallow the rest.
@@ -26233,19 +27557,18 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
         // options.dot is set.
         // . and .. are *never* matched by **, for explosively
         // exponential reasons.
-        for ( ; fi < fl; fi ++) {
-          if (file[fi] === "." || file[fi] === ".." ||
-              (!options.dot && file[fi].charAt(0) === ".")) return false
+        for (; fi < fl; fi++) {
+          if (file[fi] === '.' || file[fi] === '..' ||
+            (!options.dot && file[fi].charAt(0) === '.')) return false
         }
         return true
       }
 
       // ok, let's see if we can swallow whatever we can.
-      WHILE: while (fr < fl) {
+      while (fr < fl) {
         var swallowee = file[fr]
 
-        this.debug('\nglobstar while',
-                    file, fr, pattern, pr, swallowee)
+        this.debug('\nglobstar while', file, fr, pattern, pr, swallowee)
 
         // XXX remove this slice.  Just pass the start index.
         if (this.matchOne(file.slice(fr), pattern.slice(pr), partial)) {
@@ -26255,23 +27578,24 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
         } else {
           // can't swallow "." or ".." ever.
           // can only swallow ".foo" when explicitly asked.
-          if (swallowee === "." || swallowee === ".." ||
-              (!options.dot && swallowee.charAt(0) === ".")) {
-            this.debug("dot detected!", file, fr, pattern, pr)
-            break WHILE
+          if (swallowee === '.' || swallowee === '..' ||
+            (!options.dot && swallowee.charAt(0) === '.')) {
+            this.debug('dot detected!', file, fr, pattern, pr)
+            break
           }
 
           // ** swallows a segment, and continue.
           this.debug('globstar swallow a segment, and continue')
-          fr ++
+          fr++
         }
       }
+
       // no match was found.
       // However, in partial mode, we can't say this is necessarily over.
       // If there's more *pattern* left, then
       if (partial) {
         // ran out of file
-        this.debug("\n>>> no match, partial?", file, fr, pattern, pr)
+        this.debug('\n>>> no match, partial?', file, fr, pattern, pr)
         if (fr === fl) return true
       }
       return false
@@ -26281,16 +27605,16 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
     // non-magic patterns just have to match exactly
     // patterns with magic have been turned into regexps.
     var hit
-    if (typeof p === "string") {
+    if (typeof p === 'string') {
       if (options.nocase) {
         hit = f.toLowerCase() === p.toLowerCase()
       } else {
         hit = f === p
       }
-      this.debug("string match", p, f, hit)
+      this.debug('string match', p, f, hit)
     } else {
       hit = f.match(p)
-      this.debug("pattern match", p, f, hit)
+      this.debug('pattern match', p, f, hit)
     }
 
     if (!hit) return false
@@ -26322,27 +27646,24 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
     // this is only acceptable if we're on the very last
     // empty segment of a file with a trailing slash.
     // a/* should match a/b/
-    var emptyFileEnd = (fi === fl - 1) && (file[fi] === "")
+    var emptyFileEnd = (fi === fl - 1) && (file[fi] === '')
     return emptyFileEnd
   }
 
   // should be unreachable.
-  throw new Error("wtf?")
+  throw new Error('wtf?')
 }
-
 
 // replace stuff like \* with *
 function globUnescape (s) {
-  return s.replace(/\\(.)/g, "$1")
+  return s.replace(/\\(.)/g, '$1')
 }
-
 
 function regExpEscape (s) {
-  return s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+  return s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
 }
 
-}).call(this,require('_process'))
-},{"_process":126,"brace-expansion":141}],141:[function(require,module,exports){
+},{"brace-expansion":151,"path":135}],151:[function(require,module,exports){
 var concatMap = require('concat-map');
 var balanced = require('balanced-match');
 
@@ -26535,7 +27856,7 @@ function expand(str, isTop) {
 }
 
 
-},{"balanced-match":142,"concat-map":143}],142:[function(require,module,exports){
+},{"balanced-match":152,"concat-map":153}],152:[function(require,module,exports){
 module.exports = balanced;
 function balanced(a, b, str) {
   var bal = 0;
@@ -26575,7 +27896,7 @@ function balanced(a, b, str) {
   }
 }
 
-},{}],143:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 module.exports = function (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
@@ -26590,12 +27911,200 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],144:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
+/**
+ * ### .get(obj, path)
+ *
+ * Retrieve the value in an object given a string path.
+ *
+ * ```js
+ * var obj = {
+ *     prop1: {
+ *         arr: ['a', 'b', 'c']
+ *       , str: 'Hello'
+ *     }
+ *   , prop2: {
+ *         arr: [ { nested: 'Universe' } ]
+ *       , str: 'Hello again!'
+ *     }
+ * };
+ * ```
+ *
+ * The following would be the results.
+ *
+ * ```js
+ * var properties = require('tea-properties');
+ * properties.get(obj, 'prop1.str'); // Hello
+ * properties.get(obj, 'prop1.att[2]'); // b
+ * properties.get(obj, 'prop2.arr[0].nested'); // Universe
+ * ```
+ *
+ * @param {Object} object
+ * @param {String} path
+ * @return {Object} value or `undefined`
+ */
+
+exports.get = function(obj, path) {
+  var parsed = exports.parse(path);
+  return getPathValue(parsed, obj);
+};
+
+/**
+ * ### .set(path, value, object)
+ *
+ * Define the value in an object at a given string path.
+ *
+ * ```js
+ * var obj = {
+ *     prop1: {
+ *         arr: ['a', 'b', 'c']
+ *       , str: 'Hello'
+ *     }
+ *   , prop2: {
+ *         arr: [ { nested: 'Universe' } ]
+ *       , str: 'Hello again!'
+ *     }
+ * };
+ * ```
+ *
+ * The following would be acceptable.
+ *
+ * ```js
+ * var properties = require('tea-properties');
+ * properties.set(obj, 'prop1.str', 'Hello Universe!');
+ * properties.set(obj, 'prop1.arr[2]', 'B');
+ * properties.set(obj, 'prop2.arr[0].nested.value', { hello: 'universe' });
+ * ```
+ *
+ * @param {Object} object
+ * @param {String} path
+ * @param {Mixed} value
+ * @api public
+ */
+
+exports.set = function(obj, path, val) {
+  var parsed = exports.parse(path);
+  setPathValue(parsed, val, obj);
+};
+
+/*!
+ * Helper function used to parse string object
+ * paths. Use in conjunction with `getPathValue`.
+ *
+ *  var parsed = parsePath('myobject.property.subprop');
+ *
+ * ### Paths:
+ *
+ * * Can be as near infinitely deep and nested
+ * * Arrays are also valid using the formal `myobject.document[3].property`.
+ *
+ * @param {String} path
+ * @returns {Object} parsed
+ */
+
+exports.parse = function(path) {
+  var str = (path || '').replace(/\[/g, '.[');
+  var parts = str.match(/(\\\.|[^.]+?)+/g);
+
+  return parts.map(function(value) {
+    var re = /\[(\d+)\]$/
+      , mArr = re.exec(value)
+    if (mArr) return { i: parseFloat(mArr[1]) };
+    else return { p: value };
+  });
+};
+
+/*!
+ * Companion function for `parsePath` that returns
+ * the value located at the parsed address.
+ *
+ *  var value = getPathValue(parsed, obj);
+ *
+ * @param {Object} parsed definition from `parsePath`.
+ * @param {Object} object to search against
+ * @returns {Object|Undefined} value
+ */
+
+function getPathValue(parsed, obj) {
+  var tmp = obj;
+  var res;
+
+  for (var i = 0, l = parsed.length; i < l; i++) {
+    var part = parsed[i];
+    if (tmp) {
+      if (defined(part.p)) tmp = tmp[part.p];
+      else if (defined(part.i)) tmp = tmp[part.i];
+      if (i == (l - 1)) res = tmp;
+    } else {
+      res = undefined;
+    }
+  }
+
+  return res;
+};
+
+/*!
+ * Companion function for `parsePath` that sets
+ * the value located at a parsed address.
+ *
+ *  setPathValue(parsed, 'value', obj);
+ *
+ * @param {Object} parsed definition from `parsePath`
+ * @param {*} value to use upon set
+ * @param {Object} object to search and define on
+ * @api private
+ */
+
+function setPathValue(parsed, val, obj) {
+  var tmp = obj;
+  var i = 0;
+  var l = parsed.length;
+  var part;
+
+  for (; i < l; i++) {
+    part = parsed[i];
+
+    if (defined(tmp) && i == (l - 1)) {
+      var x = defined(part.p) ? part.p : part.i;
+      tmp[x] = val;
+    } else if (defined(tmp)) {
+      if (defined(part.p) && tmp[part.p]) {
+        tmp = tmp[part.p];
+      } else if (defined(part.i) && tmp[part.i]) {
+        tmp = tmp[part.i];
+      } else {
+        var next = parsed[i + 1];
+        var x = defined(part.p) ? part.p : part.i;
+        var y = defined(next.p) ? {} : [];
+        tmp[x] = y;
+        tmp = tmp[x];
+      }
+    } else {
+      if (i == (l - 1)) tmp = val;
+      else if (defined(part.p)) tmp = {};
+      else if (defined(part.i)) tmp = [];
+    }
+  }
+};
+
+/*!
+ * Check if `val` is defined.
+ *
+ * @param {Mixed} val
+ * @returns {Boolean} `true` if defined
+ * @api private
+ */
+
+function defined(val) {
+  return !(!val && 'undefined' === typeof val);
+}
+
+},{}],155:[function(require,module,exports){
 (function (process){
 /**
  * @module vow
  * @author Filatov Dmitry <dfilatov@yandex-team.ru>
- * @version 0.4.8
+ * @version 0.4.9
  * @license
  * Dual licensed under the MIT and GPL licenses:
  *   * http://www.opensource.org/licenses/mit-license.php
@@ -26981,7 +28490,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
     /**
      * Adds resolving reaction (to fulfillment and rejection both).
      *
-     * @param {Function} onResolved Callback that to be called with the value after promise has been rejected
+     * @param {Function} onResolved Callback that to be called with the value after promise has been resolved
      * @param {Object} [ctx] Context of callback execution
      * @returns {vow:Promise}
      */
@@ -27495,7 +29004,7 @@ var vow = /** @exports vow */ {
      * @returns {vow:Promise}
      */
     cast : function(value) {
-        return vow.isPromise(value)?
+        return value && !!value._vow?
             value :
             vow.resolve(value);
     },
@@ -27910,16 +29419,16 @@ defineAsGlobal && (global.vow = vow);
 })(this);
 
 }).call(this,require('_process'))
-},{"_process":126}],145:[function(require,module,exports){
+},{"_process":136}],156:[function(require,module,exports){
 module.exports = /[A-Za-z\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0-\u08B2\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16F1-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]|\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF30-\uDF40\uDF42-\uDF49\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF]|\uD801[\uDC00-\uDC9D\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE33\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48]|\uD804[\uDC03-\uDC37\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDE00-\uDE11\uDE13-\uDE2B\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF5D-\uDF61]|\uD805[\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDE00-\uDE2F\uDE44\uDE80-\uDEAA]|\uD806[\uDCA0-\uDCDF\uDCFF\uDEC0-\uDEF8]|\uD808[\uDC00-\uDF98]|[\uD80C\uD840-\uD868\uD86A-\uD86C][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDF00-\uDF44\uDF50\uDF93-\uDF9F]|\uD82C[\uDC00\uDC01]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD83A[\uDC00-\uDCC4]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D]|\uD87E[\uDC00-\uDE1D]/;
 
-},{}],146:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 module.exports = /[a-z\xB5\xDF-\xF6\xF8-\xFF\u0101\u0103\u0105\u0107\u0109\u010B\u010D\u010F\u0111\u0113\u0115\u0117\u0119\u011B\u011D\u011F\u0121\u0123\u0125\u0127\u0129\u012B\u012D\u012F\u0131\u0133\u0135\u0137\u0138\u013A\u013C\u013E\u0140\u0142\u0144\u0146\u0148\u0149\u014B\u014D\u014F\u0151\u0153\u0155\u0157\u0159\u015B\u015D\u015F\u0161\u0163\u0165\u0167\u0169\u016B\u016D\u016F\u0171\u0173\u0175\u0177\u017A\u017C\u017E-\u0180\u0183\u0185\u0188\u018C\u018D\u0192\u0195\u0199-\u019B\u019E\u01A1\u01A3\u01A5\u01A8\u01AA\u01AB\u01AD\u01B0\u01B4\u01B6\u01B9\u01BA\u01BD-\u01BF\u01C6\u01C9\u01CC\u01CE\u01D0\u01D2\u01D4\u01D6\u01D8\u01DA\u01DC\u01DD\u01DF\u01E1\u01E3\u01E5\u01E7\u01E9\u01EB\u01ED\u01EF\u01F0\u01F3\u01F5\u01F9\u01FB\u01FD\u01FF\u0201\u0203\u0205\u0207\u0209\u020B\u020D\u020F\u0211\u0213\u0215\u0217\u0219\u021B\u021D\u021F\u0221\u0223\u0225\u0227\u0229\u022B\u022D\u022F\u0231\u0233-\u0239\u023C\u023F\u0240\u0242\u0247\u0249\u024B\u024D\u024F-\u0293\u0295-\u02AF\u0371\u0373\u0377\u037B-\u037D\u0390\u03AC-\u03CE\u03D0\u03D1\u03D5-\u03D7\u03D9\u03DB\u03DD\u03DF\u03E1\u03E3\u03E5\u03E7\u03E9\u03EB\u03ED\u03EF-\u03F3\u03F5\u03F8\u03FB\u03FC\u0430-\u045F\u0461\u0463\u0465\u0467\u0469\u046B\u046D\u046F\u0471\u0473\u0475\u0477\u0479\u047B\u047D\u047F\u0481\u048B\u048D\u048F\u0491\u0493\u0495\u0497\u0499\u049B\u049D\u049F\u04A1\u04A3\u04A5\u04A7\u04A9\u04AB\u04AD\u04AF\u04B1\u04B3\u04B5\u04B7\u04B9\u04BB\u04BD\u04BF\u04C2\u04C4\u04C6\u04C8\u04CA\u04CC\u04CE\u04CF\u04D1\u04D3\u04D5\u04D7\u04D9\u04DB\u04DD\u04DF\u04E1\u04E3\u04E5\u04E7\u04E9\u04EB\u04ED\u04EF\u04F1\u04F3\u04F5\u04F7\u04F9\u04FB\u04FD\u04FF\u0501\u0503\u0505\u0507\u0509\u050B\u050D\u050F\u0511\u0513\u0515\u0517\u0519\u051B\u051D\u051F\u0521\u0523\u0525\u0527\u0529\u052B\u052D\u052F\u0561-\u0587\u1D00-\u1D2B\u1D6B-\u1D77\u1D79-\u1D9A\u1E01\u1E03\u1E05\u1E07\u1E09\u1E0B\u1E0D\u1E0F\u1E11\u1E13\u1E15\u1E17\u1E19\u1E1B\u1E1D\u1E1F\u1E21\u1E23\u1E25\u1E27\u1E29\u1E2B\u1E2D\u1E2F\u1E31\u1E33\u1E35\u1E37\u1E39\u1E3B\u1E3D\u1E3F\u1E41\u1E43\u1E45\u1E47\u1E49\u1E4B\u1E4D\u1E4F\u1E51\u1E53\u1E55\u1E57\u1E59\u1E5B\u1E5D\u1E5F\u1E61\u1E63\u1E65\u1E67\u1E69\u1E6B\u1E6D\u1E6F\u1E71\u1E73\u1E75\u1E77\u1E79\u1E7B\u1E7D\u1E7F\u1E81\u1E83\u1E85\u1E87\u1E89\u1E8B\u1E8D\u1E8F\u1E91\u1E93\u1E95-\u1E9D\u1E9F\u1EA1\u1EA3\u1EA5\u1EA7\u1EA9\u1EAB\u1EAD\u1EAF\u1EB1\u1EB3\u1EB5\u1EB7\u1EB9\u1EBB\u1EBD\u1EBF\u1EC1\u1EC3\u1EC5\u1EC7\u1EC9\u1ECB\u1ECD\u1ECF\u1ED1\u1ED3\u1ED5\u1ED7\u1ED9\u1EDB\u1EDD\u1EDF\u1EE1\u1EE3\u1EE5\u1EE7\u1EE9\u1EEB\u1EED\u1EEF\u1EF1\u1EF3\u1EF5\u1EF7\u1EF9\u1EFB\u1EFD\u1EFF-\u1F07\u1F10-\u1F15\u1F20-\u1F27\u1F30-\u1F37\u1F40-\u1F45\u1F50-\u1F57\u1F60-\u1F67\u1F70-\u1F7D\u1F80-\u1F87\u1F90-\u1F97\u1FA0-\u1FA7\u1FB0-\u1FB4\u1FB6\u1FB7\u1FBE\u1FC2-\u1FC4\u1FC6\u1FC7\u1FD0-\u1FD3\u1FD6\u1FD7\u1FE0-\u1FE7\u1FF2-\u1FF4\u1FF6\u1FF7\u210A\u210E\u210F\u2113\u212F\u2134\u2139\u213C\u213D\u2146-\u2149\u214E\u2184\u2C30-\u2C5E\u2C61\u2C65\u2C66\u2C68\u2C6A\u2C6C\u2C71\u2C73\u2C74\u2C76-\u2C7B\u2C81\u2C83\u2C85\u2C87\u2C89\u2C8B\u2C8D\u2C8F\u2C91\u2C93\u2C95\u2C97\u2C99\u2C9B\u2C9D\u2C9F\u2CA1\u2CA3\u2CA5\u2CA7\u2CA9\u2CAB\u2CAD\u2CAF\u2CB1\u2CB3\u2CB5\u2CB7\u2CB9\u2CBB\u2CBD\u2CBF\u2CC1\u2CC3\u2CC5\u2CC7\u2CC9\u2CCB\u2CCD\u2CCF\u2CD1\u2CD3\u2CD5\u2CD7\u2CD9\u2CDB\u2CDD\u2CDF\u2CE1\u2CE3\u2CE4\u2CEC\u2CEE\u2CF3\u2D00-\u2D25\u2D27\u2D2D\uA641\uA643\uA645\uA647\uA649\uA64B\uA64D\uA64F\uA651\uA653\uA655\uA657\uA659\uA65B\uA65D\uA65F\uA661\uA663\uA665\uA667\uA669\uA66B\uA66D\uA681\uA683\uA685\uA687\uA689\uA68B\uA68D\uA68F\uA691\uA693\uA695\uA697\uA699\uA69B\uA723\uA725\uA727\uA729\uA72B\uA72D\uA72F-\uA731\uA733\uA735\uA737\uA739\uA73B\uA73D\uA73F\uA741\uA743\uA745\uA747\uA749\uA74B\uA74D\uA74F\uA751\uA753\uA755\uA757\uA759\uA75B\uA75D\uA75F\uA761\uA763\uA765\uA767\uA769\uA76B\uA76D\uA76F\uA771-\uA778\uA77A\uA77C\uA77F\uA781\uA783\uA785\uA787\uA78C\uA78E\uA791\uA793-\uA795\uA797\uA799\uA79B\uA79D\uA79F\uA7A1\uA7A3\uA7A5\uA7A7\uA7A9\uA7FA\uAB30-\uAB5A\uAB64\uAB65\uFB00-\uFB06\uFB13-\uFB17\uFF41-\uFF5A]|\uD801[\uDC28-\uDC4F]|\uD806[\uDCC0-\uDCDF]|\uD835[\uDC1A-\uDC33\uDC4E-\uDC54\uDC56-\uDC67\uDC82-\uDC9B\uDCB6-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDCCF\uDCEA-\uDD03\uDD1E-\uDD37\uDD52-\uDD6B\uDD86-\uDD9F\uDDBA-\uDDD3\uDDEE-\uDE07\uDE22-\uDE3B\uDE56-\uDE6F\uDE8A-\uDEA5\uDEC2-\uDEDA\uDEDC-\uDEE1\uDEFC-\uDF14\uDF16-\uDF1B\uDF36-\uDF4E\uDF50-\uDF55\uDF70-\uDF88\uDF8A-\uDF8F\uDFAA-\uDFC2\uDFC4-\uDFC9\uDFCB]/;
 
-},{}],147:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 module.exports = /[A-Z\xC0-\xD6\xD8-\xDE\u0100\u0102\u0104\u0106\u0108\u010A\u010C\u010E\u0110\u0112\u0114\u0116\u0118\u011A\u011C\u011E\u0120\u0122\u0124\u0126\u0128\u012A\u012C\u012E\u0130\u0132\u0134\u0136\u0139\u013B\u013D\u013F\u0141\u0143\u0145\u0147\u014A\u014C\u014E\u0150\u0152\u0154\u0156\u0158\u015A\u015C\u015E\u0160\u0162\u0164\u0166\u0168\u016A\u016C\u016E\u0170\u0172\u0174\u0176\u0178\u0179\u017B\u017D\u0181\u0182\u0184\u0186\u0187\u0189-\u018B\u018E-\u0191\u0193\u0194\u0196-\u0198\u019C\u019D\u019F\u01A0\u01A2\u01A4\u01A6\u01A7\u01A9\u01AC\u01AE\u01AF\u01B1-\u01B3\u01B5\u01B7\u01B8\u01BC\u01C4\u01C7\u01CA\u01CD\u01CF\u01D1\u01D3\u01D5\u01D7\u01D9\u01DB\u01DE\u01E0\u01E2\u01E4\u01E6\u01E8\u01EA\u01EC\u01EE\u01F1\u01F4\u01F6-\u01F8\u01FA\u01FC\u01FE\u0200\u0202\u0204\u0206\u0208\u020A\u020C\u020E\u0210\u0212\u0214\u0216\u0218\u021A\u021C\u021E\u0220\u0222\u0224\u0226\u0228\u022A\u022C\u022E\u0230\u0232\u023A\u023B\u023D\u023E\u0241\u0243-\u0246\u0248\u024A\u024C\u024E\u0370\u0372\u0376\u037F\u0386\u0388-\u038A\u038C\u038E\u038F\u0391-\u03A1\u03A3-\u03AB\u03CF\u03D2-\u03D4\u03D8\u03DA\u03DC\u03DE\u03E0\u03E2\u03E4\u03E6\u03E8\u03EA\u03EC\u03EE\u03F4\u03F7\u03F9\u03FA\u03FD-\u042F\u0460\u0462\u0464\u0466\u0468\u046A\u046C\u046E\u0470\u0472\u0474\u0476\u0478\u047A\u047C\u047E\u0480\u048A\u048C\u048E\u0490\u0492\u0494\u0496\u0498\u049A\u049C\u049E\u04A0\u04A2\u04A4\u04A6\u04A8\u04AA\u04AC\u04AE\u04B0\u04B2\u04B4\u04B6\u04B8\u04BA\u04BC\u04BE\u04C0\u04C1\u04C3\u04C5\u04C7\u04C9\u04CB\u04CD\u04D0\u04D2\u04D4\u04D6\u04D8\u04DA\u04DC\u04DE\u04E0\u04E2\u04E4\u04E6\u04E8\u04EA\u04EC\u04EE\u04F0\u04F2\u04F4\u04F6\u04F8\u04FA\u04FC\u04FE\u0500\u0502\u0504\u0506\u0508\u050A\u050C\u050E\u0510\u0512\u0514\u0516\u0518\u051A\u051C\u051E\u0520\u0522\u0524\u0526\u0528\u052A\u052C\u052E\u0531-\u0556\u10A0-\u10C5\u10C7\u10CD\u1E00\u1E02\u1E04\u1E06\u1E08\u1E0A\u1E0C\u1E0E\u1E10\u1E12\u1E14\u1E16\u1E18\u1E1A\u1E1C\u1E1E\u1E20\u1E22\u1E24\u1E26\u1E28\u1E2A\u1E2C\u1E2E\u1E30\u1E32\u1E34\u1E36\u1E38\u1E3A\u1E3C\u1E3E\u1E40\u1E42\u1E44\u1E46\u1E48\u1E4A\u1E4C\u1E4E\u1E50\u1E52\u1E54\u1E56\u1E58\u1E5A\u1E5C\u1E5E\u1E60\u1E62\u1E64\u1E66\u1E68\u1E6A\u1E6C\u1E6E\u1E70\u1E72\u1E74\u1E76\u1E78\u1E7A\u1E7C\u1E7E\u1E80\u1E82\u1E84\u1E86\u1E88\u1E8A\u1E8C\u1E8E\u1E90\u1E92\u1E94\u1E9E\u1EA0\u1EA2\u1EA4\u1EA6\u1EA8\u1EAA\u1EAC\u1EAE\u1EB0\u1EB2\u1EB4\u1EB6\u1EB8\u1EBA\u1EBC\u1EBE\u1EC0\u1EC2\u1EC4\u1EC6\u1EC8\u1ECA\u1ECC\u1ECE\u1ED0\u1ED2\u1ED4\u1ED6\u1ED8\u1EDA\u1EDC\u1EDE\u1EE0\u1EE2\u1EE4\u1EE6\u1EE8\u1EEA\u1EEC\u1EEE\u1EF0\u1EF2\u1EF4\u1EF6\u1EF8\u1EFA\u1EFC\u1EFE\u1F08-\u1F0F\u1F18-\u1F1D\u1F28-\u1F2F\u1F38-\u1F3F\u1F48-\u1F4D\u1F59\u1F5B\u1F5D\u1F5F\u1F68-\u1F6F\u1FB8-\u1FBB\u1FC8-\u1FCB\u1FD8-\u1FDB\u1FE8-\u1FEC\u1FF8-\u1FFB\u2102\u2107\u210B-\u210D\u2110-\u2112\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u2130-\u2133\u213E\u213F\u2145\u2183\u2C00-\u2C2E\u2C60\u2C62-\u2C64\u2C67\u2C69\u2C6B\u2C6D-\u2C70\u2C72\u2C75\u2C7E-\u2C80\u2C82\u2C84\u2C86\u2C88\u2C8A\u2C8C\u2C8E\u2C90\u2C92\u2C94\u2C96\u2C98\u2C9A\u2C9C\u2C9E\u2CA0\u2CA2\u2CA4\u2CA6\u2CA8\u2CAA\u2CAC\u2CAE\u2CB0\u2CB2\u2CB4\u2CB6\u2CB8\u2CBA\u2CBC\u2CBE\u2CC0\u2CC2\u2CC4\u2CC6\u2CC8\u2CCA\u2CCC\u2CCE\u2CD0\u2CD2\u2CD4\u2CD6\u2CD8\u2CDA\u2CDC\u2CDE\u2CE0\u2CE2\u2CEB\u2CED\u2CF2\uA640\uA642\uA644\uA646\uA648\uA64A\uA64C\uA64E\uA650\uA652\uA654\uA656\uA658\uA65A\uA65C\uA65E\uA660\uA662\uA664\uA666\uA668\uA66A\uA66C\uA680\uA682\uA684\uA686\uA688\uA68A\uA68C\uA68E\uA690\uA692\uA694\uA696\uA698\uA69A\uA722\uA724\uA726\uA728\uA72A\uA72C\uA72E\uA732\uA734\uA736\uA738\uA73A\uA73C\uA73E\uA740\uA742\uA744\uA746\uA748\uA74A\uA74C\uA74E\uA750\uA752\uA754\uA756\uA758\uA75A\uA75C\uA75E\uA760\uA762\uA764\uA766\uA768\uA76A\uA76C\uA76E\uA779\uA77B\uA77D\uA77E\uA780\uA782\uA784\uA786\uA78B\uA78D\uA790\uA792\uA796\uA798\uA79A\uA79C\uA79E\uA7A0\uA7A2\uA7A4\uA7A6\uA7A8\uA7AA-\uA7AD\uA7B0\uA7B1\uFF21-\uFF3A]|\uD801[\uDC00-\uDC27]|\uD806[\uDCA0-\uDCBF]|\uD835[\uDC00-\uDC19\uDC34-\uDC4D\uDC68-\uDC81\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB5\uDCD0-\uDCE9\uDD04\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD38\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD6C-\uDD85\uDDA0-\uDDB9\uDDD4-\uDDED\uDE08-\uDE21\uDE3C-\uDE55\uDE70-\uDE89\uDEA8-\uDEC0\uDEE2-\uDEFA\uDF1C-\uDF34\uDF56-\uDF6E\uDF90-\uDFA8\uDFCA]/;
 
-},{}],148:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 module.exports={
     "disallowSpacesInNamedFunctionExpression": {
         "beforeOpeningRoundBrace": true
@@ -27989,7 +29498,7 @@ module.exports={
     "validateIndentation": 2
 }
 
-},{}],149:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28058,7 +29567,7 @@ module.exports={
     "requireSpaceBeforeObjectValues": true
 }
 
-},{}],150:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28124,7 +29633,7 @@ module.exports={
     "disallowNewlineBeforeBlockStatements": true
 }
 
-},{}],151:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 module.exports={
   "preset": "google",
   "maximumLineLength": 120,
@@ -28133,7 +29642,7 @@ module.exports={
   "disallowMultipleVarDecl": "exceptUndefined"
 }
 
-},{}],152:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28220,7 +29729,7 @@ module.exports={
     "disallowMultipleLineBreaks": true
 }
 
-},{}],153:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": ["while", "do", "try", "catch"],
     "requireSpaceAfterKeywords": ["if", "else", "for", "while", "do", "switch", "return", "try", "catch"],
@@ -28251,7 +29760,7 @@ module.exports={
     }
 }
 
-},{}],154:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 module.exports={
     "disallowKeywords": ["with"],
     "disallowKeywordsOnNewLine": ["else"],
@@ -28300,7 +29809,7 @@ module.exports={
     "validateQuoteMarks": "'"
 }
 
-},{}],155:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28374,7 +29883,7 @@ module.exports={
     "validateIndentation": "\t"
 }
 
-},{}],156:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 module.exports={
     "preset": "jquery",
     "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~"],
@@ -28389,7 +29898,7 @@ module.exports={
     "validateQuoteMarks": "'"
 }
 
-},{}],157:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 module.exports={
     "requireCurlyBraces": [
         "if",
@@ -28493,5 +30002,5 @@ module.exports={
     "requireSemicolons": true
 }
 
-},{}]},{},[118])(118)
+},{}]},{},[128])(128)
 });

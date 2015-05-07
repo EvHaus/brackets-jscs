@@ -40,10 +40,10 @@ Using with JSX
 JSCS (and brackets-jscs) can be used to validate JSX files. First you'll need to install `esprima-fb' via:
 
 ```
-npm install esprima-fb
+npm install -g esprima-fb
 ```
 
-Then in your .jscs.json file, add the following line:
+Then in your .jscsrc file, add the following line:
 
 ```
 "esprima": "./node_modules/esprima-fb"
@@ -53,6 +53,10 @@ Now your JSX syntax should be properly parsed by JSCS via this extension and the
 
 Release Notes
 =====
+
+**v0.5.0** (2015-05-07)
+
+- Upgrade to latest node-jscs (v1.13.1) (Fixes #22)
 
 **v0.4.0** (2015-04-07)
 
