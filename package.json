@@ -1,19 +1,21 @@
 {
     "name": "globexdesigns.brackets-jscs",
-    "title": "JSCS",
-    "description": "Adds JSCS support to Brackets. JSCS is a code style checker. JSCS can check cases, which are not implemeted in JSHint, but it does not duplicate JSHint functionality, so you should use JSCS and JSHint together.",
-    "homepage": "https://github.com/globexdesigns/brackets-jscs",
-	"repository": "https://github.com/globexdesigns/brackets-jscs",
-    "version": "0.5.0",
+    "title": "JSCS for Brackets",
+    "description": "Adds JSCS support to Brackets. JSCS is a code style linter for programmatically enforcing your style guide. You can configure JSCS for your project in detail using over 120 validation rules.",
+    "homepage": "https://github.com/evnaverniouk/brackets-jscs",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/evnaverniouk/brackets-jscs.git"
+	},
+    "version": "0.6.0",
 	"categories": "linting",
 	"keywords": ["jscs", "javascript", "style", "code", "checker", "linter", "linting"],
-    "author": "Evgueni Naverniouk <evgueni@globexdesigns.com> (http://www.globexdesigns.com/)",
+    "author": "Evgueni Naverniouk <evgueni@globexdesigns.com> (http://www.naverniouk.com/)",
     "license": "MIT",
     "engines": {
-        "brackets": ">=0.34.0"
+        "brackets": ">=1.2.0"
     },
 	"devDependencies": {
-		"esprima-fb": "latest",
 		"grunt": "latest",
 		"grunt-contrib-compress": "latest"
 	}
