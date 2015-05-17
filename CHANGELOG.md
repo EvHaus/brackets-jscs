@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.6.1** (2015-05-17)
+
+- Attempt to fix #23
+
 **v0.6.0** (2015-05-16)
 
 - Minimum Brackets dependency change to v1.2.0

@@ -6,9 +6,6 @@
 (function () {
 	var fs					= require('fs'),
 		path				= require('path'),
-		Checker				= require('jscs'),
-		jscsConfig			= require('jscs/lib/cli-config'),
-		findup				= require('findup'),
 		domainName			= 'globexdesigns.brackets-jscs',
 		configFiles			= ['.jscsrc', '.jscs.json'],
 		oldNodePath			= '',
@@ -16,7 +13,6 @@
 		NODE_PATH			= process.env.NODE_PATH;
 
 	// Setup NODE_PATH configuration
-
 	if (NODE_PATH) oldNodePath = NODE_PATH + (platform === 'win32' ? ';' : ':');
 
 	if (platform === 'win32') {
@@ -28,6 +24,11 @@
 	}
 
 	require('module').Module._initPaths();
+	
+	// Load JSCS and dependencies
+	var Checker				= require('jscs'),
+		jscsConfig			= require('jscs/lib/cli-config'),
+		findup				= require('findup');
 
 	var _findConfig = function (fullPath, callback) {
 		findup(fullPath, function (dir, cb) {
