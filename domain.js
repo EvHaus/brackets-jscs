@@ -1,12 +1,7 @@
-/*eslint no-process-env:0*/
-/*global require, exports*/
-
 'use strict';
 
 (function () {
-	var fs					= require('fs'),
-		path				= require('path'),
-		domainName			= 'globexdesigns.brackets-jscs',
+	var domainName			= 'globexdesigns.brackets-jscs',
 		configFiles			= ['.jscsrc', '.jscs.json'],
 		oldNodePath			= '',
 		platform			= process.platform,
@@ -24,11 +19,20 @@
 	}
 
 	require('module').Module._initPaths();
-	
+
 	// Load JSCS and dependencies
-	var Checker				= require('jscs'),
-		jscsConfig			= require('jscs/lib/cli-config'),
+	var fs, path, Checker, jscsConfig, findup;
+	try {
+		fs					= require('fs');
+		path				= require('path');
+		Checker				= require('jscs');
+		jscsConfig			= require('jscs/lib/cli-config');
 		findup				= require('findup');
+	} catch (err) {
+		if (err.code === 'MODULE_NOT_FOUND') {
+			throw new Error('Unable to start brackets-jscs due to error: "' + err.message + '". NODE_PATH is: ' + NODE_PATH);
+		}
+	}
 
 	var _findConfig = function (fullPath, callback) {
 		findup(fullPath, function (dir, cb) {

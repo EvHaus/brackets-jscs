@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.6.2** (2015-05-17)
+
+- Another attempt to fix #23. JSCS is now bundled directly with the extension.
+
 **v0.6.1** (2015-05-17)
 
 - Attempt to fix #23

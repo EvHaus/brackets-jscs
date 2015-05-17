@@ -13,12 +13,6 @@ Brackets 1.2.0 or greater
 Installation
 =====
 
-The extension assumes you have JSCS installed as a global NPM module. If it isn't simply run this first:
-
-```
-npm install -g jscs
-```
-
 If you have disabled the default Brackets JSLint service, you will need to manually enable JSCS in your prefs file:
 
 - Go to Debug > Open Preferences File
@@ -51,6 +45,8 @@ Then in your .jscsrc file, add the following line:
 ```
 
 Now your JSX syntax should be properly parsed by JSCS via this extension and the commandline JSCS parser.
+
+NOTE: Sometimes the extension is unable to load modules from the global modules directory. We're not sure why this happens yet. If you'd like to help resolve this issue, please post in Github Issues.
 
 Note about Additional Rules
 =====
