@@ -46,7 +46,7 @@ Then in your .jscsrc file, add the following line:
 
 Now your JSX syntax should be properly parsed by JSCS via this extension and the commandline JSCS parser.
 
-NOTE: Sometimes the extension is unable to load modules from the global modules directory. We're not sure why this happens yet. If you'd like to help resolve this issue, please post in Github Issues.
+NOTE: For some users, the extension is unable to load modules from the global modules directory. We're not sure why this happens yet. If you'd like to help resolve this issue, please post in Github Issues.
 
 Note about Additional Rules
 =====
