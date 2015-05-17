@@ -1,12 +1,6 @@
 {
 	"esprima": "esprima-fb",
-
-	"excludeFiles": [
-		"html/build/**/*",
-		"html/js/polyfills/**/*",
-		"html/test/jasmine-2.2.0/**"
-	],
-
+	
 	//"disallowAnonymousFunctions": true,
 	//"disallowCapitalizedComments": true,
 	//"disallowCommaBeforeLineBreak": true,

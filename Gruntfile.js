@@ -1,6 +1,6 @@
-/* global module */
+"use strict";
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -11,13 +11,13 @@ module.exports = function(grunt) {
 				},
 				files: [{
 					src: [
-						'bower_components/react/JSXTransformer.js',
-						'jscs/jscs-browser.js',
+						'domain.js',
 						'main.js',
 						'LICENSE',
 						'NOTICE',
 						'package.json',
-						'README.md'
+						'README.md',
+						'node_modules/findup/**/*'
 					],
 					dest: '/'
 				}]

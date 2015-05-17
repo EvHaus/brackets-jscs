@@ -12,15 +12,15 @@ define(function (require, exports, module) {
 		JS_LANGUAGE =		LanguageManager.getLanguageForExtension('js'),
 		LINTER_NAME =		'JSCS',
 		ExtDomain =			ExtensionUtils.getModulePath(module, 'domain'),
-		nodeDomain =		new NodeDomain('evnaverniouk.brackets-jscs', ExtDomain);
+		nodeDomain =		new NodeDomain('globexdesigns.brackets-jscs', ExtDomain);
 
 	// This will map JSCS output to match format expected by Brackets
-	function remapResults(results) {
+	var remapResults = function (results) {
 		return {
 			errors: results.map(function (result) {
 				var message = result.message,
 					isConfigError = result.rule === "";
-				
+
 				if (result.rule) message += ' [' + result.rule + ']';
 				return {
 					message: message,
@@ -28,19 +28,19 @@ define(function (require, exports, module) {
 						line: isConfigError ? -1 : result.line - 1,
 						ch: isConfigError ? -1 : result.column
 					},
-					type: result.rule
+					type: CodeInspection.Type.ERROR
 				};
 			})
 		};
-	}
+	};
 
-	function handleLintSync(text, fullPath) {
+	var handleLintSync = function (text, fullPath) {
 		throw new Error('JSCS is not available in synchronous mode, use async for ' + fullPath);
-	}
+	};
 
-	function handleLintAsync(text, fullPath) {
-		var deferred = new $.Deferred();
-		var projectRoot = ProjectManager.getProjectRoot().fullPath;
+	var handleLintAsync = function (text, fullPath) {
+		var deferred = new $.Deferred(),
+			projectRoot = ProjectManager.getProjectRoot().fullPath;
 
 		nodeDomain.exec('lintFile', fullPath, projectRoot)
 			.then(function () {
@@ -55,14 +55,14 @@ define(function (require, exports, module) {
 							},
 							message: "Unexpected JSCS processing error: " + err
 						}]
-					});;
+					});
 				}
-				
+
 				deferred.resolve(remapResults(err));
 			});
 
 		return deferred.promise();
-	}
+	};
 
 	// Register a linter with CodeInspection
 	CodeInspection.register(JS_LANGUAGE.getId(), {

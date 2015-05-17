@@ -2,10 +2,10 @@
     "name": "globexdesigns.brackets-jscs",
     "title": "JSCS for Brackets",
     "description": "Adds JSCS support to Brackets. JSCS is a code style linter for programmatically enforcing your style guide. You can configure JSCS for your project in detail using over 120 validation rules.",
-    "homepage": "https://github.com/evnaverniouk/brackets-jscs",
+    "homepage": "https://github.com/globexdesigns/brackets-jscs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/evnaverniouk/brackets-jscs.git"
+		"url": "https://github.com/globexdesigns/brackets-jscs.git"
 	},
     "version": "0.6.0",
 	"categories": "linting",
@@ -15,6 +15,9 @@
     "engines": {
         "brackets": ">=1.2.0"
     },
+	"dependencies": {
+		"findup": "latest"
+	},
 	"devDependencies": {
 		"grunt": "latest",
 		"grunt-contrib-compress": "latest"

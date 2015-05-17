@@ -5,6 +5,8 @@ Change Log
 
 - Minimum Brackets dependency change to v1.2.0
 - Rewrite extension to make use of node-jscs node.js module (instead of browser build)
+- Extension will now look for JSCS config files in all parent directories from the current file (Fixes #11)
+- additionalRules is now supported (Fixes #6)
 
 **v0.5.0** (2015-05-07)
 
