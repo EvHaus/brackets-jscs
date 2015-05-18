@@ -2,37 +2,31 @@
 
 (function () {
 	var domainName			= 'globexdesigns.brackets-jscs',
-		configFiles			= ['.jscsrc', '.jscs.json'],
-		oldNodePath			= '',
-		platform			= process.platform,
-		NODE_PATH			= process.env.NODE_PATH;
+		configFiles			= ['.jscsrc', '.jscs.json'];
 
 	// Setup NODE_PATH configuration
-	if (NODE_PATH) oldNodePath = NODE_PATH + (platform === 'win32' ? ';' : ':');
+	// This is what allows us to import modules from the global namespace
+	var oldNodePath = '';
+	if (process.env.NODE_PATH) {
+		oldNodePath = process.env.NODE_PATH + (process.platform === 'win32' ? ';' : ':');
+	}
 
-	if (platform === 'win32') {
-		NODE_PATH = oldNodePath + process.env.APPDATA + '\\npm\\node_modules';
+	if (process.platform === 'win32') {
+		process.env.NODE_PATH = oldNodePath + process.env.APPDATA + '\\npm\\node_modules';
 	} else if (process.platform === 'darwin') {
-		NODE_PATH = oldNodePath + '/usr/local/lib/node_modules';
+		process.env.NODE_PATH = oldNodePath + '/usr/local/lib/node_modules';
 	} else {
-		NODE_PATH = oldNodePath + '/usr/lib/node_modules';
+		process.env.NODE_PATH = oldNodePath + '/usr/lib/node_modules';
 	}
 
 	require('module').Module._initPaths();
 
 	// Load JSCS and dependencies
-	var fs, path, Checker, jscsConfig, findup;
-	try {
-		fs					= require('fs');
-		path				= require('path');
-		Checker				= require('jscs');
-		jscsConfig			= require('jscs/lib/cli-config');
+	var fs					= require('fs'),
+		path				= require('path'),
+		Checker				= require('jscs'),
+		jscsConfig			= require('jscs/lib/cli-config'),
 		findup				= require('findup');
-	} catch (err) {
-		if (err.code === 'MODULE_NOT_FOUND') {
-			throw new Error('Unable to start brackets-jscs due to error: "' + err.message + '". NODE_PATH is: ' + NODE_PATH);
-		}
-	}
 
 	var _findConfig = function (fullPath, callback) {
 		findup(fullPath, function (dir, cb) {
