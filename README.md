@@ -8,14 +8,24 @@ JSCS can be configured by a .jscsrc or .jscs.json file located somewhere in your
 Requirements
 =====
 
-Brackets 1.2.0 or greater
+- [Brackets 1.2.0 or greater](http://brackets.io/)
+- [node.js](https://nodejs.org/download/)
 
 Installation
 =====
 
+This extension uses the globally installed JSCS npm module. This means that you must run the following command:
+
+```npm install -g jscs```
+
+Then restart Brackets.
+
+Configuration
+=====
+
 If you have disabled the default Brackets JSLint service, you will need to manually enable JSCS in your prefs file:
 
-- Go to Debug > Open Preferences File
+- Go to `Debug > Open Preferences File`
 - Make sure your `language.javascript.linting.prefer` definition includes "JSCS" as such:
 
 ```
@@ -61,7 +71,9 @@ npm install
 grunt build
 ```
 
+A new ZIP package will be created in `/build/`.
+
 Credit
 =====
 
-Based heavily on [brackets-jshint](https://github.com/cfjedimaster/brackets-jshint/) and [brackets-eslint](https://github.com/zaggino/brackets-eslint)
+Based heavily on [brackets-jshint](https://github.com/cfjedimaster/brackets-jshint/) and [brackets-eslint](https://github.com/zaggino/brackets-eslint).
