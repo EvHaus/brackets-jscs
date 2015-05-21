@@ -11,14 +11,6 @@ Requirements
 - [Brackets 1.2.0 or greater](http://brackets.io/)
 - [node.js](https://nodejs.org/download/)
 
-Installation
-=====
-
-This extension uses the globally installed JSCS npm module. This means that you must run the following command:
-
-```npm install -g jscs```
-
-Then restart Brackets.
 
 Configuration
 =====
@@ -45,18 +37,16 @@ Using with JSX
 JSCS (and brackets-jscs) can be used to validate JSX files. First you'll need to install `esprima-fb' via:
 
 ```
-npm install -g esprima-fb
+npm install esprima-fb
 ```
 
 Then in your .jscsrc file, add the following line:
 
 ```
-"esprima": "esprima-fb"
+"esprima": "./node_modules/esprima-fb"
 ```
 
 Now your JSX syntax should be properly parsed by JSCS via this extension and the commandline JSCS parser.
-
-NOTE: For some users, the extension is unable to load modules from the global modules directory. We're not sure why this happens yet. If you'd like to help resolve this issue, please post in Github Issues.
 
 Note about Additional Rules
 =====

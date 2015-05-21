@@ -6,15 +6,8 @@
 		findup				= require('findup'),
 		domainName			= 'globexdesigns.brackets-jscs',
 		configFiles			= ['.jscsrc', '.jscs.json'],
-		Checker,
-		jscsConfig;
-
-	// Wait for global packages to load
-	require('enable-global-packages').on('ready', function () {
-		// Then load JSCS
-		Checker		= require('jscs');
-		jscsConfig	= require('jscs/lib/cli-config');
-	});
+		Checker				= require('jscs'),
+		jscsConfig			= require('jscs/lib/cli-config');
 
 	var _findConfig = function (fullPath, callback) {
 		findup(fullPath, function (dir, cb) {

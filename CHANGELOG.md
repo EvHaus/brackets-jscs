@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.6.5** (2015-05-21)
+
+- Bundle JSCS with the extension again. Global module imports refuse to work reliably. (I've admitted surrender).
+
 **v0.6.4** (2015-05-20)
 
 - Attempt to fix #24 by using zaggino's enable-global-packages module
