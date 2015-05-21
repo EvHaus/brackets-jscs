@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.6.4** (2015-05-20)
+
+- Attempt to fix #24 by using zaggino's enable-global-packages module
+
 **v0.6.3** (2015-05-17)
 
 - Fix for globally installed JSCS. No longer need to bundle JSCS with the extension.

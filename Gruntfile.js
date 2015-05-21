@@ -17,6 +17,7 @@ module.exports = function (grunt) {
 						'NOTICE',
 						'package.json',
 						'README.md',
+						'node_modules/enable-global-packages/**/*',
 						'node_modules/findup/**/*'
 					],
 					dest: '/'

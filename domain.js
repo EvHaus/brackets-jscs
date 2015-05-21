@@ -1,32 +1,20 @@
 'use strict';
 
 (function () {
-	var domainName			= 'globexdesigns.brackets-jscs',
-		configFiles			= ['.jscsrc', '.jscs.json'];
-
-	// Setup NODE_PATH configuration
-	// This is what allows us to import modules from the global namespace
-	var oldNodePath = '';
-	if (process.env.NODE_PATH) {
-		oldNodePath = process.env.NODE_PATH + (process.platform === 'win32' ? ';' : ':');
-	}
-
-	if (process.platform === 'win32') {
-		process.env.NODE_PATH = oldNodePath + process.env.APPDATA + '\\npm\\node_modules';
-	} else if (process.platform === 'darwin') {
-		process.env.NODE_PATH = oldNodePath + '/usr/local/lib/node_modules';
-	} else {
-		process.env.NODE_PATH = oldNodePath + '/usr/lib/node_modules';
-	}
-
-	require('module').Module._initPaths();
-
-	// Load JSCS and dependencies
 	var fs					= require('fs'),
 		path				= require('path'),
-		Checker				= require('jscs'),
-		jscsConfig			= require('jscs/lib/cli-config'),
-		findup				= require('findup');
+		findup				= require('findup'),
+		domainName			= 'globexdesigns.brackets-jscs',
+		configFiles			= ['.jscsrc', '.jscs.json'],
+		Checker,
+		jscsConfig;
+
+	// Wait for global packages to load
+	require('enable-global-packages').on('ready', function () {
+		// Then load JSCS
+		Checker		= require('jscs');
+		jscsConfig	= require('jscs/lib/cli-config');
+	});
 
 	var _findConfig = function (fullPath, callback) {
 		findup(fullPath, function (dir, cb) {
@@ -64,17 +52,26 @@
 	};
 
 
-	var _setConfig = function (cli, configPath) {
+	var _setConfig = function (JSCS, configPath) {
 		var config = _getConfigFile(configPath);
 
 		// Load JSCS configuration
-		cli.registerDefaultRules();
-		cli.configure(config);
+		JSCS.registerDefaultRules();
+		JSCS.configure(config);
 	};
 
 
 	var lintFile = function (fullPath, projectRoot, callback) {
-		var cli = new Checker();
+		// If the JSCS module isn't loaded yet -- wait...
+		if (!Checker) {
+			// Retry again in a bit
+			return setTimeout(function () {
+				lintFile.apply(arguments);
+			}, 100);
+		}
+
+		// Initialize JSCS
+		var JSCS = new Checker();
 
 		return _findConfig(path.dirname(fullPath), function (result) {
 			// If no config file found - let users know
@@ -85,10 +82,10 @@
 			}
 
 			// Set config file
-			_setConfig(cli, result);
+			_setConfig(JSCS, result);
 
 			// Run JSCS checker
-			cli.checkPath(fullPath).then(function (response) {
+			JSCS.checkPath(fullPath).then(function (response) {
 				callback(response[0]._errorList);
 			});
 		});
