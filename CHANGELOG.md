@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.7.0** (2015-05-23)
+
+- JSCS auto-fixing is now possible from Brackets. A new "Auto-fix with JSCS" option is now available in the Edit menu as well as in the editor context menu!
+
 **v0.6.5** (2015-05-21)
 
 - Bundle JSCS with the extension again. Global module imports refuse to work reliably. (I've admitted surrender).
