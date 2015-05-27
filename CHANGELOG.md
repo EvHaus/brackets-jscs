@@ -1,6 +1,11 @@
 Change Log
 =====
 
+**v0.7.1** (2015-05-26)
+
+- Fix issue with extension printing a "checkPath not a valid function" error when a JSCS config file cannot be found
+- Remove a setTimeout call to help avoid timeout issues
+
 **v0.7.0** (2015-05-23)
 
 - JSCS auto-fixing is now possible from Brackets. A new "Auto-fix with JSCS" option is now available in the Edit menu as well as in the editor context menu!

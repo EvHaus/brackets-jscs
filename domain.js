@@ -89,26 +89,18 @@
 	 * @returns {void}
 	 */
 	var _prepareJSCS = function (fullPath, callback) {
-		// If the JSCS module isn't loaded yet -- wait...
-		if (!Checker) {
-			// Retry again in a bit
-			return setTimeout(function () {
-				_prepareJSCS.apply(arguments);
-			}, 100);
-		}
-
 		// Initialize JSCS
 		var JSCS = new Checker();
 
 		_findConfig(path.dirname(fullPath), function (result) {
 			// If no config file found - let users know
 			if (!result) {
-				return callback([{
+				return callback(null, [{
 					message: "Unable to find a JSCS configuration file."
 				}]);
 			}
 
-			// Set config file
+			// Set config filea
 			_setConfig(JSCS, result);
 
 			callback(JSCS);
@@ -126,7 +118,9 @@
 	 * @returns {void}
 	 */
 	var lintFile = function (fullPath, callback) {
-		return _prepareJSCS(fullPath, function (JSCS) {
+		return _prepareJSCS(fullPath, function (JSCS, err) {
+			if (err) return callback(err);
+
 			JSCS.checkPath(fullPath).then(function (response) {
 				callback(response[0]._errorList);
 			}).catch(function (err) {
@@ -147,7 +141,8 @@
 	 * @returns {void}
 	 */
 	var fixFile = function (code, fullPath, callback) {
-		return _prepareJSCS(fullPath, function (JSCS) {
+		return _prepareJSCS(fullPath, function (JSCS, err) {
+			if (err) throw new Error(err);
 			var result = JSCS.fixString(code, fullPath);
 			callback(null, result.output);
 		});
