@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.7.2** (2015-06-12)
+
+- Fixed an issue with JSCS reporting timeouts when there are no errors found (Fixes #27)
+
 **v0.7.1** (2015-05-26)
 
 - Fix issue with extension printing a "checkPath not a valid function" error when a JSCS config file cannot be found

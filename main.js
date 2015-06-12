@@ -24,13 +24,13 @@ define(function (require, exports, module) {
 	/**
 	 * This will map JSCS error output to match format expected by Brackets linter API.
 	 *
-	 * @param	{array}		results		- Results object from JSCS's checkFile method
+	 * @param	{?array}		[results]		- Results object from JSCS's checkFile method
 	 *
 	 * @returns {object} Brackets lint object
 	 */
 	var remapResults = function (results) {
 		return {
-			errors: results.map(function (result) {
+			errors: (results || []).map(function (result) {
 				var message = result.message,
 					isConfigError = result.rule === "";
 
