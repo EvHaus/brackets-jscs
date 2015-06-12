@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/globexdesigns/brackets-jscs.git"
 	},
-    "version": "0.7.2",
+    "version": "0.7.3",
 	"categories": "linting",
 	"keywords": ["jscs", "javascript", "style", "code", "checker", "linter", "linting"],
     "author": "Evgueni Naverniouk <evgueni@globexdesigns.com> (http://www.naverniouk.com/)",

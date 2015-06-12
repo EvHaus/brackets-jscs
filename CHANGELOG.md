@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.7.3** (2015-06-12)
+
+- Fixed a syntax error
+
 **v0.7.2** (2015-06-12)
 
 - Fixed an issue with JSCS reporting timeouts when there are no errors found (Fixes #27)

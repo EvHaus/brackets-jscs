@@ -111,6 +111,9 @@ define(function (require, exports, module) {
 					});
 				}
 
+				// If we got back an empty error object - just convert it to an empty array
+				if (typeof err === 'object' && !Array.isArray(err)) err = [];
+
 				deferred.resolve(remapResults(err));
 			});
 
