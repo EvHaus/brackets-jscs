@@ -140,4 +140,6 @@ define(function (require, exports, module) {
 		scanFile: handleLintSync,
 		scanFileAsync: handleLintAsync
 	});
+
+	LanguageManager.getLanguage('json').addFileName('.jscsrc');
 });
