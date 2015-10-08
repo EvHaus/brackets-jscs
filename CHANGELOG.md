@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.7.4** (2015-10-07)
+
+- Upgrade to latest jscs (v2.3.0) (Fixes #35)
+
 **v0.7.3** (2015-06-12)
 
 - Fixed a syntax error
