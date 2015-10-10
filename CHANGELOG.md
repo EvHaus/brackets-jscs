@@ -4,6 +4,7 @@ Change Log
 **v0.7.5** (2015-10-10)
 
 - Fix issue with missing node_package dependency (Fixes #36)
+- New JSCS version now require manual `npm install` installation before using the extension
 
 **v0.7.4** (2015-10-07)
 
