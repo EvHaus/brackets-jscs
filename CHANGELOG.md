@@ -1,6 +1,10 @@
 Change Log
 =====
 
+**v0.7.5** (2015-10-10)
+
+- Fix issue with missing node_package dependency (Fixes #36)
+
 **v0.7.4** (2015-10-07)
 
 - Upgrade to latest jscs (v2.3.0) (Fixes #35)

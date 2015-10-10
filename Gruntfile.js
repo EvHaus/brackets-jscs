@@ -1,5 +1,3 @@
-"use strict";
-
 module.exports = function (grunt) {
 
 	grunt.initConfig({
@@ -17,8 +15,7 @@ module.exports = function (grunt) {
 						'NOTICE',
 						'package.json',
 						'README.md',
-						'node_modules/findup/**/*',
-						'node_modules/jscs/**/*'
+						'node_modules/**/*'
 					],
 					dest: '/'
 				}]
