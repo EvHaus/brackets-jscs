@@ -100,13 +100,18 @@ define(function (require, exports, module) {
 				return deferred.reject();
 			}, function (err) {
 				if (typeof err === 'string') {
+                    var message = "Unexpected JSCS processing error: " + err;
+                    if (err.indexOf('Unable to load one of the modules') >= 0) {
+                        message = "JSCS has not been installed in the extension. See Installation steps here: https://github.com/globexdesigns/brackets-jscs";
+                    }
+                    
 					return deferred.resolve({
 						errors: [{
 							pos: {
 								line: -1,
 								ch: -1
 							},
-							message: "Unexpected JSCS processing error: " + err
+							message: message
 						}]
 					});
 				}

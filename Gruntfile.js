@@ -14,8 +14,7 @@ module.exports = function (grunt) {
 						'LICENSE',
 						'NOTICE',
 						'package.json',
-						'README.md',
-						'node_modules/**/*'
+						'README.md'
 					],
 					dest: '/'
 				}]

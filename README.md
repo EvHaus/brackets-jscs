@@ -11,6 +11,14 @@ Requirements
 - [Brackets 1.2.0 or greater](http://brackets.io/)
 - [node.js](https://nodejs.org/download/)
 
+Installation
+=====
+
+- Install the extension from the Brackets Extension registry
+- Go to `Help > Show Extensions Folder`
+- In the extensions folder navigate to `/user/globexdesigns.brackets-jscs`
+- Open a terminal to this folder and run `npm install`
+- Restart Brackets
 
 Configuration
 =====
