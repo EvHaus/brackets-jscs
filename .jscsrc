@@ -1,5 +1,5 @@
 {
-	"esprima": "esprima-fb",
+	"esprima": "babel-jscs",
 	
 	//"disallowAnonymousFunctions": true,
 	//"disallowCapitalizedComments": true,
@@ -85,6 +85,7 @@
 	//"requireSpaceAfterLineComment": true,
 	//"requireSpaceAfterObjectKeys": true,
 	//"requireSpaceAfterPrefixUnaryOperators": [],
+    //"requireSpacesInsideBrackets": true,
 	"requireSpaceBeforeBinaryOperators": ["=", "+", "-", "/", "*", "==", "===", "!=", "!=="],
 	"requireSpaceBeforeBlockStatements": true,
 	"requireSpaceBeforeKeywords": ["else", "while", "catch"],
