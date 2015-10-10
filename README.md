@@ -1,9 +1,9 @@
 brackets-jscs
 =================
 
-A Brackets extension that enables JSCS validation for Javascript files. For more information about JSCS see <https://github.com/mdevils/node-jscs>.
+A Brackets extension that enables JSCS validation for Javascript files. For more information about JSCS see <https://github.com/jscs-dev/node-jscs>.
 
-JSCS can be configured by a .jscsrc or .jscs.json file located somewhere in your project.
+JSCS can be configured by a `.jscsrc` or `.jscs.json` file located somewhere in your project.
 
 Requirements
 =====
@@ -42,19 +42,11 @@ If you have disabled the default Brackets JSLint service, you will need to manua
 Using with JSX
 =====
 
-JSCS (and brackets-jscs) can be used to validate JSX files. First you'll need to install `esprima-fb' via:
+JSCS (and brackets-jscs) can be used to validate JSX files. To enable this, add this line to your `.jscsrc` file:
 
 ```
-npm install esprima-fb
+"esprima": "babel-jscs"
 ```
-
-Then in your .jscsrc file, add the following line:
-
-```
-"esprima": "./node_modules/esprima-fb"
-```
-
-Now your JSX syntax should be properly parsed by JSCS via this extension and the commandline JSCS parser.
 
 Note about Additional Rules
 =====
