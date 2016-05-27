@@ -5,6 +5,13 @@ A Brackets extension that enables JSCS validation for Javascript files. For more
 
 JSCS can be configured by a `.jscsrc` or `.jscs.json` file located somewhere in your project.
 
+THIS EXTENSION IS BEING DEPRECATED
+=====
+
+This extension is going to be deprecated soon. JSCS is being merged into ESLint. As such, there is going to be no more need for this extensions. Use the wonderful [brackets-eslint](https://github.com/zaggino/brackets-eslint) extension instead.
+
+I will still happily accept Pull Requests if you wish to fix issues, but I will no longer be actively working on it.
+
 Requirements
 =====
 
