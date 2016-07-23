@@ -8,7 +8,7 @@ JSCS can be configured by a `.jscsrc` or `.jscs.json` file located somewhere in 
 THIS EXTENSION IS BEING DEPRECATED
 =====
 
-This extension is going to be deprecated soon. JSCS is being merged into ESLint. As such, there is going to be no more need for this extensions. Use the wonderful [brackets-eslint](https://github.com/zaggino/brackets-eslint) extension instead.
+This extension is going to be deprecated soon. JSCS is being merged into ESLint. As such, there is going to be no more need it. Use the wonderful [brackets-eslint](https://github.com/zaggino/brackets-eslint) extension instead.
 
 I will still happily accept Pull Requests if you wish to fix issues, but I will no longer be actively working on it.
 
